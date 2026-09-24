@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="3.0" xmlns="https://jakarta.ee/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd">
+  <!-- Define Persistence Unit -->
+  <persistence-unit name="my_persistence_unit">
+    <class>sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.Consulta</class>
+    <class>sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.ProcedimientoPasoSecuencia</class>
+    <class>sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.Clinica</class>
+    <class>sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.TipoDocumento</class>
+    <class>sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.MedioContacto</class>
+    <class>sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.Examen</class>
+    <class>sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.TipoMedioContacto</class>
+    <class>sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.Procedimiento</class>
+    <class>sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.ConsultaProcedimientoPaso</class>
+    <class>sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.Persona</class>
+    <class>sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.ProcedimientoPasoExamen</class>
+    <class>sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.PersonaRol</class>
+    <class>sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.Rol</class>
+    <class>sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.Documento</class>
+    <class>sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.ProcedimientoPaso</class>
+    <class>sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.TipoExamen</class>
+    <class>sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.ExamenResultado</class>
+    <class>sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.OrdenExamen</class>
+    <class>sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.ExamenTipoExamen</class>
+    <class>sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.ConsultaProcedimiento</class>
+  </persistence-unit>
+</persistence>

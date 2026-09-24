@@ -1,0 +1,78 @@
+/nb-configuration.xml
+
+# ====================================================================
+# COMPILACIÓN Y ARTEFACTOS DE JAVA
+# ====================================================================
+*.class
+*.log
+*.ctxt
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+*.exe
+
+# Carpetas de salida por defecto
+/hs_err_pid*
+replay_pid*
+
+# ====================================================================
+# HERRAMIENTAS DE CONSTRUCCIÓN (BUILD TOOLS)
+# ====================================================================
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.next
+pom.xml.releaseBackup
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# Gradle
+.gradle/
+build/
+!gradle-wrapper.jar
+log/
+/out/
+
+# ====================================================================
+# ENTORNOS DE DESARROLLO (IDEs)
+# ====================================================================
+# NetBeans
+**/nbproject/private/
+**/nbbuild/
+**/dist/
+**/nbdist/
+/.mtj.tmp/
+anahata.md
+
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+
+# Eclipse
+.metadata/
+.classpath
+.project
+.settings/
+*.launch
+bin/
+
+# Visual Studio Code
+.vscode/
+
+# ====================================================================
+# SISTEMA OPERATIVO
+# ====================================================================
+.DS_Store
+Thumbs.db
+Desktop.ini
