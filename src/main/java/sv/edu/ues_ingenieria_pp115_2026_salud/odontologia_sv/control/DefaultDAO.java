@@ -1,5 +1,5 @@
 
-package control;
+package sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;

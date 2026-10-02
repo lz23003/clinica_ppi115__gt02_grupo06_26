@@ -1,4 +1,4 @@
-package control;
+package sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control;
 
 import java.util.List;
 
