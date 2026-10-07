@@ -4,8 +4,7 @@
       xmlns:h="jakarta.faces.html"
       xmlns:f="jakarta.faces.core"
       xmlns:ui="jakarta.faces.facelets"
-      xmlns:p="primefaces"
-      xmlns:g="jakarta.faces.composite/crud">
+      xmlns:p="primefaces">
 
     <ui:composition template="/WEB-INF/plantillas/PlantillaPrincipal.xhtml">
         <ui:define name="titulo">#{crud['consulta.titulo']}</ui:define>
@@ -14,29 +13,60 @@
             <h:form id="formTable">
 
                 <p:panel id="panelTabla" rendered="#{consultaModel.estado=='NADA'}"> 
-                    <g:botonNuevo model="#{consultaModel}" formPrincipal="formTable" />                 
 
-                    <p:dataTable id="tablaRegistros" var="r" value="#{consultaModel.modelo}" 
-                                 paginator="true" lazy="true" selectionMode="single"
-                                 selection="#{consultaModel.registro}"
+                    <div style="margin-bottom: 15px;">
+                        <div style="display: inline-block; padding: 8px 15px; background: #f8f9fa; border: 1px solid #dee2e6; border-bottom: none; border-radius: 4px 4px 0 0; font-weight: bold; color: #495057;">
+                            #{crud['consulta.filtro.titulo']}
+                        </div>
+                        <div style="border: 1px solid #dee2e6; padding: 15px; background: #ffffff; border-radius: 0 4px 4px 4px;">
+
+                            <h:panelGrid id="gridFiltros" columns="2" cellpadding="5">
+                                <h:outputText value="#{crud['entidad.clinica']}:" />
+                                <h:outputText value="#{sesionUsuario.clinicaUsuario}" />
+
+                                <h:outputText value="#{crud['campo.fechaDesde']}:" />
+                                <p:datePicker value="#{consultaModel.fechaFiltroInicio}" pattern="dd/MM/yyyy HH:mm:ss" 
+                                              showTime="true" hideOnDateTimeSelect="true" />
+
+                                <h:outputText value="#{crud['campo.fechaHasta']}:" />
+                                <p:datePicker value="#{consultaModel.fechaFiltroFin}" pattern="dd/MM/yyyy HH:mm:ss" 
+                                              showTime="true" hideOnDateTimeSelect="true" />
+                            </h:panelGrid>
+
+                            <p:commandButton value="#{crud['boton.filtrar']}" actionListener="#{consultaModel.filtrarConsultas}" 
+                                             process="gridFiltros @this" update="tablaRegistros" style="margin-top: 10px;" />
+                        </div>
+                    </div>
+
+                    <p:dataTable id="tablaRegistros" var="r" value="#{consultaModel.modeloList}" 
+                                 paginator="true" lazy="false" selectionMode="single"
+                                 selection="#{consultaModel.registro}" rowKey="#{r.idConsulta}"
                                  emptyMessage="#{crud['mensaje.sin.registros']}"
-                                 rows="#{consultaModel.registrosPorPagina}">
+                                 rows="#{consultaModel.registrosPorPagina}" style="margin-bottom: 15px;">
 
                         <p:ajax event="rowSelect" listener="#{consultaModel.onRowSelect}" process="@this" update=":formTable" />
 
-                        <p:column headerText="#{crud['entidad.personaRol']}">
-                            <h:outputText value="#{r.idPersonaRol.idPersona.nombres} #{r.idPersonaRol.idPersona.apellidos} (#{r.idPersonaRol.idRol.nombre})"/>
+                        <p:column headerText="#{crud['campo.id']}">
+                            <h:outputText value="#{r.idConsulta}"/>
                         </p:column>
 
-                        <p:column headerText="#{crud['campo.fechaInicio']}">
+                        <p:column headerText="#{crud['campo.paciente']}">
+                            <h:outputText value="#{r.idPersonaRol.idPersona.nombres} #{r.idPersonaRol.idPersona.apellidos}"/>
+                        </p:column>
+
+                        <p:column headerText="#{crud['campo.informacion']}">
+                            <h:outputText value="#{r.observaciones != null ? r.observaciones : crud['mensaje.sin.registros']}"/>
+                        </p:column>
+
+                        <p:column headerText="#{crud['campo.fechaConsulta']}">
                             <h:outputText value="#{r.fechaInicio}">
-                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
                             </h:outputText>
                         </p:column>
 
-                        <p:column headerText="#{crud['campo.fechaFin']}">
+                        <p:column headerText="#{crud['campo.fechaAlta']}">
                             <h:outputText value="#{r.fechaFin}">
-                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
                             </h:outputText>
                         </p:column>
 
@@ -44,40 +74,163 @@
                             <h:outputText value="#{r.referenciaExterna}"/>
                         </p:column>
 
+                        <p:column headerText="#{crud['campo.observaciones']}">
+                            <h:outputText value="#{r.observaciones}"/>
+                        </p:column>
+
                     </p:dataTable>
+
+                    <p:commandButton value="#{crud['boton.nuevo']}" 
+                                     actionListener="#{consultaModel.btnNuevoHandler}" 
+                                     update=":formTable" 
+                                     disabled="#{sesionUsuario.clinicaUsuario eq 'Ninguna Clínica'}" 
+                                     icon="pi pi-plus" />                 
+
                 </p:panel>
 
-                <p:panel id="panelRegistros" rendered="#{consultaModel.estado!='NADA'}">
-                    <p:panelGrid columns="2">
 
-                        <p:outputLabel for="idPersonaRol" value="#{crud['entidad.personaRol']}"/>
-                        <p:selectOneMenu id="idPersonaRol" value="#{consultaModel.registro.idPersonaRol}" 
-                                         converter="entityConverter" filter="true" filterMatchMode="contains" 
-                                         required="true">
-                            <f:selectItem itemLabel="-- Seleccione --" itemValue="#{null}" noSelectionOption="true"/>
-                            <f:selectItems value="#{consultaModel.listaPersonaRoles}" var="rol" 
-                                           itemLabel="#{rol.idPersona.nombres} #{rol.idPersona.apellidos} - #{rol.idRol.nombre}" 
-                                           itemValue="#{rol}"/>
+                <p:panel id="panelRegistros" rendered="#{consultaModel.estado!='NADA'}">
+
+                    <p:commandButton value="#{crud['boton.cancelar']}" actionListener="#{consultaModel.btnCancelarHandler}" 
+                                     update=":formTable" icon="pi pi-arrow-left" style="margin-bottom: 10px;" immediate="true" />
+
+                    <p:tabView id="tabViewConsulta" style="margin-top: 15px;">
+                        <p:tab title="#{crud['consulta.tab.detalle']}">
+                            <p:panelGrid columns="2" columnClasses="ui-grid-col-3,ui-grid-col-9" layout="grid" styleClass="ui-panelgrid-blank">
+
+                                <p:outputLabel value="#{crud['campo.id']}"/>
+                                <p:inputText value="#{consultaModel.registro.idConsulta}" disabled="true" style="width: 100%;"/>
+
+                                <p:outputLabel value="#{crud['campo.criterioBusqueda']}"/>
+                                <p:selectOneMenu id="criterioBusqueda" value="#{consultaModel.criterioBusqueda}">
+                                    <f:selectItem itemLabel="#{crud['campo.nombreOApellido']}" itemValue="nombre" />
+                                    <f:selectItem itemLabel="#{crud['entidad.documento']}" itemValue="documento" />
+                                    <f:selectItem itemLabel="#{crud['campo.fechaNacimiento']}" itemValue="fecha" />
+                                    <p:ajax update="idPersonaRol" />
+                                </p:selectOneMenu>
+
+                                <p:outputLabel for="idPersonaRol" value="#{crud['campo.paciente']}"/>
+                                <p:selectOneMenu id="idPersonaRol" value="#{consultaModel.registro.idPersonaRol}" 
+                                                 converter="entityConverter" filter="true" filterMatchMode="contains" 
+                                                 required="true" style="width: 100%;">
+                                    <f:selectItem itemLabel="#{crud['mensaje.seleccione']}" itemValue="#{null}" noSelectionOption="true"/>
+                                    <f:selectItems value="#{consultaModel.listaPersonaRoles}" var="rol" 
+                                                   itemLabel="#{consultaModel.obtenerEtiquetaPersona(rol)}" 
+                                                   itemValue="#{rol}"/>
+                                </p:selectOneMenu>
+
+                                <p:outputLabel for="fechaInicio" value="#{crud['campo.fechaConsulta']}"/>
+                                <p:datePicker id="fechaInicio" value="#{consultaModel.registro.fechaInicio}" 
+                                              showTime="true" pattern="dd/MM/yyyy HH:mm:ss" required="true" style="width: 100%;"/>
+
+                                <p:outputLabel for="fechaFin" value="#{crud['campo.fechaAlta']}"/>
+                                <p:datePicker id="fechaFin" value="#{consultaModel.registro.fechaFin}" 
+                                              showTime="true" pattern="dd/MM/yyyy HH:mm:ss" style="width: 100%;"/>
+
+                                <p:outputLabel for="referenciaExterna" value="#{crud['campo.referenciaExterna']}"/>
+                                <p:inputText id="referenciaExterna" value="#{consultaModel.registro.referenciaExterna}" maxlength="255" style="width: 100%;"/>
+
+                                <p:outputLabel for="observaciones" value="#{crud['campo.observaciones']}"/>
+                                <p:inputTextarea id="observaciones" value="#{consultaModel.registro.observaciones}" style="width: 100%;" rows="4"/>
+
+                            </p:panelGrid>
+                        </p:tab>
+
+                        <p:tab title="#{crud['consulta.tab.procedimiento']}" rendered="#{consultaModel.estado != 'CREAR'}">
+
+                            <p:commandButton value="#{crud['boton.nuevo']}" actionListener="#{consultaModel.prepararNuevoProcedimiento}" 
+                                             update=":formTable:dialogProcedimiento" oncomplete="PF('dlgProcedimiento').show();" 
+                                             icon="pi pi-plus" style="margin-bottom: 10px;" />
+
+                            <p:dataTable id="tablaProcedimientos" value="#{consultaModel.procedimientosDeConsulta}" var="cp" 
+                                         lazy="false" emptyMessage="#{crud['mensaje.sin.registros']}"
+                                         selectionMode="single" selection="#{consultaModel.procedimientoSeleccionado}" 
+                                         rowKey="#{cp.idConsultaProcedimiento}">
+
+                                <p:ajax event="rowSelect" listener="#{consultaModel.onProcedimientoSelect}" 
+                                        update=":formTable:dialogProcedimiento" oncomplete="PF('dlgProcedimiento').show();" />
+
+                                <p:column headerText="#{crud['campo.id']}">
+                                    <h:outputText value="#{cp.idConsultaProcedimiento}" />
+                                </p:column>
+                                <p:column headerText="#{crud['campo.tipo']}">
+                                    <h:outputText value="#{consultaModel.obtenerNombreProcedimiento(cp.idProcedimiento)}" />
+                                </p:column>
+                                <p:column headerText="#{crud['campo.fechaInicio']}">
+                                    <h:outputText value="#{cp.fechaInicio}">
+                                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss"/>
+                                    </h:outputText>
+                                </p:column>
+                                <p:column headerText="#{crud['campo.fechaFin']}">
+                                    <h:outputText value="#{cp.fechaFin}">
+                                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss"/>
+                                    </h:outputText>
+                                </p:column>
+                                <p:column headerText="#{crud['campo.observaciones']}">
+                                    <h:outputText value="#{cp.observaciones}" />
+                                </p:column>
+                                <p:column headerText="#{crud['campo.pasos']}">
+                                    <ui:repeat value="#{cp.consultaProcedimientoPasoList}" var="paso">
+                                        <h:outputText value="• #{paso.idProcedimientoPaso.nombre} (#{paso.estado != null ? paso.estado : 'CREADO'}) - " />
+                                        <h:outputText value="#{paso.idPersonaRol != null ? paso.idPersonaRol.idPersona.nombres : crud['app.sinAsignar']} " />
+                                        <h:outputText value="(#{paso.idPersonaRol != null ? paso.idPersonaRol.idRol.nombre : ''})" /><br/>
+                                    </ui:repeat>
+                                </p:column>
+                            </p:dataTable>
+
+                        </p:tab>
+                    </p:tabView>
+
+                </p:panel>
+
+                <p:dialog id="dialogProcedimiento" widgetVar="dlgProcedimiento" header="#{crud['consulta.procedimiento.nuevo']}" modal="true" width="600" resizable="false">
+                    <p:panelGrid columns="2" columnClasses="ui-grid-col-4,ui-grid-col-8" layout="grid" styleClass="ui-panelgrid-blank" 
+                                 rendered="#{consultaModel.nuevoConsultaProcedimiento != null}">
+
+                        <p:outputLabel value="#{crud['campo.id']}"/>
+                        <p:inputText value="#{consultaModel.nuevoConsultaProcedimiento.idConsultaProcedimiento}" disabled="true" style="width: 100%;"/>
+
+                        <p:outputLabel for="selectProcedimiento" value="#{crud['campo.tipo']}"/>
+                        <p:selectOneMenu id="selectProcedimiento" value="#{consultaModel.nuevoConsultaProcedimiento.idProcedimiento}" 
+                                         filter="true" filterMatchMode="contains" style="width: 100%;" required="true">
+                            <f:selectItem itemLabel="#{crud['mensaje.seleccione']}" itemValue="#{null}" noSelectionOption="true" />
+                            <f:selectItems value="#{consultaModel.listaProcedimientos}" var="proc" 
+                                           itemLabel="#{proc.nombre}" itemValue="#{proc.idProcedimiento}" />
                         </p:selectOneMenu>
 
-                        <p:outputLabel for="fechaInicio" value="#{crud['campo.fechaInicio']}"/>
-                        <p:datePicker id="fechaInicio" value="#{consultaModel.registro.fechaInicio}" 
-                                      showTime="true" pattern="dd/MM/yyyy HH:mm" required="true"/>
+                        <p:outputLabel for="fechaInicioProc" value="#{crud['campo.fechaInicio']}"/>
+                        <p:datePicker id="fechaInicioProc" value="#{consultaModel.nuevoConsultaProcedimiento.fechaInicio}" 
+                                      showTime="true" pattern="dd/MM/yyyy HH:mm:ss" style="width: 100%;"/>
 
-                        <p:outputLabel for="fechaFin" value="#{crud['campo.fechaFin']}"/>
-                        <p:datePicker id="fechaFin" value="#{consultaModel.registro.fechaFin}" 
-                                      showTime="true" pattern="dd/MM/yyyy HH:mm"/>
+                        <p:outputLabel for="fechaFinProc" value="#{crud['campo.fechaFin']}"/>
+                        <p:datePicker id="fechaFinProc" value="#{consultaModel.nuevoConsultaProcedimiento.fechaFin}" 
+                                      showTime="true" pattern="dd/MM/yyyy HH:mm:ss" style="width: 100%;"/>
 
-                        <p:outputLabel for="referenciaExterna" value="#{crud['campo.referenciaExterna']}"/>
-                        <p:inputText id="referenciaExterna" value="#{consultaModel.registro.referenciaExterna}" maxlength="255" style="width: 300px;"/>
-
-                        <p:outputLabel for="observaciones" value="#{crud['campo.observaciones']}"/>
-                        <p:inputTextarea id="observaciones" value="#{consultaModel.registro.observaciones}" style="width: 300px;"/>
+                        <p:outputLabel for="indicacionesProc" value="#{crud['campo.observaciones']}"/>
+                        <p:inputTextarea id="indicacionesProc" value="#{consultaModel.nuevoConsultaProcedimiento.observaciones}" style="width: 100%;"/>
 
                     </p:panelGrid>
 
-                    <g:botonesTop model="#{consultaModel}" estado="#{consultaModel.estado}" formPrincipal="formTable" />
-                </p:panel>
+                    <f:facet name="footer">
+                        <p:commandButton value="#{crud['boton.guardar']}" actionListener="#{consultaModel.guardarProcedimiento}" 
+                                         update=":formTable:tabViewConsulta:tablaProcedimientos" 
+                                         oncomplete="if(!args.validationFailed) PF('dlgProcedimiento').hide();" 
+                                         icon="pi pi-check" />
+
+                        <p:commandButton value="#{crud['boton.eliminar']}" actionListener="#{consultaModel.eliminarProcedimiento(consultaModel.nuevoConsultaProcedimiento)}" 
+                                         update=":formTable:tabViewConsulta:tablaProcedimientos" 
+                                         oncomplete="PF('dlgProcedimiento').hide();" 
+                                         icon="pi pi-trash" styleClass="ui-button-danger"
+                                         rendered="#{consultaModel.nuevoConsultaProcedimiento.idConsultaProcedimiento != null}">
+                            <p:confirm header="#{crud['mensaje.confirmacion']}" message="#{crud['mensaje.seguro.eliminar']}" icon="pi pi-exclamation-triangle" />
+                        </p:commandButton>
+
+                        <p:commandButton value="#{crud['boton.cancelar']}" actionListener="#{consultaModel.cancelarProcedimiento}" 
+                                         oncomplete="PF('dlgProcedimiento').hide();" 
+                                         icon="pi pi-times" styleClass="ui-button-secondary" immediate="true" />
+                    </f:facet>
+                </p:dialog>
+
             </h:form>
 
             <p:confirmDialog global="true" showEffect="fade" hideEffect="fade" responsive="true" width="350">

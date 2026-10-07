@@ -61,7 +61,7 @@
                         <p:inputText id="id" value="#{rolModel.registro.idRol}" disabled="true"/>
                         
                         <p:outputLabel for="nombre" value="#{crud['campo.nombre']}"/>
-                        <p:inputText id="nombre" value="#{rolModel.registro.nombre}"/>
+                        <p:inputText id="nombre" value="#{rolModel.registro.nombre}" required="true"/>
                         
                         <p:outputLabel for="observaciones" value="#{crud['campo.observaciones']}"/>
                         <p:inputTextarea id="observaciones" rows="6" value="#{rolModel.registro.observaciones}"/>
