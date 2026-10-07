@@ -1,0 +1,36 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:cc="jakarta.faces.composite"
+      xmlns:h="jakarta.faces.html"
+      xmlns:p="primefaces">
+
+    <!-- INTERFACE -->
+    <cc:interface>
+        <cc:attribute 
+                     name="formPrincipal" required="true"
+            />
+        <cc:attribute name="model" required="true"/>
+    </cc:interface>
+
+    <!-- IMPLEMENTATION -->
+    <cc:implementation>
+        <h:panelGroup>
+            <p:commandButton
+                value="#{crud['boton.nuevo']} #{cc.attrs.model.nombreEntidad}"
+                actionListener="#{cc.attrs.model.btnNuevoHandler(event)}"
+                update=":#{cc.attrs.formPrincipal}"
+                process="@this"
+                style="margin-right: 10px;"
+                />
+
+           <p:commandButton value="#{crud['boton.cancelar']}"
+                             actionListener="#{cc.attrs.model.btnCancelarHandler(event)}"
+                             process="@this"
+                             immediate="true"
+                             update=":#{cc.attrs.formPrincipal}"
+                             rendered="#{cc.attrs.model.estado != 'NADA'}"/>
+
+        </h:panelGroup>
+    </cc:implementation>
+</html>

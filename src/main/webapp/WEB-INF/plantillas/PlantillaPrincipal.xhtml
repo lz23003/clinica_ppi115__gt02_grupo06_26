@@ -1,0 +1,113 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets">
+    <h:head>
+        <title> <ui:insert name="titulo"></ui:insert></title>
+        <style>
+            .ui-selectonemenu { min-width: 300px; width: auto; }
+            .ui-selectonemenu-panel { width: auto; }
+            #frmSeleccionarIdioma .ui-selectonemenu { min-width: 120px; }
+        </style>
+    </h:head>
+    <h:body>
+        <f:view locale="#{empty sesionUsuario.locale ? 'es' : sesionUsuario.locale}">
+
+            <form id="frmMensajes">
+                <p:growl showDetail="true" life="5000">
+                    <p:autoUpdate/>
+                </p:growl>
+            </form>
+
+            <div class="ui-g">
+                <!-- CABECERA -->
+                <div class="ui-g-12">
+                    <div class="ui-g">
+                        <div class="ui-g-12 ui-md-4">
+                            <p:graphicImage name="Logo.png" library="images" height="80"/>
+                        </div>
+
+                        <div class="ui-g-12 ui-md-4">
+                            <h2>
+                                <p:outputPanel id="tituloApp">
+                                    <ui:insert name="titulo">titulo</ui:insert>
+                                </p:outputPanel>
+                            </h2>
+                        </div>
+
+                        <!-- Usuario -->
+                        <div class="ui-g-12 ui-md-4" style="text-align: right;">
+                            <h:form id="frmUsuarioAutenticado">
+                                <p:commandLink id="opcionesUsuario" style="text-decoration: none; color: inherit;">
+                                    <i class="pi pi-user" style="font-size: 1.5rem; margin-right: 5px; vertical-align: middle;"></i>
+                                    <h:panelGroup style="display: inline-block; text-align: left; vertical-align: middle;">
+                                        <span style="font-weight: bold; font-size: 1.1rem; display: block;">
+                                            #{sesionUsuario.nombreUsuario eq 'Invitado' ? crud['app.invitado'] : sesionUsuario.nombreUsuario} 
+                                            <i class="pi pi-angle-down" style="font-size: 0.8rem;"></i>
+                                        </span>
+                                        <span style="color: #666; font-size: 0.9rem;">
+                                            (#{sesionUsuario.rolUsuario eq 'Sin Asignar' ? crud['app.sinAsignar'] : sesionUsuario.rolUsuario}) 
+                                            - #{sesionUsuario.clinicaUsuario eq 'Ninguna Clínica' ? crud['app.ningunaClinica'] : sesionUsuario.clinicaUsuario}
+                                        </span>
+                                    </h:panelGroup>
+                                </p:commandLink>
+
+                                <p:menu overlay="true" trigger="opcionesUsuario" my="right top" at="right bottom">                                   
+                                    <p:menuitem value="#{crud['menu.cerrarSesion']}" icon="pi pi-power-off" action="#{sesionUsuario.cerrarSesion}" ajax="false" />
+                                </p:menu>
+                            </h:form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MENÚ LATERAL -->
+                <div class="ui-g-12">
+                    <p:commandButton icon="pi pi-bars" type="button" onclick="PF('sidebarMenu').show()" 
+                                     value="#{crud['menu.titulo']}" style="margin-bottom: 15px;" />
+
+                    <p:sidebar widgetVar="sidebarMenu" style="overflow-y: auto;">
+                        <h3>#{crud['menu.titulo']}</h3>
+                        <h:form id="frmMenuPrincipal">
+                            <p:menu style="width:100%; border:none;">
+                                <p:menuitem value="#{crud['menu.cambiarRol']}" outcome="/paginas/CambiarRol" icon="pi pi-link"/>
+                                <p:menuitem value="#{crud['clinica.titulo']}" outcome="/paginas/Clinica" icon="pi pi-link"/>
+                                <p:menuitem value="#{crud['consulta.titulo']}" outcome="/paginas/Consulta" icon="pi pi-link"/>
+                                <p:menuitem value="#{crud['examen.titulo']}" outcome="/paginas/Examen" icon="pi pi-link"/>
+                                <p:menuitem value="#{crud['persona.titulo']}" outcome="/paginas/Persona" icon="pi pi-link"/>
+                                <p:menuitem value="#{crud['procedimiento.titulo']}" outcome="/paginas/Procedimiento" icon="pi pi-link"/>
+                                <p:menuitem value="#{crud['rol.titulo']}" outcome="/paginas/Rol" icon="pi pi-link"/>
+                                <p:menuitem value="#{crud['tipoDocumento.titulo']}" outcome="/paginas/TipoDocumento" icon="pi pi-link"/>
+                                <p:menuitem value="#{crud['tipoExamen.titulo']}" outcome="/paginas/TipoExamen" icon="pi pi-link"/>
+                                <p:menuitem value="#{crud['tipoMedioContacto.titulo']}" outcome="/paginas/TipoMedioContacto" icon="pi pi-link"/>
+                            </p:menu>
+                        </h:form>
+                    </p:sidebar>
+                </div>
+
+                <!-- CONTENIDO PRINCIPAL -->
+                <div class="ui-g-12 ui-md-10 ui-md-offset-1">
+                    <h:form id="frmSeleccionarIdioma">
+                        <p:selectOneMenu value="#{sesionUsuario.idiomaSeleccionado}">
+                            <f:selectItems value="#{sesionUsuario.idiomasDisponibles.entrySet()}"
+                                           var="entry"
+                                           itemLabel="#{entry.key}"
+                                           itemValue="#{entry.key}"/>
+                            <p:ajax event="change" listener="#{sesionUsuario.cambiarIdioma}" update="@all"/>
+                        </p:selectOneMenu>
+                    </h:form>
+
+                    <ui:insert name="contenido">contenido principal</ui:insert>
+                </div>
+
+                <!-- FOOTER -->
+                <div class="ui-g-12">
+                    <footer>© #{crud['app.derechos']} #{crud['app.titulo']} </footer>
+                </div>
+
+            </div>
+        </f:view>
+    </h:body>
+</html>

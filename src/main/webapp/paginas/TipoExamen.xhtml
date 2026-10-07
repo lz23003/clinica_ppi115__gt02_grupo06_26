@@ -1,0 +1,109 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:p="primefaces"
+      xmlns:g="jakarta.faces.composite/crud"
+      >
+  
+    <ui:composition template="/WEB-INF/plantillas/PlantillaPrincipal.xhtml">
+        
+        <ui:define name="titulo">#{crud['tipoExamen.titulo']}</ui:define>
+        
+        <ui:define name="contenido">
+            
+            <h:form id="formTable">
+                
+                <p:panel id="panelTabla" 
+                         rendered="#{tipoExamenModel.estado=='NADA'}"
+                         > 
+                    <g:botonNuevo model="#{tipoExamenModel}"
+                                  formPrincipal="formTable"
+                        
+                        />
+                    
+                   
+                    <p:dataTable id="tablaRegistros" var="r" value="#{tipoExamenModel.modelo}" 
+                                 paginator="true"
+                                 paginatorTemplate="{RowsPerPageDropdown} {FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink}"
+                                 selectionMode="single"
+                                 lazy="true"
+                                 selection="#{tipoExamenModel.registro}"
+                                 emptyMessage="#{crud['mensaje.sin.registros']}"
+                                 rows="#{tipoExamenModel.registrosPorPagina}"
+                                 >
+                        <p:ajax event="rowSelect"
+                                listener="#{tipoExamenModel.onRowSelect}"
+                                process="@this"
+                                update=":formTable"
+                                />
+                        
+                        <p:column headerText="#{crud['campo.id']}" >
+                            <h:outputText value="#{r.idTipoExamen}"/>
+                        </p:column>
+                        
+                        <p:column headerText="#{crud['campo.nombre']}" >
+                            <h:outputText value="#{r.nombre}"/>
+                        </p:column>
+                        
+                        <p:column headerText="#{crud['campo.observaciones']}" >
+                            <h:outputText value="#{r.observaciones}"/>
+                        </p:column>
+                        
+                        <p:column headerText="#{crud['campo.activo']}" >
+                            <h:outputText value="#{r.activo ? crud['boton.si'] : crud['boton.no']}"/>
+                        </p:column>
+                        
+                    </p:dataTable>
+
+                </p:panel>
+                
+                <p:panel id="panelRegistros" rendered="#{tipoExamenModel.estado!='NADA'}">
+                    <p:panelGrid columns="2" >
+                     
+                        <p:outputLabel for="id" value="#{crud['campo.id']}"/>
+                        <p:inputText id="id" value="#{tipoExamenModel.registro.idTipoExamen}" disabled="true"/>
+                        
+                        <p:outputLabel for="nombre" value="#{crud['campo.nombre']}"/>
+                        <p:inputText id="nombre" value="#{tipoExamenModel.registro.nombre}" required="true" requiredMessage="El nombre es obligatorio"/>
+                        
+                        <p:outputLabel for="observaciones" value="#{crud['campo.observaciones']}"/>
+                        <p:inputTextarea id="observaciones" value="#{tipoExamenModel.registro.observaciones}"/>
+                        
+                        <p:outputLabel for="activo" value="#{crud['campo.activo']}"/>
+                        <p:selectBooleanCheckbox id="activo" value="#{tipoExamenModel.registro.activo}"/>
+                        
+                    </p:panelGrid>
+                    
+                    <g:botonesTop model="#{tipoExamenModel}"
+                                  estado="#{tipoExamenModel.estado}"
+                                  formPrincipal="formTable"
+                        
+                        />
+                    
+                    
+                
+                </p:panel>
+                
+            </h:form>
+            
+                <!-- Diálogo Global de Confirmación (para Eliminar) -->
+                <!-- Funciona sin widgetVar gracias al globla=true -->
+                <p:confirmDialog global="true" showEffect="fade" hideEffect="fade" responsive="true" width="350">
+                    <p:commandButton value="#{crud['boton.si']}" type="button" styleClass="ui-confirmdialog-yes" icon="pi pi-check" />
+                    <p:commandButton value="#{crud['boton.no']}" type="button" styleClass="ui-confirmdialog-no ui-button-secondary" icon="pi pi-times" />
+                </p:confirmDialog>
+            
+        </ui:define>
+        
+        
+        
+        
+        
+        
+        
+    </ui:composition>
+    
+    
+</html>

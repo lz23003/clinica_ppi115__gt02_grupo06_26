@@ -18,7 +18,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-
 @Entity
 @Table(name = "consulta_procedimiento_paso", catalog = "odontologia_sv", schema = "public")
 @NamedQueries({
@@ -29,24 +28,38 @@ import java.util.UUID;
 public class ConsultaProcedimientoPaso implements Serializable {
 
     private static final long serialVersionUID = 1L;
+    
     @Id
     @Column(name = "id_consulta_procedimiento_paso")
     private UUID idConsultaProcedimientoPaso;
+    
     @Column(name = "fecha_inicio")
     @Temporal(TemporalType.TIMESTAMP)
     private Date fechaInicio;
+    
     @Column(name = "fecha_fin")
     @Temporal(TemporalType.TIMESTAMP)
     private Date fechaFin;
+    
     @Size(max = 20)
     @Column(name = "estado")
     private String estado;
+    
+    @Column(name = "valor", columnDefinition = "text")
+    private String valor;
+
+    @JoinColumn(name = "id_procedimiento_paso", referencedColumnName = "id_procedimiento_paso")
+    @ManyToOne(fetch = FetchType.LAZY)
+    private ProcedimientoPaso idProcedimientoPaso;
+
     @JoinColumn(name = "id_consulta_procedimiento", referencedColumnName = "id_consulta_procedimiento")
     @ManyToOne(fetch = FetchType.LAZY)
     private ConsultaProcedimiento idConsultaProcedimiento;
+    
     @JoinColumn(name = "id_persona_rol", referencedColumnName = "id_persona_rol")
     @ManyToOne(fetch = FetchType.LAZY)
     private PersonaRol idPersonaRol;
+    
     @OneToMany(mappedBy = "idConsultaProcedimientoPaso", fetch = FetchType.LAZY)
     private List<OrdenExamen> ordenExamenList;
 
@@ -113,6 +126,22 @@ public class ConsultaProcedimientoPaso implements Serializable {
         this.ordenExamenList = ordenExamenList;
     }
 
+    public String getValor() {
+        return valor;
+    }
+
+    public void setValor(String valor) {
+        this.valor = valor;
+    }
+
+    public ProcedimientoPaso getIdProcedimientoPaso() {
+        return idProcedimientoPaso;
+    }
+
+    public void setIdProcedimientoPaso(ProcedimientoPaso idProcedimientoPaso) {
+        this.idProcedimientoPaso = idProcedimientoPaso;
+    }
+
     @Override
     public int hashCode() {
         int hash = 0;
@@ -122,7 +151,6 @@ public class ConsultaProcedimientoPaso implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
         if (!(object instanceof ConsultaProcedimientoPaso)) {
             return false;
         }

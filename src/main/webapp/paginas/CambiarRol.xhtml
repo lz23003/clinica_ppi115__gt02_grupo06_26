@@ -1,0 +1,62 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                template="/WEB-INF/plantillas/PlantillaPrincipal.xhtml">
+
+    <ui:define name="titulo">
+        #{crud['menu.cambiarRol']}
+    </ui:define>
+
+    <ui:define name="contenido">
+        <div class="ui-fluid" style="max-width: 600px; margin: 40px auto;">
+            
+            <h:form id="frmCambioRol">
+                <p:panelGrid columns="2" columnClasses="ui-grid-col-3, ui-grid-col-9" layout="grid" styleClass="ui-noborder" style="margin-bottom: 20px;">
+                    
+                    <p:outputLabel for="clinica" value="#{crud['entidad.clinica']}" />
+                    <p:selectOneMenu id="clinica" value="#{cambiarRolModel.clinicaSeleccionada}" converter="entityConverter">
+                        <f:selectItem itemLabel="#{crud['mensaje.seleccione']}" itemValue="#{null}" noSelectionOption="true" />
+                        <f:selectItems value="#{cambiarRolModel.clinicasDisponibles}" 
+                                       var="cli" 
+                                       itemLabel="#{cli.nombre}" 
+                                       itemValue="#{cli}" />
+                        <p:ajax update="persona" listener="#{cambiarRolModel.actualizarPersonas}" />
+                    </p:selectOneMenu>
+
+                    <p:outputLabel for="rol" value="#{crud['entidad.rol']}" />
+                    <p:selectOneMenu id="rol" value="#{cambiarRolModel.rolSeleccionado}" converter="entityConverter">
+                        <f:selectItem itemLabel="#{crud['mensaje.seleccione']}" itemValue="#{null}" noSelectionOption="true" />
+                        <f:selectItems value="#{cambiarRolModel.rolesDisponibles}" 
+                                       var="r" 
+                                       itemLabel="#{r.nombre}" 
+                                       itemValue="#{r}" />
+                        <p:ajax update="persona" listener="#{cambiarRolModel.actualizarPersonas}" />
+                    </p:selectOneMenu>
+
+                    <p:outputLabel for="persona" value="#{crud['entidad.Persona']}" />
+                    <p:selectOneMenu id="persona" value="#{cambiarRolModel.personaSeleccionada}" converter="entityConverter"
+                                     disabled="#{empty cambiarRolModel.clinicaSeleccionada or empty cambiarRolModel.rolSeleccionado}">
+                        <f:selectItem itemLabel="#{crud['mensaje.seleccione']}" itemValue="#{null}" noSelectionOption="true"/>
+                        <f:selectItems value="#{cambiarRolModel.personasDisponibles}" 
+                                       var="p" 
+                                       itemLabel="#{p.nombres} #{p.apellidos}" 
+                                       itemValue="#{p}" />
+                    </p:selectOneMenu>
+
+                </p:panelGrid>
+
+                <div style="padding-left: 25%;">
+                    <p:commandButton value="#{crud['boton.aplicar']}" 
+                                     action="#{cambiarRolModel.aplicarCambioRol}" 
+                                     ajax="false"
+                                     style="width: 120px;" 
+                                     styleClass="ui-button-primary"/>
+                </div>
+            </h:form>
+            
+        </div>
+    </ui:define>
+
+</ui:composition>

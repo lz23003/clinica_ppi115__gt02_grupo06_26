@@ -66,7 +66,7 @@ public class ConsultaProcedimiento implements Serializable {
         this.idConsultaProcedimiento = idConsultaProcedimiento;
     }
 
-    public Object getIdProcedimiento() {
+    public UUID getIdProcedimiento() {
         return idProcedimiento;
     }
 

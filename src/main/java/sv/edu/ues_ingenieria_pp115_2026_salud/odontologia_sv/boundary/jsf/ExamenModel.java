@@ -131,7 +131,6 @@ public class ExamenModel extends DefaultModel<Examen> implements Serializable {
                 return;
             }
 
-            // Validar que el tipo sea activo
             if (!Boolean.TRUE.equals(examenTipoExamenRegistro.getIdTipoExamen().getActivo())) {
                 enviarMensaje(getText("model.crud.advertencia"),
                         "No se puede asignar un tipo de examen inactivo.",
@@ -170,6 +169,51 @@ public class ExamenModel extends DefaultModel<Examen> implements Serializable {
     
     public List<TipoExamen> completarTipoExamen(String query) {
         return tipoExamenDao.findByNombreLikeActivo(query, 0, 10);
+    }
+    
+    public void btnEliminarExamenHandler(ActionEvent event) {
+        if (registro == null || registro.getIdExamen() == null) {
+            return;
+        }
+        try {
+            if (tiposAsignados != null && !tiposAsignados.isEmpty()) {
+                enviarMensaje(getText("model.crud.advertencia"),
+                        "No se puede eliminar el examen porque tiene tipos asociados.",
+                        FacesMessage.SEVERITY_WARN);
+                return;
+            }
+
+            examenDao.eliminar(registro);
+            enviarMensaje(getText("model.crud.exito"),
+                    getText("model.crud.eliminado"),
+                    FacesMessage.SEVERITY_INFO);
+
+            btnCancelarHandler(event);
+        } catch (Exception ex) {
+            enviarMensaje(getText("model.crud.error"),
+                    getText("model.crud.error.eliminar"),
+                    FacesMessage.SEVERITY_ERROR);
+            ex.printStackTrace();
+        }
+    }
+
+    public void btnEliminarTipoExamenHandler(ActionEvent event) {
+        try {
+            if (examenTipoExamenRegistro != null) {
+                examenTipoExamenDao.eliminar(examenTipoExamenRegistro);
+                enviarMensaje(getText("model.crud.exito"),
+                        getText("model.crud.eliminado"),
+                        FacesMessage.SEVERITY_INFO);
+                tiposAsignados = examenTipoExamenDao.buscarPorExamen(registro.getIdExamen());
+                examenTipoExamenRegistro = null;
+                examenTipoExamenEstado = ESTADO_CRUD.NADA;
+            }
+        } catch (Exception ex) {
+            enviarMensaje(getText("model.crud.error"),
+                    getText("model.crud.error.eliminar"),
+                    FacesMessage.SEVERITY_ERROR);
+            ex.printStackTrace();
+        }
     }
 
  

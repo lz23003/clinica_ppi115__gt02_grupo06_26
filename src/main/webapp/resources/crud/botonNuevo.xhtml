@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:cc="jakarta.faces.composite"
+      xmlns:h="jakarta.faces.html"
+      xmlns:p="primefaces">
+
+    <!-- INTERFACE  atributos que recibe-->3
+    <cc:interface>
+        <cc:attribute name="model" required="true"
+                      shortDescription="El bean del modelo (ej: tipoDocumentoModel)" />
+        
+        <cc:attribute name="formPrincipal" required="true"
+                      shortDescription="ID del formulario principal (ej: formTable)" />
+    </cc:interface>
+        
+        
+        
+        
+        
+
+
+    <!-- IMPLEMENTATION -->
+   <cc:implementation>
+        <h:panelGroup>
+            <p:commandButton value="#{crud['boton.nuevo']} #{cc.attrs.model.nombreEntidad}"
+                             icon="pi pi-plus"
+                             actionListener="#{cc.attrs.model.btnNuevoHandler(event)}"
+                             update=":#{cc.attrs.formPrincipal}"
+                             process="@this" />
+        </h:panelGroup>
+    </cc:implementation>
+    
+</html>

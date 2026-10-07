@@ -1,0 +1,212 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:g="jakarta.faces.composite/crud">
+
+    <ui:composition template="/WEB-INF/plantillas/PlantillaPrincipal.xhtml">
+
+        <ui:define name="titulo">#{crud['examen.titulo']}</ui:define>
+
+        <ui:define name="contenido">
+            <h:form id="formExamen">
+
+
+                <p:panel rendered="#{examenModel.estado=='NADA'}">
+
+                    <g:botonNuevo model="#{examenModel}"
+                                  formPrincipal="formExamen"/>
+
+                    <p:dataTable id="tablaExamen"
+                                 value="#{examenModel.modelo}"
+                                 var="r"
+                                 paginator="true"
+                                 rows="#{examenModel.registrosPorPagina}"
+                                 paginatorTemplate="{RowsPerPageDropdown} {FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink}"
+                                 selectionMode="single"
+                                 selection="#{examenModel.registro}"
+                                 emptyMessage="#{crud['mensaje.sin.registros']}"
+                                 lazy="true">
+
+                        <p:ajax event="rowSelect"
+                                listener="#{examenModel.onRowSelect}"
+                                update=":formExamen"/>
+
+                        <p:column headerText="#{crud['campo.id']}">
+                            <h:outputText value="#{r.idExamen}"/>
+                        </p:column>
+                        <p:column headerText="#{crud['campo.nombre']}">
+                            <h:outputText value="#{r.nombre}"/>
+                        </p:column>
+                        <p:column headerText="#{crud['campo.activo']}">
+                            <h:outputText value="#{r.activo ? 'ACTIVO' : 'INACTIVO'}"/>
+                        </p:column>
+                        <p:column headerText="#{crud['campo.observaciones']}">
+                            <h:outputText value="#{r.observaciones}"/>
+                        </p:column>
+
+                    </p:dataTable>
+                </p:panel>
+
+
+                <p:panel rendered="#{examenModel.estado != 'NADA'}">
+
+                    <g:botonNuevoYCancelar model="#{examenModel}"
+                                           formPrincipal="formExamen"/>
+
+                    <p:tabView id="tabsExamen" activeIndex="#{examenModel.activa}">
+
+                        <p:ajax event="tabChange"
+                                listener="#{examenModel.cambiarTab}"
+                                update="@this"/>
+
+
+                        <p:tab id="tabDetalle" title="#{crud['persona.tab.detalle']}">
+                            <p:panel id="panelDetalle">
+                                <p:panelGrid columns="2" columnClasses="label,value">
+
+                                    <p:outputLabel for="idExamen" value="#{crud['campo.id']}:"/>
+                                    <p:inputText id="idExamen"
+                                                 value="#{examenModel.registro.idExamen}"
+                                                 disabled="true"/>
+
+                                    <p:outputLabel for="nombre" value="#{crud['campo.nombre']}: *"/>
+                                    <p:inputText id="nombre"
+                                                 value="#{examenModel.registro.nombre}"
+                                                 required="true"
+                                                 requiredMessage="#{crud['campo.nombre']} #{crud['mensaje.requerido']}"/>
+
+                                    <p:outputLabel for="activo" value="#{crud['campo.activo']}:"/>
+                                    <p:toggleSwitch id="activo"
+                                                    value="#{examenModel.registro.activo}"/>
+
+                                    <p:outputLabel for="observaciones" value="#{crud['campo.observaciones']}:"/>
+                                    <p:inputTextarea id="observaciones"
+                                                     value="#{examenModel.registro.observaciones}"
+                                                     rows="4"/>
+
+                                </p:panelGrid>
+
+                                <h:panelGroup layout="block" style="margin-top: 15px; display: flex; gap: 10px;">    
+                                    <p:commandButton value="#{crud['boton.guardar']}" actionListener="#{examenModel.btnCrearHandler}"
+                                                     rendered="#{examenModel.estado eq 'CREAR'}" update=":formExamen" process="panelDetalle" icon="pi pi-save" />
+
+                                    <p:commandButton value="#{crud['boton.guardar']}" actionListener="#{examenModel.btnCrearHandler}"
+                                                     rendered="#{examenModel.estado eq 'MODIFICAR'}" update=":formExamen" process="panelDetalle" icon="pi pi-pencil" />
+
+                                    <p:commandButton value="#{crud['boton.eliminar']}" actionListener="#{examenModel.btnEliminarExamenHandler}"
+                                                     rendered="#{examenModel.estado eq 'MODIFICAR'}" update=":formExamen" process="@this" icon="pi pi-trash" styleClass="ui-button-danger">
+                                        <p:confirm header="#{crud['mensaje.confirmacion.titulo']}" 
+                                                   message="#{crud['mensaje.confirmar.eliminar']}" 
+                                                   icon="pi pi-exclamation-triangle"/>
+                                    </p:commandButton>
+                                </h:panelGroup>
+                            </p:panel>
+                        </p:tab>
+
+
+                        <p:tab id="tabTipoExamen" title="#{crud['examen.tab.tipoExamen']}"
+                               disabled="#{examenModel.estado == 'CREAR'}">
+
+                            <p:panel id="panelTipoExamen">
+
+                                <p:panel rendered="#{examenModel.examenTipoExamenEstado != 'NADA'}"
+                                         header="#{examenModel.examenTipoExamenEstado=='CREAR' ? crud['tipoExamen.nuevo'] : crud['tipoExamen.modificar']}">
+
+                                    <p:panelGrid columns="2" columnClasses="label,value">
+
+                                        <p:outputLabel for="eteId" value="#{crud['campo.id']}:"/>
+                                        <p:inputText id="eteId"
+                                                     value="#{examenModel.examenTipoExamenRegistro.idExamenTipoExamen}"
+                                                     disabled="true"/>
+
+                                        <p:outputLabel for="eteTipo" value="#{crud['campo.tipo']}: *"/>
+                                        <p:autoComplete id="eteTipo"
+                                                        value="#{examenModel.examenTipoExamenRegistro.idTipoExamen}"
+                                                        completeMethod="#{examenModel.completarTipoExamen}"
+                                                        var="te"
+                                                        itemLabel="#{te.nombre}"
+                                                        itemValue="#{te}"
+                                                        converter="entityConverter"
+                                                        dropdown="true"
+                                                        forceSelection="true"
+                                                        disabled="#{examenModel.examenTipoExamenEstado == 'MODIFICAR'}"
+                                                        required="true"/>
+
+                                        <p:outputLabel for="eteObs" value="#{crud['campo.observaciones']}:"/>
+                                        <p:inputTextarea id="eteObs"
+                                                         value="#{examenModel.examenTipoExamenRegistro.observaciones}"
+                                                         rows="3"/>
+                                    </p:panelGrid>
+
+                                    <h:panelGroup layout="block" style="margin-top: 15px; display: flex; gap: 10px;">    
+                                        <p:commandButton value="#{crud['boton.guardar']}" actionListener="#{examenModel.btnGuardarTipoExamenHandler}"
+                                                         rendered="#{examenModel.examenTipoExamenEstado eq 'CREAR'}" update=":formExamen" process="panelTipoExamen" icon="pi pi-save" />
+
+                                        <p:commandButton value="#{crud['boton.guardar']}" actionListener="#{examenModel.btnGuardarTipoExamenHandler}"
+                                                         rendered="#{examenModel.examenTipoExamenEstado eq 'MODIFICAR'}" update=":formExamen" process="panelTipoExamen" icon="pi pi-pencil" />
+
+                                        <p:commandButton value="#{crud['boton.eliminar']}" actionListener="#{examenModel.btnEliminarTipoExamenHandler}"
+                                                         rendered="#{examenModel.examenTipoExamenEstado eq 'MODIFICAR'}" update=":formExamen" process="@this" icon="pi pi-trash" styleClass="ui-button-danger">
+                                            <p:confirm header="#{crud['mensaje.confirmacion.titulo']}" message="#{crud['mensaje.confirmacion.eliminar']}" icon="pi pi-exclamation-triangle" />
+                                        </p:commandButton>
+
+                                        <p:commandButton value="#{crud['boton.cancelar']}" actionListener="#{examenModel.btnCancelarTipoExamenHandler}"
+                                                         rendered="#{examenModel.examenTipoExamenEstado ne 'NADA'}" update=":formExamen" process="@this" icon="pi pi-times" styleClass="ui-button-secondary" />
+                                    </h:panelGroup>
+                                </p:panel>
+
+                                <p:panel rendered="#{examenModel.examenTipoExamenEstado=='NADA'}">
+
+                                    <g:botonNuevoGenerico
+                                        actionListener="#{examenModel.btnNuevoTipoExamenHandler(event)}"
+                                        formPrincipal="formExamen"
+                                        procces="panelTipoExamen"
+                                        />
+
+                                    <p:dataTable value="#{examenModel.tiposAsignados}"
+                                                 var="ete"
+                                                 selectionMode="single"
+                                                 selection="#{examenModel.examenTipoExamenRegistro}"
+                                                 rowKey="#{ete.idExamenTipoExamen}"
+                                                 emptyMessage="#{crud['mensaje.sin.registros']}">
+                                        <p:ajax event="rowSelect"
+                                                listener="#{examenModel.onExamenTipoExamenSelect}"
+                                                process="@this"
+                                                update="panelTipoExamen"
+                                                />
+                                        <p:column headerText="#{crud['campo.id']}">
+                                            <h:outputText value="#{ete.idExamenTipoExamen}"/>
+                                        </p:column>
+                                        <p:column headerText="#{crud['campo.tipo']}">
+                                            <h:outputText value="#{ete.idTipoExamen.nombre}"/>
+                                        </p:column>
+                                        <p:column headerText="#{crud['campo.fechaCreacion']}">
+                                            <h:outputText value="#{ete.fechaCreacion}">
+                                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+                                            </h:outputText>
+                                        </p:column>
+                                        <p:column headerText="#{crud['campo.observaciones']}">
+                                            <h:outputText value="#{ete.observaciones}"/>
+                                        </p:column>
+                                    </p:dataTable>
+                                </p:panel>
+                            </p:panel>
+                        </p:tab>
+
+                    </p:tabView>
+                </p:panel>
+
+                <p:confirmDialog global="true" showEffect="fade" hideEffect="fade" responsive="true" width="350">
+                    <p:commandButton value="#{crud['boton.si']}" type="button" styleClass="ui-confirmdialog-yes" icon="pi pi-check" />
+                    <p:commandButton value="#{crud['boton.no']}" type="button" styleClass="ui-confirmdialog-no ui-button-flat" icon="pi pi-times" />
+                </p:confirmDialog>
+
+            </h:form>
+        </ui:define>
+
+    </ui:composition>
+</html>

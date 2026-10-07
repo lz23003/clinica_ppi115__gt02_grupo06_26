@@ -1,6 +1,5 @@
 package sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.boundary.jsf;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.event.ActionEvent;
@@ -105,8 +104,6 @@ public class PersonaModel extends DefaultModel<Persona> implements Serializable 
         return getText("entidad.Persona");
     }
 
-  
-
     @Override
     public void onRowSelect(SelectEvent<Persona> event) {
         super.onRowSelect(event);
@@ -120,29 +117,62 @@ public class PersonaModel extends DefaultModel<Persona> implements Serializable 
         }
     }
 
+    public void btnEliminarPersonaHandler(ActionEvent event) {
+        if (registro == null || registro.getIdPersona() == null) {
+            return;
+        }
+        try {
+            UUID idPersona = registro.getIdPersona();
+
+            List<Documento> docs = documentoDao.buscarPorPersona(idPersona);
+            List<MedioContacto> medios = medioContactoDao.buscarPorPersona(idPersona);
+            List<PersonaRol> roles = personaRolDao.buscarPorPersona(idPersona);
+
+            if ((docs != null && !docs.isEmpty()) ||
+                (medios != null && !medios.isEmpty()) ||
+                (roles != null && !roles.isEmpty())) {
+                enviarMensaje(getText("model.crud.advertencia"),
+                        "No se puede eliminar la persona porque tiene registros dependientes (documentos, medios de contacto o roles asociados).",
+                        FacesMessage.SEVERITY_WARN);
+                return;
+            }
+
+            personaDao.eliminar(registro);
+            enviarMensaje(getText("model.crud.exito"),
+                    getText("model.crud.eliminado"),
+                    FacesMessage.SEVERITY_INFO);
+
+            btnCancelarHandler(event);
+        } catch (Exception ex) {
+            enviarMensaje(getText("model.crud.error"),
+                    getText("model.crud.error.eliminar"),
+                    FacesMessage.SEVERITY_ERROR);
+            ex.printStackTrace();
+        }
+    }
+
     public void onDocumentoSelect(SelectEvent<Documento> event) {
         if (event != null && event.getObject() != null) {
             this.documentoRegistro = event.getObject();
             this.documentoEstado = ESTADO_CRUD.MODIFICAR;
         }
     }
-    
+
     public void onMedioContactoSelect(SelectEvent<MedioContacto> event) {
-    if (event != null && event.getObject() != null) {
-        this.medioContactoRegistro = event.getObject();
-        this.medioContactoEstado = ESTADO_CRUD.MODIFICAR;
+        if (event != null && event.getObject() != null) {
+            this.medioContactoRegistro = event.getObject();
+            this.medioContactoEstado = ESTADO_CRUD.MODIFICAR;
+        }
     }
-}
 
-
-    
-
-    public void btnNuevoDocumentoHandler(ActionEvent event) {
-        Documento d = new Documento();
-        d.setIdDocumento(UUID.randomUUID());
-        d.setIdPersona(registro);
-        this.documentoRegistro = d;
-        this.documentoEstado = ESTADO_CRUD.CREAR;
+    public void onPersonaRolSelect(SelectEvent<PersonaRol> event) {
+        if (event != null && event.getObject() != null) {
+            this.personaRolRegistro = event.getObject();
+            if (this.personaRolRegistro.getIdClinica() != null) {
+                this.clinicaSeleccionada = this.personaRolRegistro.getIdClinica();
+            }
+            this.personaRolEstado = ESTADO_CRUD.MODIFICAR;
+        }
     }
 
     @Override
@@ -170,16 +200,21 @@ public class PersonaModel extends DefaultModel<Persona> implements Serializable 
 
     @Override
     public void btnCancelarHandler(ActionEvent event) {
-        // Resetear el maestro (estado = NADA, registro = null)
         super.btnCancelarHandler(event);
-
         resetSubEstados();
         this.activa = 0;
     }
 
+    public void btnNuevoDocumentoHandler(ActionEvent event) {
+        Documento d = new Documento();
+        d.setIdDocumento(UUID.randomUUID());
+        d.setIdPersona(registro);
+        this.documentoRegistro = d;
+        this.documentoEstado = ESTADO_CRUD.CREAR;
+    }
+
     public void btnGuardarDocumentoHandler(ActionEvent event) {
         try {
-            // Validar formato contra la regex del TipoDocumento
             if (!validarDocumentoContraRegex()) {
                 return;
             }
@@ -195,13 +230,31 @@ public class PersonaModel extends DefaultModel<Persona> implements Serializable 
                         getText("model.crud.actualizado"),
                         FacesMessage.SEVERITY_INFO);
             }
-            // Refrescar la lista
             documentosAsignados = documentoDao.buscarPorPersona(registro.getIdPersona());
             documentoRegistro = null;
             documentoEstado = ESTADO_CRUD.NADA;
         } catch (Exception ex) {
             enviarMensaje(getText("model.crud.error"),
                     getText("model.crud.error.guardar"),
+                    FacesMessage.SEVERITY_ERROR);
+            ex.printStackTrace();
+        }
+    }
+
+    public void btnEliminarDocumentoHandler(ActionEvent event) {
+        try {
+            if (documentoRegistro != null) {
+                documentoDao.eliminar(documentoRegistro);
+                enviarMensaje(getText("model.crud.exito"),
+                        getText("model.crud.eliminado"),
+                        FacesMessage.SEVERITY_INFO);
+                documentosAsignados = documentoDao.buscarPorPersona(registro.getIdPersona());
+                documentoRegistro = null;
+                documentoEstado = ESTADO_CRUD.NADA;
+            }
+        } catch (Exception ex) {
+            enviarMensaje(getText("model.crud.error"),
+                    getText("model.crud.error.eliminar"),
                     FacesMessage.SEVERITY_ERROR);
             ex.printStackTrace();
         }
@@ -282,6 +335,25 @@ public class PersonaModel extends DefaultModel<Persona> implements Serializable 
         }
     }
 
+    public void btnEliminarMedioContactoHandler(ActionEvent event) {
+        try {
+            if (medioContactoRegistro != null) {
+                medioContactoDao.eliminar(medioContactoRegistro);
+                enviarMensaje(getText("model.crud.exito"),
+                        getText("model.crud.eliminado"),
+                        FacesMessage.SEVERITY_INFO);
+                mediosContactoAsignados = medioContactoDao.buscarPorPersona(registro.getIdPersona());
+                medioContactoRegistro = null;
+                medioContactoEstado = ESTADO_CRUD.NADA;
+            }
+        } catch (Exception ex) {
+            enviarMensaje(getText("model.crud.error"),
+                    getText("model.crud.error.eliminar"),
+                    FacesMessage.SEVERITY_ERROR);
+            ex.printStackTrace();
+        }
+    }
+
     public void btnCancelarMedioContactoHandler(ActionEvent event) {
         medioContactoRegistro = null;
         medioContactoEstado = ESTADO_CRUD.NADA;
@@ -335,17 +407,18 @@ public class PersonaModel extends DefaultModel<Persona> implements Serializable 
         pr.setIdClinica(clinicaSeleccionada);
         this.personaRolRegistro = pr;
         this.personaRolEstado = ESTADO_CRUD.CREAR;
-
     }
 
     public void btnGuardarRolHandler(ActionEvent event) {
         try {
             if (personaRolEstado == ESTADO_CRUD.CREAR) {
+                personaRolRegistro.setIdClinica(clinicaSeleccionada);
                 personaRolDao.crear(personaRolRegistro);
                 enviarMensaje(getText("model.crud.exito"),
                         getText("model.crud.creado"),
                         FacesMessage.SEVERITY_INFO);
             } else if (personaRolEstado == ESTADO_CRUD.MODIFICAR) {
+                personaRolRegistro.setIdClinica(clinicaSeleccionada);
                 personaRolDao.modificar(personaRolRegistro);
                 enviarMensaje(getText("model.crud.exito"),
                         getText("model.crud.actualizado"),
@@ -357,6 +430,25 @@ public class PersonaModel extends DefaultModel<Persona> implements Serializable 
         } catch (Exception ex) {
             enviarMensaje(getText("model.crud.error"),
                     getText("model.crud.error.guardar"),
+                    FacesMessage.SEVERITY_ERROR);
+            ex.printStackTrace();
+        }
+    }
+
+    public void btnEliminarRolHandler(ActionEvent event) {
+        try {
+            if (personaRolRegistro != null) {
+                personaRolDao.eliminar(personaRolRegistro);
+                enviarMensaje(getText("model.crud.exito"),
+                        getText("model.crud.eliminado"),
+                        FacesMessage.SEVERITY_INFO);
+                rolesAsignados = personaRolDao.buscarPorPersona(registro.getIdPersona());
+                personaRolRegistro = null;
+                personaRolEstado = ESTADO_CRUD.NADA;
+            }
+        } catch (Exception ex) {
+            enviarMensaje(getText("model.crud.error"),
+                    getText("model.crud.error.eliminar"),
                     FacesMessage.SEVERITY_ERROR);
             ex.printStackTrace();
         }

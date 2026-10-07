@@ -1,0 +1,50 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:cc="jakarta.faces.composite"
+      xmlns:h="jakarta.faces.html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="jakarta.faces.core">
+
+    <!-- INTERFACE -->
+   <cc:interface>
+        <cc:attribute name="model" required="true"/>
+        <cc:attribute name="estado" required="true"/>
+        <cc:attribute name="formPrincipal" required="true"/>
+    </cc:interface>
+
+ <cc:implementation>
+        <h:panelGroup style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 15px;">
+            <!-- Botón Guardar -->
+            <p:commandButton value="#{crud['boton.Guardar']}" 
+                             actionListener="#{cc.attrs.model.btnCrearHandler(event)}"
+                             icon="pi pi-save"
+                             styleClass="ui-button-success"
+                             process="@form"
+                             update=":#{cc.attrs.formPrincipal} :frmMensajes" />
+
+            <!-- Botón Eliminar -->
+            <p:commandButton value="#{crud['boton.Eliminar']}"
+                             icon="pi pi-trash"
+                             styleClass="ui-button-danger"
+                             actionListener="#{cc.attrs.model.btnEliminarHandler(cc.attrs.model.registro)}"
+                             update=":#{cc.attrs.formPrincipal}"
+                             rendered="#{cc.attrs.estado == 'MODIFICAR'}">
+                <p:confirm header="#{crud['model.crud.advertencia']}" 
+                           message="#{crud['model.crud.confirmar.eliminar']}" 
+                           icon="pi pi-exclamation-triangle" />
+            </p:commandButton>
+
+            <!-- Botón Cancelar -->
+            <p:commandButton value="#{crud['boton.cancelar']}" 
+                             actionListener="#{cc.attrs.model.btnCancelarHandler(event)}"
+                             icon="pi pi-times"
+                             styleClass="ui-button-secondary"
+                             process="@this"
+                             immediate="true"
+                             update=":#{cc.attrs.formPrincipal}" />
+
+        </h:panelGroup>
+    </cc:implementation>
+    
+</html>

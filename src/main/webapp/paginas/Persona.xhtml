@@ -1,0 +1,467 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:g="jakarta.faces.composite/crud">
+
+    <ui:composition template="/WEB-INF/plantillas/PlantillaPrincipal.xhtml">
+
+        <ui:define name="titulo">#{crud['persona.titulo']}</ui:define>
+
+        <ui:define name="contenido">
+
+            <h:form id="formPersona">
+                <p:panel rendered="#{personaModel.estado=='NADA'}">
+                    <g:botonNuevo model="#{personaModel}"
+                                  formPrincipal="formPersona"
+                                  />
+
+                    <p:dataTable id="tablaPersona"
+                                 value="#{personaModel.modelo}"
+                                 var="r"
+                                 paginator="true"
+                                 rows="#{personaModel.registrosPorPagina}"
+                                 paginatorTemplate="{RowsPerPageDropdown} {FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink}"
+                                 selectionMode="single"
+                                 selection="#{personaModel.registro}"
+                                 emptyMessage="#{crud['mensaje.sin.registros']}"
+                                 lazy="true"
+                                 >
+                        <p:ajax  event="rowSelect"
+                                 listener="#{personaModel.onRowSelect}"
+                                 update=":formPersona"
+                                 />
+
+                        <p:column headerText="#{crud['campo.id']}">
+                            <h:outputText value="#{r.idPersona}"/>
+                        </p:column>
+
+                        <p:column headerText="#{crud['campo.nombres']}">
+                            <h:outputText value="#{r.nombres}"/>
+                        </p:column>
+
+                        <p:column headerText="#{crud['campo.apellidos']}">
+                            <h:outputText value="#{r.apellidos}"/>
+                        </p:column>
+
+                        <p:column headerText="#{crud['campo.fechaNacimiento']}">
+                            <h:outputText value="#{r.fechaNacimiento}">
+                                <f:convertDateTime pattern="dd/MM/yyyy"/>
+                            </h:outputText>
+                        </p:column>
+
+                        <p:column headerText="#{crud['campo.fechaCreacion']}">
+                            <h:outputText value="#{r.fechaCreacion}">
+                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+                            </h:outputText>
+                        </p:column>
+
+                    </p:dataTable>
+                </p:panel>
+
+
+                <p:panel rendered="#{personaModel.estado!='NADA'}">
+
+                    <g:botonNuevoYCancelar
+                        model="#{personaModel}"
+                        formPrincipal="formPersona"
+                        />
+
+                    <p:tabView id="tabsPersona" activeIndex="#{personaModel.activa}">
+                        <p:ajax event="tabChange"
+                                listener="#{personaModel.onTabChange}"
+                                update="@this"
+                                />
+
+                        <p:tab id="tabDetalle" title="#{crud['persona.tab.detalle']}">
+                            <p:panel id="panelDetalle">
+                                <p:panelGrid columns="2"  columnClasses="label,value">
+
+                                    <p:outputLabel for="idPersona" value="#{crud['campo.id']}:"/>
+                                    <p:inputText id="idPersona"
+                                                 value="#{personaModel.registro.idPersona}"
+                                                 disabled="true"
+                                                 />
+
+                                    <p:outputLabel for="nombres" value="#{crud['campo.nombres']}:"/>
+                                    <p:inputText id="nombres"
+                                                 value="#{personaModel.registro.nombres}"
+                                                 required="true"
+                                                 requiredMessage="#{crud['campo.nombres']} #{crud['mensaje.requerido']}"
+                                                 />
+
+                                    <p:outputLabel for="apellidos" value="#{crud['campo.apellidos']}:"/>
+                                    <p:inputText id="apellidos"
+                                                 value="#{personaModel.registro.apellidos}"
+                                                 required="true"
+                                                 requiredMessage="#{crud['campo.apellidos']} #{crud['mensaje.requerido']}"
+                                                 />
+
+                                    <p:outputLabel for="fechaNacimiento" value="#{crud['campo.fechaNacimiento']}:"/>
+                                    <p:calendar id="fechaNacimiento"
+                                                value="#{personaModel.registro.fechaNacimiento}"
+                                                pattern="dd/MM/yyyy"
+                                                locale="es"
+                                                required="true"
+                                                navigator="true"
+                                                yearRange="c-80:"
+                                                disabled="#{personaModel.estado eq 'MODIFICAR'}"
+                                                />
+
+                                    <p:outputLabel for="fechaCreacion" value="#{crud['campo.fechaCreacion']}:"/>
+                                    <p:inputText id="fechaCreacion"
+                                                 value="#{personaModel.registro.fechaCreacion}"
+                                                 disabled="true"
+                                                 >
+                                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+                                    </p:inputText>
+                                </p:panelGrid>
+
+                                <h:panelGroup layout="block" style="margin-top: 15px; display: flex; gap: 10px;">    
+                                    <p:commandButton value="#{crud['boton.guardar']}" actionListener="#{personaModel.btnCrearHandler}"
+                                                     rendered="#{personaModel.estado eq 'CREAR'}" update=":formPersona" process="panelDetalle" icon="pi pi-save" />
+
+                                    <p:commandButton value="#{crud['boton.guardar']}" actionListener="#{personaModel.btnCrearHandler}"
+                                                     rendered="#{personaModel.estado eq 'MODIFICAR'}" update=":formPersona" process="panelDetalle" icon="pi pi-pencil" />
+
+                                    <p:commandButton value="#{crud['boton.eliminar']}" actionListener="#{personaModel.btnEliminarPersonaHandler}"
+                                                     rendered="#{personaModel.estado eq 'MODIFICAR'}" update=":formPersona" process="@this" icon="pi pi-trash" styleClass="ui-button-danger">
+                                        <p:confirm header="#{crud['mensaje.confirmacion.titulo']}" message="#{crud['mensaje.confirmacion.eliminar.persona']}" icon="pi pi-exclamation-triangle" />
+                                    </p:commandButton>
+
+                                </h:panelGroup>
+
+                            </p:panel>
+                        </p:tab>
+
+
+
+                        <p:tab id="tabDocumentos" title="#{crud['persona.tab.documentos']}"
+                               disabled="#{personaModel.estado == 'CREAR'}">
+
+                            <p:panel id="panelDocumentos">
+                                <p:panel  rendered="#{personaModel.documentoEstado != 'NADA'}"
+                                          header="#{personaModel.documentoEstado=='CREAR' ? crud['documento.nuevo'] : crud['documento.modificar']}">
+
+
+                                    <p:panelGrid columns="2"  columnClasses="label,value">
+
+                                        <p:outputLabel for="docId" value="#{crud['campo.id']}:"/>
+                                        <p:inputText id="docId"
+                                                     value="#{personaModel.documentoRegistro.idDocumento}"
+                                                     disabled="true"
+                                                     />
+
+                                        <p:outputLabel for="docTipo" value="#{crud['campo.tipo']}: *"/>
+                                        <p:autoComplete id="docTipo"
+                                                        value="#{personaModel.documentoRegistro.idTipoDocumento}"
+                                                        completeMethod="#{personaModel.completarTipoDocumento}"
+                                                        var="td"
+                                                        itemLabel="#{td.nombre}"
+                                                        itemValue="#{td}"
+                                                        converter="entityConverter"
+                                                        dropdown="true"
+                                                        forceSelection="true"
+                                                        required="true"
+                                                        disabled="#{personaModel.documentoEstado eq 'MODIFICAR'}"
+                                                        />
+
+                                        <p:outputLabel for="docValor" value="#{crud['campo.valor']}:"/>
+                                        <p:inputText id="docValor"
+                                                     value="#{personaModel.documentoRegistro.valor}"
+                                                     required="true"
+                                                     requiredMessage="#{crud['campo.valor']} #{crud['mensaje.requerido']}"
+                                                     />
+
+                                        <p:outputLabel for="docRuta" value="#{crud['campo.rutaFisica']}:"/>
+                                        <p:inputText id="docRuta"
+                                                     value="#{personaModel.documentoRegistro.rutaFisica}"
+                                                     />
+                                    </p:panelGrid>
+
+                                    <h:panelGroup layout="block" style="margin-top: 15px; display: flex; gap: 10px;">    
+                                        <p:commandButton value="#{crud['boton.guardar']}" actionListener="#{personaModel.btnGuardarDocumentoHandler}"
+                                                         rendered="#{personaModel.documentoEstado eq 'CREAR'}" update=":formPersona" process="panelDocumentos" icon="pi pi-save" />
+
+                                        <p:commandButton value="#{crud['boton.guardar']}" actionListener="#{personaModel.btnGuardarDocumentoHandler}"
+                                                         rendered="#{personaModel.documentoEstado eq 'MODIFICAR'}" update=":formPersona" process="panelDocumentos" icon="pi pi-pencil" />
+
+                                        <p:commandButton value="#{crud['boton.eliminar']}" actionListener="#{personaModel.btnEliminarDocumentoHandler}"
+                                                         rendered="#{personaModel.documentoEstado eq 'MODIFICAR'}" update=":formPersona" process="@this" icon="pi pi-trash" styleClass="ui-button-danger">
+                                            <p:confirm header="#{crud['mensaje.confirmacion.titulo']}" message="#{crud['mensaje.confirmacion.eliminar.documento']}" icon="pi pi-exclamation-triangle" />
+                                        </p:commandButton>
+
+                                        <p:commandButton value="#{crud['boton.cancelar']}" actionListener="#{personaModel.btnCancelarDocumentoHandler}"
+                                                         rendered="#{personaModel.documentoEstado ne 'NADA'}" update=":formPersona" process="@this" icon="pi pi-times" styleClass="ui-button-secondary" />
+                                    </h:panelGroup>
+
+                                </p:panel>
+
+                                <p:panel  rendered="#{personaModel.documentoEstado=='NADA'}">
+                                    <g:botonNuevoGenerico
+                                        actionListener="#{personaModel.btnNuevoDocumentoHandler(event)}"
+                                        formPrincipal="formPersona"
+                                        />
+
+                                    <p:dataTable value="#{personaModel.documentosAsignados}"
+                                                 var="d"
+                                                 emptyMessage="#{crud['mensaje.sin.registros']}"
+                                                 rowKey="#{d.idDocumento}"
+                                                 selectionMode="single"
+                                                 selection="#{personaModel.documentoRegistro}"
+                                                 >
+                                        <p:ajax event="rowSelect"
+                                                listener="#{personaModel.onDocumentoSelect}"
+                                                process="@this"
+                                                update="panelDocumentos"
+                                                />
+                                        <p:column headerText="#{crud['campo.id']}">
+                                            <h:outputText value="#{d.idDocumento}"/>
+                                        </p:column>
+                                        <p:column headerText="#{crud['campo.tipo']}">
+                                            <h:outputText value="#{d.idTipoDocumento.nombre}"/>
+                                        </p:column>
+                                        <p:column headerText="#{crud['campo.valor']}">
+                                            <h:outputText value="#{d.valor}"/>
+                                        </p:column>
+                                        <p:column headerText="#{crud['campo.rutaFisica']}">
+                                            <h:outputText value="#{d.rutaFisica}"/>
+                                        </p:column>
+                                    </p:dataTable>
+                                </p:panel>
+
+                            </p:panel>
+                        </p:tab>
+
+                        <p:tab id="tabMediosContacto" title="#{crud['persona.tab.mediosContacto']}"
+                               disabled="#{personaModel.estado == 'CREAR'}">
+
+                            <p:panel id="panelMediosContacto">
+
+                                <p:panel rendered="#{personaModel.medioContactoEstado != 'NADA'}"
+                                         header="#{crud['medioContacto.nuevo']}">
+
+                                    <p:panelGrid columns="2"  columnClasses="label,value">
+
+                                        <p:outputLabel for="mcId" value="#{crud['campo.id']}:"/>
+                                        <p:inputText id="mcId"
+                                                     value="#{personaModel.medioContactoRegistro.idMedioContacto}"
+                                                     disabled="true"
+                                                     />
+
+                                        <p:outputLabel for="mcTipo" value="#{crud['campo.tipo']}: *"/>
+                                        <p:autoComplete id="mcTipo"
+                                                        value="#{personaModel.medioContactoRegistro.idTipoMedioContacto}"
+                                                        completeMethod="#{personaModel.completarTipoMedioContacto}"
+                                                        var="tmc"
+                                                        itemLabel="#{tmc.nombre}"
+                                                        itemValue="#{tmc}"
+                                                        converter="entityConverter"
+                                                        dropdown="true"
+                                                        forceSelection="true"
+                                                        required="true"
+                                                        disabled="#{personaModel.medioContactoEstado eq 'MODIFICAR'}"
+                                                        />
+
+                                        <p:outputLabel for="mcValor" value="#{crud['campo.valor']}:"/>
+                                        <p:inputText id="mcValor"
+                                                     value="#{personaModel.medioContactoRegistro.valor}"
+                                                     required="true"
+                                                     requiredMessage="#{crud['campo.valor']} #{crud['mensaje.requerido']}"
+                                                     />
+
+                                        <p:outputLabel for="mcFecha" value="#{crud['campo.fechaCreacion']}:"/>
+                                        <p:inputText id="mcFecha"
+                                                     value="#{personaModel.medioContactoRegistro.fechaCreacion}"
+                                                     disabled="true"
+                                                     >
+                                            <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+                                        </p:inputText>
+                                    </p:panelGrid>
+
+                                    <h:panelGroup layout="block" style="margin-top: 15px; display: flex; gap: 10px;">    
+                                        <p:commandButton value="#{crud['boton.guardar']}" actionListener="#{personaModel.btnGuardarMedioContactoHandler}"
+                                                         rendered="#{personaModel.medioContactoEstado eq 'CREAR'}" update=":formPersona" process="panelMediosContacto" icon="pi pi-save" />
+
+                                        <p:commandButton value="#{crud['boton.guardar']}" actionListener="#{personaModel.btnGuardarMedioContactoHandler}"
+                                                         rendered="#{personaModel.medioContactoEstado eq 'MODIFICAR'}" update=":formPersona" process="panelMediosContacto" icon="pi pi-pencil" />
+
+                                        <p:commandButton value="#{crud['boton.eliminar']}" actionListener="#{personaModel.btnEliminarMedioContactoHandler}"
+                                                         rendered="#{personaModel.medioContactoEstado eq 'MODIFICAR'}" update=":formPersona" process="@this" icon="pi pi-trash" styleClass="ui-button-danger">
+                                            <p:confirm header="#{crud['mensaje.confirmacion.titulo']}" message="#{crud['mensaje.confirmacion.eliminar.medio']}" icon="pi pi-exclamation-triangle" />
+                                        </p:commandButton>
+
+                                        <p:commandButton value="#{crud['boton.cancelar']}" actionListener="#{personaModel.btnCancelarMedioContactoHandler}"
+                                                         rendered="#{personaModel.medioContactoEstado ne 'NADA'}" update=":formPersona" process="@this" icon="pi pi-times" styleClass="ui-button-secondary" />
+                                    </h:panelGroup>
+
+                                </p:panel>
+
+                                <p:panel rendered="#{personaModel.medioContactoEstado=='NADA'}">
+
+                                    <g:botonNuevoGenerico actionListener="#{personaModel.btnNuevoMedioContactoHandler(event)}"
+                                                          formPrincipal="formPersona"
+                                                          />
+
+                                    <p:dataTable value="#{personaModel.mediosContactoAsignados}"
+                                                 var="mc"
+                                                 emptyMessage="#{crud['mensaje.sin.registros']}"
+                                                 selectionMode="single"
+                                                 selection="#{personaModel.medioContactoRegistro}"
+                                                 rowKey="#{mc.idMedioContacto}"
+                                                 >
+                                        <p:ajax event="rowSelect"
+                                                listener="#{personaModel.onMedioContactoSelect}"
+                                                process="@this"
+                                                update="panelMediosContacto"
+                                                />
+                                        <p:column headerText="#{crud['campo.id']}">
+                                            <h:outputText value="#{mc.idMedioContacto}"/>
+                                        </p:column>
+                                        <p:column headerText="#{crud['campo.tipo']}">
+                                            <h:outputText value="#{mc.idTipoMedioContacto.nombre}"/>
+                                        </p:column>
+                                        <p:column headerText="#{crud['campo.valor']}">
+                                            <h:outputText value="#{mc.valor}"/>
+                                        </p:column>
+                                        <p:column headerText="#{crud['campo.fechaCreacion']}">
+                                            <h:outputText value="#{mc.fechaCreacion}">
+                                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+                                            </h:outputText>
+                                        </p:column>
+                                    </p:dataTable>
+                                </p:panel>
+                            </p:panel>
+                        </p:tab>
+
+
+                        <p:tab id="tabRoles" title="#{crud['persona.tab.roles']}"
+                               disabled="#{personaModel.estado == 'CREAR'}">
+                            <p:panel id="panelRol">
+                                <p:panelGrid columns="2" 
+                                             columnClasses="label,value">
+                                    <p:outputLabel for="clinicaSel" value="#{crud['campo.clinica']}:"/>
+                                    <p:autoComplete id="clinicaSel"
+                                                    value="#{personaModel.clinicaSeleccionada}"
+                                                    completeMethod="#{personaModel.completarClinica}"
+                                                    var="c"
+                                                    itemLabel="#{c.nombre}"
+                                                    itemValue="#{c}"
+                                                    converter="entityConverter"
+                                                    dropdown="true"
+                                                    forceSelection="true"
+                                                    />
+                                </p:panelGrid>
+
+                                <p:panel rendered="#{personaModel.personaRolEstado != 'NADA'}"
+                                         header="#{crud['personaRol.nuevo']}">
+
+                                    <p:panelGrid columns="2"  columnClasses="label,value">
+
+                                        <p:outputLabel for="prId" value="#{crud['campo.id']}:"/>
+                                        <p:inputText id="prId"
+                                                     value="#{personaModel.personaRolRegistro.idPersonaRol}"
+                                                     disabled="true"
+                                                     />
+
+                                        <p:outputLabel for="prRol" value="#{crud['campo.rol']}: *"/>
+                                        <p:autoComplete id="prRol"
+                                                        value="#{personaModel.personaRolRegistro.idRol}"
+                                                        completeMethod="#{personaModel.completarRol}"
+                                                        var="r"
+                                                        itemLabel="#{r.nombre}"
+                                                        itemValue="#{r}"
+                                                        converter="entityConverter"
+                                                        dropdown="true"
+                                                        forceSelection="true"
+                                                        required="true"
+                                                        disabled="#{personaModel.personaRolEstado eq 'MODIFICAR'}"
+                                                        />
+
+                                        <p:outputLabel for="prFecha" value="#{crud['campo.fechaCreacion']}:"/>
+                                        <p:inputText id="prFecha"
+                                                     value="#{personaModel.personaRolRegistro.fechaCreacion}"
+                                                     disabled="true"
+                                                     >
+                                            <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+                                        </p:inputText>
+                                    </p:panelGrid>
+
+                                    <h:panelGroup layout="block" style="margin-top: 15px; display: flex; gap: 10px;">    
+                                        <p:commandButton value="#{crud['boton.guardar']}" actionListener="#{personaModel.btnGuardarRolHandler}"
+                                                         rendered="#{personaModel.personaRolEstado eq 'CREAR'}" update=":formPersona" process="panelRol" icon="pi pi-save" />
+
+                                        <p:commandButton value="#{crud['boton.guardar']}" actionListener="#{personaModel.btnGuardarRolHandler}"
+                                                         rendered="#{personaModel.personaRolEstado eq 'MODIFICAR'}" update=":formPersona" process="panelRol" icon="pi pi-pencil" />
+
+                                        <p:commandButton value="#{crud['boton.eliminar']}" actionListener="#{personaModel.btnEliminarRolHandler}"
+                                                         rendered="#{personaModel.personaRolEstado eq 'MODIFICAR'}" update=":formPersona" process="@this" icon="pi pi-trash" styleClass="ui-button-danger">
+                                            <p:confirm header="#{crud['mensaje.confirmacion.titulo']}" message="#{crud['mensaje.confirmacion.eliminar.rol']}" icon="pi pi-exclamation-triangle" />
+                                        </p:commandButton>
+
+                                        <p:commandButton value="#{crud['boton.cancelar']}" actionListener="#{personaModel.btnCancelarRolHandler}"
+                                                         rendered="#{personaModel.personaRolEstado ne 'NADA'}" update=":formPersona" process="@this" icon="pi pi-times" styleClass="ui-button-secondary" />
+                                    </h:panelGroup>
+
+                                </p:panel>
+
+                                <p:panel rendered="#{personaModel.personaRolEstado=='NADA'}">
+
+                                    <g:botonNuevoGenerico
+                                        actionListener="#{personaModel.btnNuevoRolHandler(event)}"
+                                        formPrincipal="formPersona"
+                                        procces="panelRol"
+                                        />
+
+                                    <p:dataTable value="#{personaModel.rolesAsignados}"
+                                                 var="pr"
+                                                 emptyMessage="#{crud['mensaje.sin.registros']}"
+                                                 selectionMode="single"
+                                                 selection="#{personaModel.personaRolRegistro}"
+                                                 rowKey="#{pr.idPersonaRol}"
+                                                 >
+
+                                        <p:ajax event="rowSelect"
+                                                listener="#{personaModel.onPersonaRolSelect}"
+                                                process="@this"
+                                                update="panelRol"
+                                                />
+
+                                        <p:column headerText="#{crud['campo.id']}">
+                                            <h:outputText value="#{pr.idPersonaRol}"/>
+                                        </p:column>
+                                        <p:column headerText="#{crud['campo.rol']}">
+                                            <h:outputText value="#{pr.idRol.nombre}"/>
+                                        </p:column>
+                                        <p:column headerText="#{crud['campo.clinica']}">
+                                            <h:outputText value="#{pr.idClinica.nombre}"/>
+                                        </p:column>
+                                        <p:column headerText="#{crud['campo.fechaCreacion']}">
+                                            <h:outputText value="#{pr.fechaCreacion}">
+                                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+                                            </h:outputText>
+                                        </p:column>
+                                    </p:dataTable>
+                                </p:panel>
+                            </p:panel>
+                        </p:tab>
+
+                    </p:tabView>
+
+                </p:panel>
+
+                <p:confirmDialog global="true" showEffect="fade" hideEffect="fade" responsive="true" width="350">
+                    <p:commandButton value="#{crud['boton.si']}" type="button" styleClass="ui-confirmdialog-yes" icon="pi pi-check" />
+                    <p:commandButton value="#{crud['boton.no']}" type="button" styleClass="ui-confirmdialog-no ui-button-flat" icon="pi pi-times" />
+                </p:confirmDialog>
+
+            </h:form>
+
+        </ui:define>
+
+    </ui:composition>
+
+</html>

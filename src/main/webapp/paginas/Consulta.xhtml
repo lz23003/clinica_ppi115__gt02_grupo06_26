@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:p="primefaces"
+      xmlns:g="jakarta.faces.composite/crud">
+
+    <ui:composition template="/WEB-INF/plantillas/PlantillaPrincipal.xhtml">
+        <ui:define name="titulo">#{crud['consulta.titulo']}</ui:define>
+
+        <ui:define name="contenido">
+            <h:form id="formTable">
+
+                <p:panel id="panelTabla" rendered="#{consultaModel.estado=='NADA'}"> 
+                    <g:botonNuevo model="#{consultaModel}" formPrincipal="formTable" />                 
+
+                    <p:dataTable id="tablaRegistros" var="r" value="#{consultaModel.modelo}" 
+                                 paginator="true" lazy="true" selectionMode="single"
+                                 selection="#{consultaModel.registro}"
+                                 emptyMessage="#{crud['mensaje.sin.registros']}"
+                                 rows="#{consultaModel.registrosPorPagina}">
+
+                        <p:ajax event="rowSelect" listener="#{consultaModel.onRowSelect}" process="@this" update=":formTable" />
+
+                        <p:column headerText="#{crud['entidad.personaRol']}">
+                            <h:outputText value="#{r.idPersonaRol.idPersona.nombres} #{r.idPersonaRol.idPersona.apellidos} (#{r.idPersonaRol.idRol.nombre})"/>
+                        </p:column>
+
+                        <p:column headerText="#{crud['campo.fechaInicio']}">
+                            <h:outputText value="#{r.fechaInicio}">
+                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+                            </h:outputText>
+                        </p:column>
+
+                        <p:column headerText="#{crud['campo.fechaFin']}">
+                            <h:outputText value="#{r.fechaFin}">
+                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+                            </h:outputText>
+                        </p:column>
+
+                        <p:column headerText="#{crud['campo.referenciaExterna']}">
+                            <h:outputText value="#{r.referenciaExterna}"/>
+                        </p:column>
+
+                    </p:dataTable>
+                </p:panel>
+
+                <p:panel id="panelRegistros" rendered="#{consultaModel.estado!='NADA'}">
+                    <p:panelGrid columns="2">
+
+                        <p:outputLabel for="idPersonaRol" value="#{crud['entidad.personaRol']}"/>
+                        <p:selectOneMenu id="idPersonaRol" value="#{consultaModel.registro.idPersonaRol}" 
+                                         converter="entityConverter" filter="true" filterMatchMode="contains" 
+                                         required="true">
+                            <f:selectItem itemLabel="-- Seleccione --" itemValue="#{null}" noSelectionOption="true"/>
+                            <f:selectItems value="#{consultaModel.listaPersonaRoles}" var="rol" 
+                                           itemLabel="#{rol.idPersona.nombres} #{rol.idPersona.apellidos} - #{rol.idRol.nombre}" 
+                                           itemValue="#{rol}"/>
+                        </p:selectOneMenu>
+
+                        <p:outputLabel for="fechaInicio" value="#{crud['campo.fechaInicio']}"/>
+                        <p:datePicker id="fechaInicio" value="#{consultaModel.registro.fechaInicio}" 
+                                      showTime="true" pattern="dd/MM/yyyy HH:mm" required="true"/>
+
+                        <p:outputLabel for="fechaFin" value="#{crud['campo.fechaFin']}"/>
+                        <p:datePicker id="fechaFin" value="#{consultaModel.registro.fechaFin}" 
+                                      showTime="true" pattern="dd/MM/yyyy HH:mm"/>
+
+                        <p:outputLabel for="referenciaExterna" value="#{crud['campo.referenciaExterna']}"/>
+                        <p:inputText id="referenciaExterna" value="#{consultaModel.registro.referenciaExterna}" maxlength="255" style="width: 300px;"/>
+
+                        <p:outputLabel for="observaciones" value="#{crud['campo.observaciones']}"/>
+                        <p:inputTextarea id="observaciones" value="#{consultaModel.registro.observaciones}" style="width: 300px;"/>
+
+                    </p:panelGrid>
+
+                    <g:botonesTop model="#{consultaModel}" estado="#{consultaModel.estado}" formPrincipal="formTable" />
+                </p:panel>
+            </h:form>
+
+            <p:confirmDialog global="true" showEffect="fade" hideEffect="fade" responsive="true" width="350">
+                <p:commandButton value="#{crud['boton.si']}" type="button" styleClass="ui-confirmdialog-yes" icon="pi pi-check" />
+                <p:commandButton value="#{crud['boton.no']}" type="button" styleClass="ui-confirmdialog-no ui-button-secondary" icon="pi pi-times" />
+            </p:confirmDialog>
+
+        </ui:define>
+    </ui:composition>
+</html>

@@ -1,0 +1,96 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:g="jakarta.faces.composite/crud"
+      xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets"
+      >
+   
+    <ui:composition template="/WEB-INF/plantillas/PlantillaPrincipal.xhtml">
+        <ui:define name="titulo">#{crud['tipoMedioContacto.titulo']}</ui:define>
+        
+        <ui:define name="contenido">
+            <h:form id="frmTipoMedioContacto">
+                <p:panel rendered="#{tipoMedioContactoModel.estado=='NADA'}">
+                    <g:botonNuevo model="#{tipoMedioContactoModel}"
+                                  formPrincipal="frmTipoMedioContacto"
+                                   />
+                    
+                    <p:dataTable id="tablaTipoMedioContacto"
+                                 value="#{tipoMedioContactoModel.modelo}"
+                                 var="r"
+                                 rows="#{tipoMedioContactoModel.registrosPorPagina}"
+                                 selectionMode="single"
+                                 selection="#{tipoMedioContactoModel.registro}"
+                                 lazy="true"
+                                 emptyMessage="#{crud['mensaje.sin.registros']}"
+                                 >
+                        <p:ajax event="rowSelect"
+                                listener="#{tipoMedioContactoModel.onRowSelect}"
+                                update=":frmTipoMedioContacto"
+                                />
+                        
+                        <p:column headerText="#{crud['campo.id']}">
+                            <h:outputText value="#{r.idTipoMedioContacto}"/>
+                        </p:column>
+                        
+                        <p:column headerText="#{crud['campo.nombre']}">
+                            <h:outputText value="#{r.nombre}"/>
+                        </p:column>
+                        
+                        <p:column headerText="#{crud['tipoMedioContacto.indicaciones']}">
+                            <h:outputText value="#{r.indicaciones}"/>
+                        </p:column>
+                        
+                        <p:column headerText="#{crud['tipoMedioContacto.expresionRegular']}">
+                            <h:outputText value="#{r.expresionRegular}"/>
+                        </p:column>
+                        
+                        <p:column headerText="#{crud['campo.activo']}">
+                            <h:outputText value="#{r.activo ? crud['boton.si'] : crud['boton.no']}"/>
+                        </p:column>
+                    </p:dataTable>
+                </p:panel>
+                
+                <p:panel rendered="#{tipoMedioContactoModel.estado!='NADA'}">
+                    <p:panelGrid columns="2" columnClasses="label,value">
+                        <p:outputLabel for="id" value="#{crud['campo.id']}"/>
+                        <p:inputText id="id" value="#{tipoMedioContactoModel.registro.idTipoMedioContacto}" disabled="true"/>
+                        
+                        <p:outputLabel for="nombre" value="#{crud['campo.nombre']}"/>
+                        <p:inputText id="nombre" value="#{tipoMedioContactoModel.registro.nombre}"/>
+                        
+                        <p:outputLabel for="indicaciones" value="#{crud['tipoMedioContacto.indicaciones']}"/>
+                        <p:inputTextarea id="indicaciones" value="#{tipoMedioContactoModel.registro.indicaciones}" rows="6"/>
+                        
+                        <p:outputLabel for="expresionRegular" value="#{crud['tipoMedioContacto.expresionRegular']}"/>
+                        <p:inputText id="expresionRegular" value="#{tipoMedioContactoModel.registro.expresionRegular}"/>
+                        
+                        <p:outputLabel for="activo" value="#{crud['campo.activo']}"/>
+                        <p:selectBooleanCheckbox id="activo" value="#{tipoMedioContactoModel.registro.activo}"/>
+                    </p:panelGrid>
+                    
+                    <g:botonesTop model="#{tipoMedioContactoModel}"
+                                  formPrincipal="frmTipoMedioContacto"
+                                  estado="#{tipoMedioContactoModel.estado}"
+                        />
+                </p:panel>
+                
+            </h:form>
+            
+            <p:confirmDialog global="true" showEffect="fade" hideEffect="fade" responsive="true">
+                <p:commandButton value="#{crud['boton.si']}" type="button"
+                                 styleClass="ui-confirmdialog-yes" icon="pi pi-check"/>
+                <p:commandButton value="#{crud['boton.no']}" type="button"
+                                 styleClass="ui-confirmdialog-no ui-button-secondary" icon="pi pi-times"/>
+            </p:confirmDialog>
+        </ui:define>
+        
+        
+        
+    </ui:composition>
+    
+    
+</html>

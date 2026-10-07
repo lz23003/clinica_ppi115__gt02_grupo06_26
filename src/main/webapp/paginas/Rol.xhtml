@@ -1,0 +1,93 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:g="jakarta.faces.composite/crud"
+      xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets"
+      >
+    
+    <ui:composition template="/WEB-INF/plantillas/PlantillaPrincipal.xhtml">
+        <ui:define name="titulo">#{crud['rol.titulo']} </ui:define>
+
+        <ui:define name="contenido">
+            <h:form id="formRol">
+                
+                <!-- Visible solo si estado es nada (tabla) -->
+                <p:panel rendered="#{rolModel.estado=='NADA'}">
+                    
+                    <g:botonNuevo model="#{rolModel}"
+                                  formPrincipal="formRol"
+                        />
+                    
+                    <p:dataTable id="tablaRol" value="#{rolModel.modelo}"
+                                 var="r"
+                                 paginator="true"
+                                 rows="#{rolModel.registrosPorPagina}"
+                                 paginatorTemplate="{RowsPerPageDropdown} {FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink}"
+                                 selectionMode="single"
+                                 lazy="true"
+                                 selection="#{rolModel.registro}"
+                                 emptyMessage="#{crud['mensaje.sin.registros']}"
+                                 >
+                        <p:ajax event="rowSelect" listener="#{rolModel.onRowSelect}" update=":formRol"/>
+                        
+                        <p:column headerText="#{crud['campo.id']}">
+                            <h:outputText value="#{r.idRol}"/>
+                        </p:column>
+                        
+                        <p:column headerText="#{crud['campo.nombre']}">
+                            <h:outputText value="#{r.nombre}"/>
+                        </p:column>
+                        
+                        <p:column headerText="#{crud['campo.observaciones']}">
+                            <h:outputText value="#{r.observaciones}"/>
+                        </p:column>
+                        
+                        <p:column headerText="#{crud['campo.activo']}">
+                            <h:outputText value="#{r.activo ? crud['boton.si'] : crud['boton.no']}"/>
+                        </p:column>
+                        
+                    </p:dataTable>
+                     
+                </p:panel>
+                
+                
+                <!-- vista del formulario a llenar -->
+                <p:panel id="panelRol" rendered="#{rolModel.estado!='NADA'}">
+                    <p:panelGrid columns="2" columnClasses="label,value">
+                        <p:outputLabel for="id" value="#{crud['campo.id']}"/>
+                        <p:inputText id="id" value="#{rolModel.registro.idRol}" disabled="true"/>
+                        
+                        <p:outputLabel for="nombre" value="#{crud['campo.nombre']}"/>
+                        <p:inputText id="nombre" value="#{rolModel.registro.nombre}"/>
+                        
+                        <p:outputLabel for="observaciones" value="#{crud['campo.observaciones']}"/>
+                        <p:inputTextarea id="observaciones" rows="6" value="#{rolModel.registro.observaciones}"/>
+                        
+                        <p:outputLabel for="activo" value="#{crud['campo.activo']}"/>
+                        <p:selectBooleanCheckbox id="activo" value="#{rolModel.registro.activo}"/>
+                    </p:panelGrid>
+                    
+                     <g:botonesTop model="#{rolModel}"
+                              formPrincipal="formRol"
+                              estado="#{rolModel.estado}" />
+                </p:panel>
+                
+               
+                    
+            </h:form>
+            
+            <p:confirmDialog global="true" showEffect="fade" hideEffect="fade" responsive="true">
+                <p:commandButton value="#{crud['boton.si']}" type="button"
+                                 styleClass="ui-confirmdialog-yes" icon="pi pi-check"/>
+                <p:commandButton value="#{crud['boton.no']}" type="button"
+                                 styleClass="ui-confirmdialog-no ui-button-secondary" icon="pi pi-times"/>
+                
+            </p:confirmDialog>
+            
+        </ui:define>
+    </ui:composition>
+
+</html>

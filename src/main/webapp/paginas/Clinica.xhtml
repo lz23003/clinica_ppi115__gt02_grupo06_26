@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:p="primefaces"
+      xmlns:g="jakarta.faces.composite/crud">
+
+    <ui:composition template="/WEB-INF/plantillas/PlantillaPrincipal.xhtml">
+
+        <ui:define name="titulo">#{crud['entidad.clinica']}</ui:define>
+
+        <ui:define name="contenido">
+
+            <h:form id="formTable">
+
+                <p:panel id="panelTabla" rendered="#{clinicaModel.estado=='NADA'}">
+                    <g:botonNuevo model="#{clinicaModel}" formPrincipal="formTable" />
+
+                    <p:dataTable id="tablaRegistros" var="r" value="#{clinicaModel.modelo}"
+                                 paginator="true"
+                                 paginatorTemplate="{RowsPerPageDropdown} {FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink}"
+                                 selectionMode="single"
+                                 lazy="true"
+                                 selection="#{clinicaModel.registro}"
+                                 emptyMessage="#{crud['mensaje.sin.registros']}"
+                                 rows="#{clinicaModel.registrosPorPagina}">
+
+                        <p:ajax event="rowSelect"
+                                listener="#{clinicaModel.onRowSelect}"
+                                process="@this"
+                                update=":formTable" />
+
+                        <p:column headerText="#{crud['campo.id']}">
+                            <h:outputText value="#{r.idClinica}"/>
+                        </p:column>
+
+                        <p:column headerText="#{crud['campo.nombre']}">
+                            <h:outputText value="#{r.nombre}"/>
+                        </p:column>
+
+                        <p:column headerText="#{crud['campo.tipo']}">
+                            <h:outputText value="#{r.tipo}"/>
+                        </p:column>
+
+                        <p:column headerText="#{crud['campo.activo']}">
+                            <p:selectBooleanCheckbox value="#{r.activo}" disabled="true"/>
+                        </p:column>
+
+                        <p:column headerText="#{crud['campo.observaciones']}">
+                            <h:outputText value="#{r.comentarios}"/>
+                        </p:column>
+
+                    </p:dataTable>
+
+                </p:panel>
+
+                <p:panel id="panelRegistros" rendered="#{clinicaModel.estado!='NADA'}">
+                    <p:panelGrid columns="2">
+
+                        <p:outputLabel for="id" value="#{crud['campo.id']}"/>
+                        <p:inputText id="id" value="#{clinicaModel.registro.idClinica}" disabled="true" size="40"/>
+
+                        <p:outputLabel for="nombre" value="#{crud['campo.nombre']}"/>
+                        <p:inputText id="nombre" value="#{clinicaModel.registro.nombre}" required="true" requiredMessage="#{crud['mensaje.requerido']}" size="40"/>
+
+                        <p:outputLabel for="tipo" value="Tipo"/>
+                        <p:selectOneMenu id="tipo" value="#{clinicaModel.registro.tipo}" required="true" requiredMessage="El tipo de clínica es requerido" disabled="#{clinicaModel.estado eq 'MODIFICAR'}">
+                            <f:selectItem itemLabel="Seleccione un tipo" itemValue="#{null}" noSelectionOption="true" />
+                            <f:selectItem itemLabel="Comunal" itemValue="Comunal" />
+                            <f:selectItem itemLabel="Empresarial" itemValue="Empresarial"/>
+                            <f:selectItem itemLabel="Dental" itemValue="Dental"/>
+                            <f:selectItem itemLabel="Medicina General" itemValue="Medicina General" />
+                        </p:selectOneMenu>
+
+                        <p:outputLabel for="activo" value="#{crud['campo.activo']}"/>
+                        <p:selectBooleanCheckbox id="activo" value="#{clinicaModel.registro.activo}"/>
+
+                        <p:outputLabel for="comentarios" value="#{crud['campo.observaciones']}"/>
+                        <p:inputTextarea id="comentarios" value="#{clinicaModel.registro.comentarios}" cols="40" rows="3"/>
+
+                    </p:panelGrid>
+
+                    <g:botonesTop model="#{clinicaModel}"
+                                  estado="#{clinicaModel.estado}"
+                                  formPrincipal="formTable" />
+
+                </p:panel>
+
+            </h:form>
+
+            <!-- Diálogo Global de Confirmación (para Eliminar) -->
+            <p:confirmDialog global="true" showEffect="fade" hideEffect="fade" responsive="true" width="350">
+                <p:commandButton value="#{crud['boton.si']}" type="button" styleClass="ui-confirmdialog-yes" icon="pi pi-check" />
+                <p:commandButton value="#{crud['boton.no']}" type="button" styleClass="ui-confirmdialog-no ui-button-secondary" icon="pi pi-times" />
+            </p:confirmDialog>
+
+        </ui:define>
+
+    </ui:composition>
+
+</html>

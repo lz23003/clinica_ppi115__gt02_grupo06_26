@@ -1,4 +1,3 @@
-
 package sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity;
 
 import jakarta.persistence.Column;
@@ -25,21 +24,31 @@ import java.util.UUID;
 public class ProcedimientoPaso implements Serializable {
 
     private static final long serialVersionUID = 1L;
+    
     @Id
     @Column(name = "id_procedimiento_paso")
     private UUID idProcedimientoPaso;
+    
     @Size(max = 155)
     @Column(name = "nombre")
     private String nombre;
+    
     @Column(name = "indica_fin")
     private Boolean indicaFin;
+    
     @OneToMany(mappedBy = "idProcedimientoPaso", fetch = FetchType.LAZY)
     private List<ProcedimientoPasoSecuencia> procedimientoPasoSecuenciaList;
+    
     @OneToMany(mappedBy = "idProcedimientoPaso", fetch = FetchType.LAZY)
     private List<ProcedimientoPasoExamen> procedimientoPasoExamenList;
+    
+    @OneToMany(mappedBy = "idProcedimientoPaso", fetch = FetchType.LAZY)
+    private List<ConsultaProcedimientoPaso> consultaProcedimientoPasoList;
+    
     @JoinColumn(name = "id_procedimiento", referencedColumnName = "id_procedimiento")
     @ManyToOne(fetch = FetchType.LAZY)
     private Procedimiento idProcedimiento;
+    
     @JoinColumn(name = "id_rol", referencedColumnName = "id_rol")
     @ManyToOne(fetch = FetchType.LAZY)
     private Rol idRol;
@@ -107,6 +116,14 @@ public class ProcedimientoPaso implements Serializable {
         this.idRol = idRol;
     }
 
+    public List<ConsultaProcedimientoPaso> getConsultaProcedimientoPasoList() {
+        return consultaProcedimientoPasoList;
+    }
+
+    public void setConsultaProcedimientoPasoList(List<ConsultaProcedimientoPaso> consultaProcedimientoPasoList) {
+        this.consultaProcedimientoPasoList = consultaProcedimientoPasoList;
+    }
+    
     @Override
     public int hashCode() {
         int hash = 0;
@@ -116,7 +133,6 @@ public class ProcedimientoPaso implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
         if (!(object instanceof ProcedimientoPaso)) {
             return false;
         }

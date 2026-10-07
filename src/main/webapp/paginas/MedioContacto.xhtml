@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:p="primefaces"
+      xmlns:g="jakarta.faces.composite/crud">
+    
+    <ui:composition template="/WEB-INF/plantillas/PlantillaPrincipal.xhtml">
+        
+        <ui:define name="titulo">#{crud['medioContacto.titulo']}</ui:define>
+        
+        <ui:define name="contenido">
+            
+            <h:form id="formTable">
+                
+                <p:panel id="panelTabla" rendered="#{medioContactoModel.estado=='NADA'}"> 
+                    <g:botonNuevo model="#{medioContactoModel}" formPrincipal="formTable" />                 
+                   
+                    <p:dataTable id="tablaRegistros" var="r" value="#{medioContactoModel.modelo}" 
+                                 paginator="true"
+                                 paginatorTemplate="{RowsPerPageDropdown} {FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink}"
+                                 selectionMode="single"
+                                 lazy="true"
+                                 selection="#{medioContactoModel.registro}"
+                                 emptyMessage="#{crud['mensaje.sin.registros']}"
+                                 rows="#{medioContactoModel.registrosPorPagina}">
+                        
+                        <p:ajax event="rowSelect"
+                                listener="#{medioContactoModel.onRowSelect}"
+                                process="@this"
+                                update=":formTable" />
+                        
+                        <p:column headerText="#{crud['campo.persona']}">
+                            <h:outputText value="#{r.idPersona.nombres} #{r.idPersona.apellidos}"/>
+                        </p:column>
+                        
+                        <p:column headerText="#{crud['entidad.tipoMedioContacto']}">
+                            <h:outputText value="#{r.idTipoMedioContacto.nombre}"/>
+                        </p:column>
+
+                        <p:column headerText="#{crud['campo.valor']}">
+                            <h:outputText value="#{r.valor}"/>
+                        </p:column>
+                        
+                    </p:dataTable>
+
+                </p:panel>
+                
+                <p:panel id="panelRegistros" rendered="#{medioContactoModel.estado!='NADA'}">
+                    <p:panelGrid columns="2">
+                     
+                        <p:outputLabel for="persona" value="#{crud['campo.persona']}"/>
+                        <p:selectOneMenu id="persona" value="#{medioContactoModel.registro.idPersona}" converter="entityConverter" filter="true" filterMatchMode="contains" required="true" requiredMessage="#{crud['mensaje.requerido']}">
+                            <f:selectItem itemLabel="-- Seleccione una Persona --" itemValue="#{null}" noSelectionOption="true"/>
+                            <f:selectItems value="#{medioContactoModel.listaPersonas}" var="per" itemLabel="#{per.nombres} #{per.apellidos}" itemValue="#{per}"/>
+                        </p:selectOneMenu>
+                        
+                        <p:outputLabel for="tipo" value="#{crud['entidad.tipoMedioContacto']}"/>
+                        <p:selectOneMenu id="tipo" value="#{medioContactoModel.registro.idTipoMedioContacto}" converter="entityConverter" filter="true" filterMatchMode="contains" required="true" requiredMessage="#{crud['mensaje.requerido']}">
+                            <f:selectItem itemLabel="-- Seleccione un Tipo --" itemValue="#{null}" noSelectionOption="true"/>
+                            <f:selectItems value="#{medioContactoModel.listaTipos}" var="tipo" itemLabel="#{tipo.nombre}" itemValue="#{tipo}"/>
+                        </p:selectOneMenu>
+                        
+                        <p:outputLabel for="valor" value="#{crud['campo.valor']}"/>
+                        <p:inputText id="valor" value="#{medioContactoModel.registro.valor}" required="true" requiredMessage="#{crud['mensaje.requerido']}" size="40"/>
+                        
+                    </p:panelGrid>
+                    
+                    <g:botonesTop model="#{medioContactoModel}"
+                                  estado="#{medioContactoModel.estado}"
+                                  formPrincipal="formTable" />
+                
+                </p:panel>
+                
+            </h:form>
+            
+            <p:confirmDialog global="true" showEffect="fade" hideEffect="fade" responsive="true" width="350">
+                <p:commandButton value="#{crud['boton.si']}" type="button" styleClass="ui-confirmdialog-yes" icon="pi pi-check" />
+                <p:commandButton value="#{crud['boton.no']}" type="button" styleClass="ui-confirmdialog-no ui-button-secondary" icon="pi pi-times" />
+            </p:confirmDialog>
+            
+        </ui:define>
+        
+    </ui:composition>
+    
+</html>
