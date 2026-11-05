@@ -1,6 +1,7 @@
 
 package sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity;
 
+import jakarta.json.bind.annotation.JsonbTransient;
 import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -45,6 +46,7 @@ public class Clinica implements Serializable {
     @Column(name = "comentarios")
     private String comentarios;
     @OneToMany(mappedBy = "idClinica", fetch = FetchType.LAZY)
+    @JsonbTransient
     private List<PersonaRol> personaRolList;
 
     public Clinica() {

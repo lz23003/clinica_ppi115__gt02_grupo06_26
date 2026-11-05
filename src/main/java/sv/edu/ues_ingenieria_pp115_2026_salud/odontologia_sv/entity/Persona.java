@@ -1,6 +1,7 @@
 
 package sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity;
 
+import jakarta.json.bind.annotation.JsonbTransient;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -45,10 +46,13 @@ public class Persona implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date fechaCreacion;
     @OneToMany(mappedBy = "idPersona", fetch = FetchType.LAZY)
+    @JsonbTransient
     private List<MedioContacto> medioContactoList;
     @OneToMany(mappedBy = "idPersona", fetch = FetchType.LAZY)
+    @JsonbTransient
     private List<Documento> documentoList;
     @OneToMany(mappedBy = "idPersona", fetch = FetchType.LAZY)
+    @JsonbTransient
     private List<PersonaRol> personaRolList;
 
     public Persona() {

@@ -15,7 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.primefaces.event.SelectEvent;
-import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.DefaultDAO;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.DefaultService;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -64,10 +64,10 @@ public class DefaultModelTest {
 
     static class DefaultModelTestImpl extends DefaultModel<TestEntity> {
 
-        private final DefaultDAO<TestEntity> dao;
+        private final DefaultService<TestEntity> dao;
         private final FacesContext FacesContext;
 
-        public DefaultModelTestImpl(DefaultDAO<TestEntity> dao, FacesContext FacesContext) {
+        public DefaultModelTestImpl(DefaultService<TestEntity> dao, FacesContext FacesContext) {
             this.dao = dao;
             this.FacesContext = FacesContext;
         }
@@ -78,7 +78,7 @@ public class DefaultModelTest {
         }
 
         @Override
-        protected DefaultDAO<TestEntity> getDao() {
+        protected DefaultService<TestEntity> getService() {
             return dao;
         }
 
@@ -101,7 +101,7 @@ public class DefaultModelTest {
     }
 
     @Mock
-    private DefaultDAO<TestEntity> daoMock;
+    private DefaultService<TestEntity> daoMock;
 
     @Mock
     private FacesContext facesContext;
@@ -214,7 +214,7 @@ public class DefaultModelTest {
         model.estado = ESTADO_CRUD.CREAR;
         ActionEvent event = mock(ActionEvent.class);
 
-        // Simulamos error en el DAO
+        // Simulamos error en el Service
         org.mockito.Mockito.doThrow(new RuntimeException("Error simulado"))
                 .when(daoMock).crear(any());
 
@@ -325,7 +325,7 @@ public class DefaultModelTest {
     }
 
     @Test
-    public void testCountLlamaAlDao() {
+    public void testCountLlamaAlService() {
         when(daoMock.count()).thenReturn(42);
 
         int resultado = model.getModelo().count(new HashMap<>());
@@ -345,7 +345,7 @@ public class DefaultModelTest {
     }
 
     @Test
-    public void testLoadLlamaAlDao() {
+    public void testLoadLlamaAlService() {
         List<TestEntity> esperado = List.of(new TestEntity(UUID.randomUUID(), "A"));
         when(daoMock.count()).thenReturn(1);
         when(daoMock.findRange(0, 5)).thenReturn(esperado);

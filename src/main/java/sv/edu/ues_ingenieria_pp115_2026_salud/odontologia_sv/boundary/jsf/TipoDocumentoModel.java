@@ -7,8 +7,8 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import java.io.Serializable;
 import java.util.UUID;
-import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.DefaultDAO;
-import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.TipoDocumentoDAO;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.DefaultService;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.TipoDocumentoService;
 import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.TipoDocumento;
 
 @Named
@@ -16,7 +16,7 @@ import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.TipoDocument
 public class TipoDocumentoModel extends DefaultModel<TipoDocumento> implements Serializable{
 
     @Inject
-    protected TipoDocumentoDAO TipoDocumentoDao;
+    protected TipoDocumentoService TipoDocumentoService;
     
     @Inject
     protected FacesContext FacesContext ;
@@ -28,8 +28,8 @@ public class TipoDocumentoModel extends DefaultModel<TipoDocumento> implements S
     }
 
     @Override
-    protected DefaultDAO<TipoDocumento> getDao() {
-        return TipoDocumentoDao;
+    protected DefaultService<TipoDocumento> getService() {
+        return TipoDocumentoService;
     }
 
     @Override

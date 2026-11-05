@@ -1,9 +1,7 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
+
 package sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity;
 
+import jakarta.json.bind.annotation.JsonbTransient;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -48,6 +46,7 @@ public class PersonaRol implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     private Rol idRol;
     @OneToMany(mappedBy = "idPersonaRol", fetch = FetchType.LAZY)
+    @JsonbTransient
     private List<Consulta> consultaList;
 
     public PersonaRol() {

@@ -1,6 +1,7 @@
 
 package sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity;
 
+import jakarta.json.bind.annotation.JsonbTransient;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -41,6 +42,7 @@ public class TipoDocumento implements Serializable {
     @Column(name = "activo")
     private Boolean activo;
     @OneToMany(mappedBy = "idTipoDocumento", fetch = FetchType.LAZY)
+    @JsonbTransient
     private List<Documento> documentoList;
 
     public TipoDocumento() {

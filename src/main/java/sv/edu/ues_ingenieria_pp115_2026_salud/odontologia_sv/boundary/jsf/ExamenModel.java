@@ -13,10 +13,10 @@ import java.util.List;
 import java.util.UUID;
 import org.primefaces.event.SelectEvent;
 import org.primefaces.event.TabChangeEvent;
-import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.DefaultDAO;
-import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.ExamenDAO;
-import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.ExamenTipoExamenDAO;
-import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.TipoExamenDAO;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.DefaultService;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.ExamenService;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.ExamenTipoExamenService;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.TipoExamenService;
 import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.Examen;
 import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.ExamenTipoExamen;
 import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.TipoExamen;
@@ -26,11 +26,11 @@ import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.TipoExamen;
 public class ExamenModel extends DefaultModel<Examen> implements Serializable {
 
     @Inject
-    private ExamenDAO examenDao;
+    private ExamenService examenService;
     @Inject
-    private ExamenTipoExamenDAO examenTipoExamenDao;
+    private ExamenTipoExamenService examenTipoExamenService;
     @Inject
-    private TipoExamenDAO tipoExamenDao;
+    private TipoExamenService tipoExamenService;
 
     private ExamenTipoExamen examenTipoExamenRegistro;
     private ESTADO_CRUD examenTipoExamenEstado = ESTADO_CRUD.NADA;
@@ -49,8 +49,8 @@ public class ExamenModel extends DefaultModel<Examen> implements Serializable {
     }
 
     @Override
-    protected DefaultDAO<Examen> getDao() {
-        return examenDao;
+    protected DefaultService<Examen> getService() {
+        return examenService;
     }
 
     @Override
@@ -79,7 +79,7 @@ public class ExamenModel extends DefaultModel<Examen> implements Serializable {
         super.onRowSelect(event);
         if (event != null && event.getObject() != null) {
             UUID idExamen = event.getObject().getIdExamen();
-            tiposAsignados = examenTipoExamenDao.buscarPorExamen(idExamen);
+            tiposAsignados = examenTipoExamenService.buscarPorExamen(idExamen);
             this.activa = 0;
         }
     }
@@ -139,18 +139,18 @@ public class ExamenModel extends DefaultModel<Examen> implements Serializable {
             }
 
             if (examenTipoExamenEstado == ESTADO_CRUD.CREAR) {
-                examenTipoExamenDao.crear(examenTipoExamenRegistro);
+                examenTipoExamenService.crear(examenTipoExamenRegistro);
                 enviarMensaje(getText("model.crud.exito"),
                         getText("model.crud.creado"),
                         FacesMessage.SEVERITY_INFO);
             } else if (examenTipoExamenEstado == ESTADO_CRUD.MODIFICAR) {
-                examenTipoExamenDao.modificar(examenTipoExamenRegistro);
+                examenTipoExamenService.modificar(examenTipoExamenRegistro);
                 enviarMensaje(getText("model.crud.exito"),
                         getText("model.crud.actualizado"),
                         FacesMessage.SEVERITY_INFO);
             }
 
-            tiposAsignados = examenTipoExamenDao.buscarPorExamen(registro.getIdExamen());
+            tiposAsignados = examenTipoExamenService.buscarPorExamen(registro.getIdExamen());
             examenTipoExamenRegistro = null;
             examenTipoExamenEstado = ESTADO_CRUD.NADA;
         } catch (Exception ex) {
@@ -168,7 +168,7 @@ public class ExamenModel extends DefaultModel<Examen> implements Serializable {
 
     
     public List<TipoExamen> completarTipoExamen(String query) {
-        return tipoExamenDao.findByNombreLikeActivo(query, 0, 10);
+        return tipoExamenService.findByNombreLikeActivo(query, 0, 10);
     }
     
     public void btnEliminarExamenHandler(ActionEvent event) {
@@ -183,7 +183,7 @@ public class ExamenModel extends DefaultModel<Examen> implements Serializable {
                 return;
             }
 
-            examenDao.eliminar(registro);
+            examenService.eliminar(registro);
             enviarMensaje(getText("model.crud.exito"),
                     getText("model.crud.eliminado"),
                     FacesMessage.SEVERITY_INFO);
@@ -200,11 +200,11 @@ public class ExamenModel extends DefaultModel<Examen> implements Serializable {
     public void btnEliminarTipoExamenHandler(ActionEvent event) {
         try {
             if (examenTipoExamenRegistro != null) {
-                examenTipoExamenDao.eliminar(examenTipoExamenRegistro);
+                examenTipoExamenService.eliminar(examenTipoExamenRegistro);
                 enviarMensaje(getText("model.crud.exito"),
                         getText("model.crud.eliminado"),
                         FacesMessage.SEVERITY_INFO);
-                tiposAsignados = examenTipoExamenDao.buscarPorExamen(registro.getIdExamen());
+                tiposAsignados = examenTipoExamenService.buscarPorExamen(registro.getIdExamen());
                 examenTipoExamenRegistro = null;
                 examenTipoExamenEstado = ESTADO_CRUD.NADA;
             }

@@ -1,6 +1,7 @@
 
 package sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity;
 
+import jakarta.json.bind.annotation.JsonbTransient;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -50,6 +51,7 @@ public class Consulta implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     private PersonaRol idPersonaRol;
     @OneToMany(mappedBy = "idConsulta", fetch = FetchType.LAZY)
+    @JsonbTransient
     private List<ConsultaProcedimiento> consultaProcedimientoList;
 
     public Consulta() {

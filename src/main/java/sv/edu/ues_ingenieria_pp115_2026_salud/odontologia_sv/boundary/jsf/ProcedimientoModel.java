@@ -14,13 +14,13 @@ import java.util.List;
 import java.util.UUID;
 import org.primefaces.event.SelectEvent;
 import org.primefaces.event.TabChangeEvent;
-import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.DefaultDAO;
-import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.ProcedimientoDAO;
-import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.ProcedimientoPasoDAO;
-import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.ProcedimientoPasoSecuenciaDAO;
-import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.ProcedimientoPasoExamenDAO;
-import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.RolDAO;
-import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.ExamenDAO;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.DefaultService;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.ProcedimientoService;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.ProcedimientoPasoService;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.ProcedimientoPasoSecuenciaService;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.ProcedimientoPasoExamenService;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.RolService;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.ExamenService;
 import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.Procedimiento;
 import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.ProcedimientoPaso;
 import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.ProcedimientoPasoSecuencia;
@@ -36,17 +36,17 @@ import org.primefaces.event.NodeSelectEvent;
 public class ProcedimientoModel extends DefaultModel<Procedimiento> implements Serializable {
 
     @Inject
-    private ProcedimientoDAO procedimientoDao;
+    private ProcedimientoService procedimientoService;
     @Inject
-    private ProcedimientoPasoDAO pasoDao;
+    private ProcedimientoPasoService pasoService;
     @Inject
-    private ProcedimientoPasoSecuenciaDAO secuenciaDao;
+    private ProcedimientoPasoSecuenciaService secuenciaService;
     @Inject
-    private ProcedimientoPasoExamenDAO pasoExamenDao;
+    private ProcedimientoPasoExamenService pasoExamenService;
     @Inject
-    private RolDAO rolDao;
+    private RolService rolService;
     @Inject
-    private ExamenDAO examenDao;
+    private ExamenService examenService;
 
     private TreeNode rootNode;
     private TreeNode selectedNode;
@@ -67,8 +67,8 @@ public class ProcedimientoModel extends DefaultModel<Procedimiento> implements S
     @PostConstruct
     public void init() {
         super.inicializador();
-        rolesDisponibles = rolDao.listarActivos();
-        examenesDisponibles = examenDao.listarActivos();
+        rolesDisponibles = rolService.listarActivos();
+        examenesDisponibles = examenService.listarActivos();
     }
 
     public void onTabChange(TabChangeEvent event) {
@@ -80,7 +80,7 @@ public class ProcedimientoModel extends DefaultModel<Procedimiento> implements S
         super.onRowSelect(event);
         if (event != null && event.getObject() != null) {
             UUID idProc = event.getObject().getIdProcedimiento();
-            pasosAsignados = pasoDao.buscarPorProcedimiento(idProc);
+            pasosAsignados = pasoService.buscarPorProcedimiento(idProc);
             construirArbolPasos(idProc);
             this.activa = 0;
             resetSubEstados();
@@ -104,7 +104,7 @@ public class ProcedimientoModel extends DefaultModel<Procedimiento> implements S
     private void resetSubEstados() {
         pasoRegistro = null;
         pasoEstado = ESTADO_CRUD.NADA;
-        pasosAsignados = (registro != null) ? pasoDao.buscarPorProcedimiento(registro.getIdProcedimiento()) : new ArrayList<>();
+        pasosAsignados = (registro != null) ? pasoService.buscarPorProcedimiento(registro.getIdProcedimiento()) : new ArrayList<>();
         if (registro != null) {
             construirArbolPasos(registro.getIdProcedimiento());
         } else {
@@ -119,11 +119,11 @@ public class ProcedimientoModel extends DefaultModel<Procedimiento> implements S
 
     private void construirArbolPasos(UUID idProc) {
         rootNode = new DefaultTreeNode(new ProcedimientoPaso(), null);
-        List<ProcedimientoPaso> todosLosPasos = pasoDao.buscarPorProcedimiento(idProc);
+        List<ProcedimientoPaso> todosLosPasos = pasoService.buscarPorProcedimiento(idProc);
 
         List<ProcedimientoPaso> raices = new ArrayList<>();
         for (ProcedimientoPaso p : todosLosPasos) {
-            List<ProcedimientoPasoSecuencia> seqs = secuenciaDao.buscarPorPaso(p.getIdProcedimientoPaso());
+            List<ProcedimientoPasoSecuencia> seqs = secuenciaService.buscarPorPaso(p.getIdProcedimientoPaso());
             boolean tienePadre = seqs.stream().anyMatch(s -> "ANTERIOR".equals(s.getTipoSecuencia()));
             if (!tienePadre) {
                 raices.add(p);
@@ -143,7 +143,7 @@ public class ProcedimientoModel extends DefaultModel<Procedimiento> implements S
         }
 
         for (ProcedimientoPaso p : todosLosPasos) {
-            List<ProcedimientoPasoSecuencia> seqs = secuenciaDao.buscarPorPaso(p.getIdProcedimientoPaso());
+            List<ProcedimientoPasoSecuencia> seqs = secuenciaService.buscarPorPaso(p.getIdProcedimientoPaso());
             for (ProcedimientoPasoSecuencia seq : seqs) {
                 if ("ANTERIOR".equals(seq.getTipoSecuencia()) && pasoPadre.getIdProcedimientoPaso().equals(seq.getIdProcedimientoPasoReferencia())) {
                     TreeNode nodoHijo = new DefaultTreeNode(p, nodoPadre);
@@ -163,11 +163,11 @@ public class ProcedimientoModel extends DefaultModel<Procedimiento> implements S
             }
             this.pasoEstado = ESTADO_CRUD.MODIFICAR;
 
-            this.examenesAsignados = pasoExamenDao.buscarPorPaso(pasoRegistro.getIdProcedimientoPaso());
+            this.examenesAsignados = pasoExamenService.buscarPorPaso(pasoRegistro.getIdProcedimientoPaso());
             this.examenEstado = ESTADO_CRUD.NADA;
 
             this.idPasoDependencia = null;
-            List<ProcedimientoPasoSecuencia> dependencias = secuenciaDao.buscarPorPaso(pasoRegistro.getIdProcedimientoPaso());
+            List<ProcedimientoPasoSecuencia> dependencias = secuenciaService.buscarPorPaso(pasoRegistro.getIdProcedimientoPaso());
             for (ProcedimientoPasoSecuencia seq : dependencias) {
                 if ("ANTERIOR".equals(seq.getTipoSecuencia())) {
                     this.idPasoDependencia = seq.getIdProcedimientoPasoReferencia();
@@ -181,11 +181,11 @@ public class ProcedimientoModel extends DefaultModel<Procedimiento> implements S
         this.pasoRegistro = event.getObject();
         this.pasoEstado = ESTADO_CRUD.MODIFICAR;
 
-        this.examenesAsignados = pasoExamenDao.buscarPorPaso(pasoRegistro.getIdProcedimientoPaso());
+        this.examenesAsignados = pasoExamenService.buscarPorPaso(pasoRegistro.getIdProcedimientoPaso());
         this.examenEstado = ESTADO_CRUD.NADA;
 
         this.idPasoDependencia = null;
-        List<ProcedimientoPasoSecuencia> dependencias = secuenciaDao.buscarPorPaso(pasoRegistro.getIdProcedimientoPaso());
+        List<ProcedimientoPasoSecuencia> dependencias = secuenciaService.buscarPorPaso(pasoRegistro.getIdProcedimientoPaso());
         for (ProcedimientoPasoSecuencia seq : dependencias) {
             if ("ANTERIOR".equals(seq.getTipoSecuencia())) {
                 this.idPasoDependencia = seq.getIdProcedimientoPasoReferencia();
@@ -211,7 +211,7 @@ public class ProcedimientoModel extends DefaultModel<Procedimiento> implements S
             return hijos;
         }
         for (ProcedimientoPaso p : pasosAsignados) {
-            List<ProcedimientoPasoSecuencia> seqs = secuenciaDao.buscarPorPaso(p.getIdProcedimientoPaso());
+            List<ProcedimientoPasoSecuencia> seqs = secuenciaService.buscarPorPaso(p.getIdProcedimientoPaso());
             for (ProcedimientoPasoSecuencia seq : seqs) {
                 if ("ANTERIOR".equals(seq.getTipoSecuencia()) && idPasoPadre.equals(seq.getIdProcedimientoPasoReferencia())) {
                     hijos.add(p);
@@ -225,7 +225,7 @@ public class ProcedimientoModel extends DefaultModel<Procedimiento> implements S
         if (idPaso == null) {
             return new ArrayList<>();
         }
-        return pasoExamenDao.buscarPorPaso(idPaso);
+        return pasoExamenService.buscarPorPaso(idPaso);
     }
 
     public void btnNuevoPasoHandler(ActionEvent event) {
@@ -261,7 +261,7 @@ public class ProcedimientoModel extends DefaultModel<Procedimiento> implements S
             return false;
         }
         for (ProcedimientoPaso p : pasosAsignados) {
-            List<ProcedimientoPasoSecuencia> seqs = secuenciaDao.buscarPorPaso(p.getIdProcedimientoPaso());
+            List<ProcedimientoPasoSecuencia> seqs = secuenciaService.buscarPorPaso(p.getIdProcedimientoPaso());
             boolean tienePadre = seqs.stream().anyMatch(s -> "ANTERIOR".equals(s.getTipoSecuencia()));
             if (!tienePadre) {
                 return true;
@@ -280,44 +280,44 @@ public class ProcedimientoModel extends DefaultModel<Procedimiento> implements S
     public void btnGuardarPasoHandler(ActionEvent event) {
         try {
             if (pasoEstado == ESTADO_CRUD.CREAR) {
-                pasoDao.crear(pasoRegistro);
+                pasoService.crear(pasoRegistro);
                 enviarMensaje(getText("model.crud.exito"), getText("model.crud.creado"), FacesMessage.SEVERITY_INFO);
             } else if (pasoEstado == ESTADO_CRUD.MODIFICAR) {
-                pasoDao.modificar(pasoRegistro);
+                pasoService.modificar(pasoRegistro);
                 enviarMensaje(getText("model.crud.exito"), getText("model.crud.actualizado"), FacesMessage.SEVERITY_INFO);
             }
 
-            List<ProcedimientoPasoSecuencia> dependencias = secuenciaDao.buscarPorPaso(pasoRegistro.getIdProcedimientoPaso());
+            List<ProcedimientoPasoSecuencia> dependencias = secuenciaService.buscarPorPaso(pasoRegistro.getIdProcedimientoPaso());
             ProcedimientoPasoSecuencia seqExistente = dependencias.stream().filter(d -> "ANTERIOR".equals(d.getTipoSecuencia())).findFirst().orElse(null);
 
             if (idPasoDependencia != null) {
                 if (seqExistente != null) {
                     seqExistente.setIdProcedimientoPasoReferencia(idPasoDependencia);
-                    secuenciaDao.modificar(seqExistente);
+                    secuenciaService.modificar(seqExistente);
                 } else {
                     ProcedimientoPasoSecuencia nuevaSeq = new ProcedimientoPasoSecuencia();
                     nuevaSeq.setIdProcedimientoPasoSecuencia(UUID.randomUUID());
                     nuevaSeq.setIdProcedimientoPaso(pasoRegistro);
                     nuevaSeq.setTipoSecuencia("ANTERIOR");
                     nuevaSeq.setIdProcedimientoPasoReferencia(idPasoDependencia);
-                    secuenciaDao.crear(nuevaSeq);
+                    secuenciaService.crear(nuevaSeq);
                 }
             } else if (seqExistente != null) {
-                secuenciaDao.eliminar(seqExistente);
+                secuenciaService.eliminar(seqExistente);
             }
 
             for (ProcedimientoPasoExamen ppe : examenesAsignados) {
                 if (ppe.getIdProcedimientoPaso() == null) {
                     ppe.setIdProcedimientoPaso(pasoRegistro);
                 }
-                if (pasoExamenDao.buscarPorId(ppe.getIdProcedimientoPasoExamen()) == null) {
-                    pasoExamenDao.crear(ppe);
+                if (pasoExamenService.buscarPorId(ppe.getIdProcedimientoPasoExamen()) == null) {
+                    pasoExamenService.crear(ppe);
                 } else {
-                    pasoExamenDao.modificar(ppe);
+                    pasoExamenService.modificar(ppe);
                 }
             }
 
-            pasosAsignados = pasoDao.buscarPorProcedimiento(registro.getIdProcedimiento());
+            pasosAsignados = pasoService.buscarPorProcedimiento(registro.getIdProcedimiento());
             construirArbolPasos(registro.getIdProcedimiento());
             pasoEstado = ESTADO_CRUD.MODIFICAR;
 
@@ -334,14 +334,14 @@ public class ProcedimientoModel extends DefaultModel<Procedimiento> implements S
                     return;
                 }
 
-                for (ProcedimientoPasoSecuencia seq : secuenciaDao.buscarPorPaso(pasoRegistro.getIdProcedimientoPaso())) {
-                    secuenciaDao.eliminar(seq);
+                for (ProcedimientoPasoSecuencia seq : secuenciaService.buscarPorPaso(pasoRegistro.getIdProcedimientoPaso())) {
+                    secuenciaService.eliminar(seq);
                 }
-                for (ProcedimientoPasoExamen ex : pasoExamenDao.buscarPorPaso(pasoRegistro.getIdProcedimientoPaso())) {
-                    pasoExamenDao.eliminar(ex);
+                for (ProcedimientoPasoExamen ex : pasoExamenService.buscarPorPaso(pasoRegistro.getIdProcedimientoPaso())) {
+                    pasoExamenService.eliminar(ex);
                 }
 
-                pasoDao.eliminar(pasoRegistro);
+                pasoService.eliminar(pasoRegistro);
                 enviarMensaje(getText("model.crud.exito"), getText("model.crud.eliminado"), FacesMessage.SEVERITY_INFO);
                 resetSubEstados();
             }
@@ -390,8 +390,8 @@ public class ProcedimientoModel extends DefaultModel<Procedimiento> implements S
         if (ppe != null) {
             examenesAsignados.remove(ppe);
             try {
-                if (pasoExamenDao.buscarPorId(ppe.getIdProcedimientoPasoExamen()) != null) {
-                    pasoExamenDao.eliminar(ppe);
+                if (pasoExamenService.buscarPorId(ppe.getIdProcedimientoPasoExamen()) != null) {
+                    pasoExamenService.eliminar(ppe);
                 }
             } catch (Exception e) {
             }
@@ -411,8 +411,8 @@ public class ProcedimientoModel extends DefaultModel<Procedimiento> implements S
     }
 
     @Override
-    protected DefaultDAO<Procedimiento> getDao() {
-        return procedimientoDao;
+    protected DefaultService<Procedimiento> getService() {
+        return procedimientoService;
     }
 
     @Override

@@ -7,8 +7,8 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import java.io.Serializable;
 import java.util.UUID;
-import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.DefaultDAO;
-import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.RolDAO;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.DefaultService;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.RolService;
 import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.Rol;
 
 @Named
@@ -16,7 +16,7 @@ import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.Rol;
 public class RolModel extends DefaultModel<Rol> implements Serializable{
 
     @Inject
-    protected RolDAO rolDao;
+    protected RolService rolService;
     
     @Inject
     protected  FacesContext FacesContext; 
@@ -27,8 +27,8 @@ public class RolModel extends DefaultModel<Rol> implements Serializable{
     }
 
     @Override
-    protected DefaultDAO<Rol> getDao() {
-        return rolDao;
+    protected DefaultService<Rol> getService() {
+        return rolService;
     }
 
     @Override

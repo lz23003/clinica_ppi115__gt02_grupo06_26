@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.PersonaDAO;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.PersonaService;
 import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.Persona;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -21,7 +21,7 @@ import static org.mockito.Mockito.lenient;
 public class PersonaModelTest {
 
     @Mock 
-    private PersonaDAO personaDao;
+    private PersonaService personaService;
     @Mock 
     private FacesContext facesContextMock;
     @Mock
@@ -41,9 +41,9 @@ public class PersonaModelTest {
 
         model = new PersonaModel();
 
-        Field daoField = PersonaModel.class.getDeclaredField("personaDao");
+        Field daoField = PersonaModel.class.getDeclaredField("personaService");
         daoField.setAccessible(true);
-        daoField.set(model, personaDao);
+        daoField.set(model, personaService);
 
         model.inicializador();
     }
@@ -70,7 +70,7 @@ public class PersonaModelTest {
     }
 
     @Test
-    public void testGetDao() {
-        assertThat(model.getDao()).isSameAs(personaDao);
+    public void testGetService() {
+        assertThat(model.getService()).isSameAs(personaService);
     }
 }

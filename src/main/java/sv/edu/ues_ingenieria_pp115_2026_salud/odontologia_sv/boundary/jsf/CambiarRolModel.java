@@ -11,10 +11,10 @@ import java.util.ResourceBundle;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.application.FacesMessage;
 
-import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.ClinicaDAO;
-import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.PersonaDAO;
-import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.PersonaRolDAO;
-import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.RolDAO;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.ClinicaService;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.PersonaService;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.PersonaRolService;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.RolService;
 import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.Clinica;
 import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.Persona;
 import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.PersonaRol;
@@ -28,13 +28,13 @@ public class CambiarRolModel implements Serializable {
     private SesionUsuario sesionUsuario;
 
     @Inject
-    private ClinicaDAO clinicaDao;
+    private ClinicaService clinicaService;
     @Inject
-    private RolDAO rolDao;
+    private RolService rolService;
     @Inject
-    private PersonaDAO personaDao;
+    private PersonaService personaService;
     @Inject
-    private PersonaRolDAO personaRolDao;
+    private PersonaRolService personaRolService;
 
     private List<Clinica> clinicasDisponibles;
     private List<Rol> rolesDisponibles;
@@ -46,8 +46,8 @@ public class CambiarRolModel implements Serializable {
 
     @PostConstruct
     public void init() {
-        clinicasDisponibles = clinicaDao.listarActivas();
-        rolesDisponibles = rolDao.listarActivos();      
+        clinicasDisponibles = clinicaService.listarActivas();
+        rolesDisponibles = rolService.listarActivos();      
         personasDisponibles = new ArrayList<>(); 
     }
     
@@ -55,7 +55,7 @@ public class CambiarRolModel implements Serializable {
         personasDisponibles = new ArrayList<>();
         
         if (clinicaSeleccionada != null && rolSeleccionado != null) {
-            List<PersonaRol> asignaciones = personaRolDao.buscarPorClinica(clinicaSeleccionada.getIdClinica());
+            List<PersonaRol> asignaciones = personaRolService.buscarPorClinica(clinicaSeleccionada.getIdClinica());
             
             for (PersonaRol pr : asignaciones) {
                 if (pr.getIdRol().equals(rolSeleccionado) && !personasDisponibles.contains(pr.getIdPersona())) {

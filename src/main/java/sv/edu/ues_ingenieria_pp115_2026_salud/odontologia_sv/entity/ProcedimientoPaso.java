@@ -1,5 +1,6 @@
 package sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity;
 
+import jakarta.json.bind.annotation.JsonbTransient;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -40,9 +41,11 @@ public class ProcedimientoPaso implements Serializable {
     private List<ProcedimientoPasoSecuencia> procedimientoPasoSecuenciaList;
     
     @OneToMany(mappedBy = "idProcedimientoPaso", fetch = FetchType.LAZY)
+    @JsonbTransient
     private List<ProcedimientoPasoExamen> procedimientoPasoExamenList;
     
     @OneToMany(mappedBy = "idProcedimientoPaso", fetch = FetchType.LAZY)
+    @JsonbTransient
     private List<ConsultaProcedimientoPaso> consultaProcedimientoPasoList;
     
     @JoinColumn(name = "id_procedimiento", referencedColumnName = "id_procedimiento")

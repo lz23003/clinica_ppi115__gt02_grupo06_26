@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.ExamenDAO;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.ExamenService;
 import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.Examen;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -21,7 +21,7 @@ import static org.mockito.Mockito.lenient;
 public class ExamenModelTest {
 
     @Mock
-    private ExamenDAO examenDao;
+    private ExamenService examenService;
     @Mock
     private FacesContext facesContextMock;
     @Mock 
@@ -41,9 +41,9 @@ public class ExamenModelTest {
 
         model = new ExamenModel();
 
-        Field daoField = ExamenModel.class.getDeclaredField("examenDao");
+        Field daoField = ExamenModel.class.getDeclaredField("examenService");
         daoField.setAccessible(true);
-        daoField.set(model, examenDao);
+        daoField.set(model, examenService);
 
         model.inicializador();
     }
@@ -70,7 +70,7 @@ public class ExamenModelTest {
     }
 
     @Test
-    public void testGetDao() {
-        assertThat(model.getDao()).isSameAs(examenDao);
+    public void testGetService() {
+        assertThat(model.getService()).isSameAs(examenService);
     }
 }

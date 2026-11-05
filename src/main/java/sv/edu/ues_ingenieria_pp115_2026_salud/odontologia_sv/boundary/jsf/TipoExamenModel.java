@@ -7,8 +7,8 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import java.io.Serializable;
 import java.util.UUID;
-import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.DefaultDAO;
-import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.TipoExamenDAO;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.DefaultService;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.TipoExamenService;
 import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.TipoExamen;
 
 
@@ -17,7 +17,7 @@ import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.TipoExamen;
 public class TipoExamenModel extends DefaultModel<TipoExamen> implements Serializable{
     
      @Inject
-    private TipoExamenDAO tipoExamenDao;
+    private TipoExamenService tipoExamenService;
 
     @Inject
     private FacesContext facesContext;
@@ -32,8 +32,8 @@ public class TipoExamenModel extends DefaultModel<TipoExamen> implements Seriali
     }
 
     @Override
-    protected DefaultDAO<TipoExamen> getDao() {
-        return tipoExamenDao;
+    protected DefaultService<TipoExamen> getService() {
+        return tipoExamenService;
     }
 
     @Override

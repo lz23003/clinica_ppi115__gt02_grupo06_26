@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.RolDAO;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.RolService;
 import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.Rol;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -21,7 +21,7 @@ import static org.mockito.Mockito.lenient;
 public class RolModelTest {
 
     @Mock 
-    private RolDAO rolDao;
+    private RolService rolService;
     @Mock
     private FacesContext facesContextMock;
     @Mock
@@ -41,9 +41,9 @@ public class RolModelTest {
 
         model = new RolModel();
 
-        Field daoField = RolModel.class.getDeclaredField("rolDao");
+        Field daoField = RolModel.class.getDeclaredField("rolService");
         daoField.setAccessible(true);
-        daoField.set(model, rolDao);
+        daoField.set(model, rolService);
 
         Field facesField = RolModel.class.getDeclaredField("FacesContext");
         facesField.setAccessible(true);
@@ -74,7 +74,7 @@ public class RolModelTest {
     }
 
     @Test
-    public void testGetDao() {
-        assertThat(model.getDao()).isSameAs(rolDao);
+    public void testGetService() {
+        assertThat(model.getService()).isSameAs(rolService);
     }
 }

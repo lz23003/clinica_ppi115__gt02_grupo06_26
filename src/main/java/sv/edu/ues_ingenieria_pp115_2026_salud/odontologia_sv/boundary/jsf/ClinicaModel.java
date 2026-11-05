@@ -6,8 +6,8 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import java.io.Serializable;
 import java.util.UUID;
-import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.ClinicaDAO;
-import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.DefaultDAO;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.ClinicaService;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.DefaultService;
 import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.Clinica;
 
 @Named
@@ -15,7 +15,7 @@ import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.Clinica;
 public class ClinicaModel extends DefaultModel<Clinica> implements Serializable {
 
     @Inject
-    private ClinicaDAO clinicaDao;
+    private ClinicaService clinicaService;
 
     @Override
     protected Object getId(Clinica object) {
@@ -23,8 +23,8 @@ public class ClinicaModel extends DefaultModel<Clinica> implements Serializable 
     }
 
     @Override
-    protected DefaultDAO<Clinica> getDao() {
-        return clinicaDao;
+    protected DefaultService<Clinica> getService() {
+        return clinicaService;
     }
 
     @Override
@@ -44,4 +44,6 @@ public class ClinicaModel extends DefaultModel<Clinica> implements Serializable 
     public String getNombreEntidad() {
         return getText("entidad.clinica");
     }
+
+   
 }

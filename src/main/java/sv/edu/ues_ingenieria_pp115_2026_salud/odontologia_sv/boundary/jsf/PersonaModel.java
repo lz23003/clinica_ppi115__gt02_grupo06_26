@@ -14,15 +14,15 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 import org.primefaces.event.SelectEvent;
 import org.primefaces.event.TabChangeEvent;
-import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.ClinicaDAO;
-import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.DefaultDAO;
-import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.DocumentoDAO;
-import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.MedioContactoDAO;
-import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.PersonaDAO;
-import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.PersonaRolDAO;
-import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.RolDAO;
-import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.TipoDocumentoDAO;
-import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.TipoMedioContactoDAO;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.ClinicaService;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.DefaultService;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.DocumentoService;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.MedioContactoService;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.PersonaService;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.PersonaRolService;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.RolService;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.TipoDocumentoService;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.TipoMedioContactoService;
 import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.Clinica;
 import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.Documento;
 import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.MedioContacto;
@@ -37,21 +37,21 @@ import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.TipoMedioCon
 public class PersonaModel extends DefaultModel<Persona> implements Serializable {
 
     @Inject
-    private PersonaDAO personaDao;
+    private PersonaService personaService;
     @Inject
-    private DocumentoDAO documentoDao;
+    private DocumentoService documentoService;
     @Inject
-    private MedioContactoDAO medioContactoDao;
+    private MedioContactoService medioContactoService;
     @Inject
-    private PersonaRolDAO personaRolDao;
+    private PersonaRolService personaRolService;
     @Inject
-    private TipoDocumentoDAO tipoDocumentoDao;
+    private TipoDocumentoService tipoDocumentoService;
     @Inject
-    private TipoMedioContactoDAO tipoMedioContactoDao;
+    private TipoMedioContactoService tipoMedioContactoService;
     @Inject
-    private RolDAO rolDao;
+    private RolService rolService;
     @Inject
-    private ClinicaDAO clinicaDao;
+    private ClinicaService clinicaService;
 
     private Documento documentoRegistro;
     private ESTADO_CRUD documentoEstado = ESTADO_CRUD.NADA;
@@ -82,8 +82,8 @@ public class PersonaModel extends DefaultModel<Persona> implements Serializable 
     }
 
     @Override
-    protected DefaultDAO<Persona> getDao() {
-        return personaDao;
+    protected DefaultService<Persona> getService() {
+        return personaService;
     }
 
     @Override
@@ -109,9 +109,9 @@ public class PersonaModel extends DefaultModel<Persona> implements Serializable 
         super.onRowSelect(event);
         if (event != null && event.getObject() != null) {
             UUID idPersona = event.getObject().getIdPersona();
-            documentosAsignados = documentoDao.buscarPorPersona(idPersona);
-            mediosContactoAsignados = medioContactoDao.buscarPorPersona(idPersona);
-            rolesAsignados = personaRolDao.buscarPorPersona(idPersona);
+            documentosAsignados = documentoService.buscarPorPersona(idPersona);
+            mediosContactoAsignados = medioContactoService.buscarPorPersona(idPersona);
+            rolesAsignados = personaRolService.buscarPorPersona(idPersona);
 
             this.activa = 0;
         }
@@ -124,9 +124,9 @@ public class PersonaModel extends DefaultModel<Persona> implements Serializable 
         try {
             UUID idPersona = registro.getIdPersona();
 
-            List<Documento> docs = documentoDao.buscarPorPersona(idPersona);
-            List<MedioContacto> medios = medioContactoDao.buscarPorPersona(idPersona);
-            List<PersonaRol> roles = personaRolDao.buscarPorPersona(idPersona);
+            List<Documento> docs = documentoService.buscarPorPersona(idPersona);
+            List<MedioContacto> medios = medioContactoService.buscarPorPersona(idPersona);
+            List<PersonaRol> roles = personaRolService.buscarPorPersona(idPersona);
 
             if ((docs != null && !docs.isEmpty()) ||
                 (medios != null && !medios.isEmpty()) ||
@@ -137,7 +137,7 @@ public class PersonaModel extends DefaultModel<Persona> implements Serializable 
                 return;
             }
 
-            personaDao.eliminar(registro);
+            personaService.eliminar(registro);
             enviarMensaje(getText("model.crud.exito"),
                     getText("model.crud.eliminado"),
                     FacesMessage.SEVERITY_INFO);
@@ -220,17 +220,17 @@ public class PersonaModel extends DefaultModel<Persona> implements Serializable 
             }
 
             if (documentoEstado == ESTADO_CRUD.CREAR) {
-                documentoDao.crear(documentoRegistro);
+                documentoService.crear(documentoRegistro);
                 enviarMensaje(getText("model.crud.exito"),
                         getText("model.crud.creado"),
                         FacesMessage.SEVERITY_INFO);
             } else if (documentoEstado == ESTADO_CRUD.MODIFICAR) {
-                documentoDao.modificar(documentoRegistro);
+                documentoService.modificar(documentoRegistro);
                 enviarMensaje(getText("model.crud.exito"),
                         getText("model.crud.actualizado"),
                         FacesMessage.SEVERITY_INFO);
             }
-            documentosAsignados = documentoDao.buscarPorPersona(registro.getIdPersona());
+            documentosAsignados = documentoService.buscarPorPersona(registro.getIdPersona());
             documentoRegistro = null;
             documentoEstado = ESTADO_CRUD.NADA;
         } catch (Exception ex) {
@@ -244,11 +244,11 @@ public class PersonaModel extends DefaultModel<Persona> implements Serializable 
     public void btnEliminarDocumentoHandler(ActionEvent event) {
         try {
             if (documentoRegistro != null) {
-                documentoDao.eliminar(documentoRegistro);
+                documentoService.eliminar(documentoRegistro);
                 enviarMensaje(getText("model.crud.exito"),
                         getText("model.crud.eliminado"),
                         FacesMessage.SEVERITY_INFO);
-                documentosAsignados = documentoDao.buscarPorPersona(registro.getIdPersona());
+                documentosAsignados = documentoService.buscarPorPersona(registro.getIdPersona());
                 documentoRegistro = null;
                 documentoEstado = ESTADO_CRUD.NADA;
             }
@@ -314,17 +314,17 @@ public class PersonaModel extends DefaultModel<Persona> implements Serializable 
             }
 
             if (medioContactoEstado == ESTADO_CRUD.CREAR) {
-                medioContactoDao.crear(medioContactoRegistro);
+                medioContactoService.crear(medioContactoRegistro);
                 enviarMensaje(getText("model.crud.exito"),
                         getText("model.crud.creado"),
                         FacesMessage.SEVERITY_INFO);
             } else if (medioContactoEstado == ESTADO_CRUD.MODIFICAR) {
-                medioContactoDao.modificar(medioContactoRegistro);
+                medioContactoService.modificar(medioContactoRegistro);
                 enviarMensaje(getText("model.crud.exito"),
                         getText("model.crud.actualizado"),
                         FacesMessage.SEVERITY_INFO);
             }
-            mediosContactoAsignados = medioContactoDao.buscarPorPersona(registro.getIdPersona());
+            mediosContactoAsignados = medioContactoService.buscarPorPersona(registro.getIdPersona());
             medioContactoRegistro = null;
             medioContactoEstado = ESTADO_CRUD.NADA;
         } catch (Exception ex) {
@@ -338,11 +338,11 @@ public class PersonaModel extends DefaultModel<Persona> implements Serializable 
     public void btnEliminarMedioContactoHandler(ActionEvent event) {
         try {
             if (medioContactoRegistro != null) {
-                medioContactoDao.eliminar(medioContactoRegistro);
+                medioContactoService.eliminar(medioContactoRegistro);
                 enviarMensaje(getText("model.crud.exito"),
                         getText("model.crud.eliminado"),
                         FacesMessage.SEVERITY_INFO);
-                mediosContactoAsignados = medioContactoDao.buscarPorPersona(registro.getIdPersona());
+                mediosContactoAsignados = medioContactoService.buscarPorPersona(registro.getIdPersona());
                 medioContactoRegistro = null;
                 medioContactoEstado = ESTADO_CRUD.NADA;
             }
@@ -413,18 +413,18 @@ public class PersonaModel extends DefaultModel<Persona> implements Serializable 
         try {
             if (personaRolEstado == ESTADO_CRUD.CREAR) {
                 personaRolRegistro.setIdClinica(clinicaSeleccionada);
-                personaRolDao.crear(personaRolRegistro);
+                personaRolService.crear(personaRolRegistro);
                 enviarMensaje(getText("model.crud.exito"),
                         getText("model.crud.creado"),
                         FacesMessage.SEVERITY_INFO);
             } else if (personaRolEstado == ESTADO_CRUD.MODIFICAR) {
                 personaRolRegistro.setIdClinica(clinicaSeleccionada);
-                personaRolDao.modificar(personaRolRegistro);
+                personaRolService.modificar(personaRolRegistro);
                 enviarMensaje(getText("model.crud.exito"),
                         getText("model.crud.actualizado"),
                         FacesMessage.SEVERITY_INFO);
             }
-            rolesAsignados = personaRolDao.buscarPorPersona(registro.getIdPersona());
+            rolesAsignados = personaRolService.buscarPorPersona(registro.getIdPersona());
             personaRolRegistro = null;
             personaRolEstado = ESTADO_CRUD.NADA;
         } catch (Exception ex) {
@@ -438,11 +438,11 @@ public class PersonaModel extends DefaultModel<Persona> implements Serializable 
     public void btnEliminarRolHandler(ActionEvent event) {
         try {
             if (personaRolRegistro != null) {
-                personaRolDao.eliminar(personaRolRegistro);
+                personaRolService.eliminar(personaRolRegistro);
                 enviarMensaje(getText("model.crud.exito"),
                         getText("model.crud.eliminado"),
                         FacesMessage.SEVERITY_INFO);
-                rolesAsignados = personaRolDao.buscarPorPersona(registro.getIdPersona());
+                rolesAsignados = personaRolService.buscarPorPersona(registro.getIdPersona());
                 personaRolRegistro = null;
                 personaRolEstado = ESTADO_CRUD.NADA;
             }
@@ -460,19 +460,19 @@ public class PersonaModel extends DefaultModel<Persona> implements Serializable 
     }
 
     public List<TipoDocumento> completarTipoDocumento(String query) {
-        return tipoDocumentoDao.findByNombreLikeActivo(query, 0, 10);
+        return tipoDocumentoService.findByNombreLikeActivo(query, 0, 10);
     }
 
     public List<TipoMedioContacto> completarTipoMedioContacto(String query) {
-        return tipoMedioContactoDao.findByNombreLikeActivo(query, 0, 10);
+        return tipoMedioContactoService.findByNombreLikeActivo(query, 0, 10);
     }
 
     public List<Rol> completarRol(String query) {
-        return rolDao.findByNombreLikeActivo(query, 0, 10);
+        return rolService.findByNombreLikeActivo(query, 0, 10);
     }
 
     public List<Clinica> completarClinica(String query) {
-        return clinicaDao.findByNombreLikeActiva(query, 0, 10);
+        return clinicaService.findByNombreLikeActiva(query, 0, 10);
     }
 
     public Documento getDocumentoRegistro() {

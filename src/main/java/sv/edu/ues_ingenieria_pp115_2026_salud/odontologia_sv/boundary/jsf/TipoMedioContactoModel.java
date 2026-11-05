@@ -6,8 +6,8 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import java.io.Serializable;
 import java.util.UUID;
-import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.DefaultDAO;
-import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.TipoMedioContactoDAO;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.DefaultService;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.TipoMedioContactoService;
 import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.TipoMedioContacto;
 
 @Named
@@ -18,7 +18,7 @@ public class TipoMedioContactoModel extends DefaultModel<TipoMedioContacto> impl
     protected FacesContext FacesContext;
     
     @Inject
-    protected TipoMedioContactoDAO tipoMedioContactoDao;
+    protected TipoMedioContactoService tipoMedioContactoService;
     
     @Override
     protected Object getId(TipoMedioContacto object) {
@@ -26,8 +26,8 @@ public class TipoMedioContactoModel extends DefaultModel<TipoMedioContacto> impl
     }
 
     @Override
-    protected DefaultDAO<TipoMedioContacto> getDao() {
-        return tipoMedioContactoDao;
+    protected DefaultService<TipoMedioContacto> getService() {
+        return tipoMedioContactoService;
     }
 
     @Override

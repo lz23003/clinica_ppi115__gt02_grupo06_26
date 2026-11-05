@@ -12,7 +12,7 @@ import org.primefaces.event.SelectEvent;
 import org.primefaces.model.FilterMeta;
 import org.primefaces.model.LazyDataModel;
 import org.primefaces.model.SortMeta;
-import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.DefaultDAO;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.DefaultService;
 
 public abstract class DefaultModel<T> implements Serializable {
 
@@ -24,7 +24,7 @@ public abstract class DefaultModel<T> implements Serializable {
     // MÉTODOS ABSTRACTOS
     protected abstract Object getId(T object);
 
-    protected abstract DefaultDAO<T> getDao();
+    protected abstract DefaultService<T> getService();
 
     protected abstract FacesContext getFacesContext();
 
@@ -70,7 +70,7 @@ public abstract class DefaultModel<T> implements Serializable {
             @Override
             public int count(Map<String, FilterMeta> filterBy) {
                 try {
-                    return getDao().count();
+                    return getService().count();
                 } catch (Exception ex) {
                     enviarMensaje(getText("model.crud.error"),
                             getText("model.crud.error.contar"),
@@ -82,9 +82,9 @@ public abstract class DefaultModel<T> implements Serializable {
             @Override
             public List<T> load(int first, int pageSize, Map<String, SortMeta> sortBy, Map<String, FilterMeta> filterBy) {
                 try {
-                    int total = getDao().count();
+                    int total = getService().count();
                     this.setRowCount(total);
-                    return getDao().findRange(first, pageSize);
+                    return getService().findRange(first, pageSize);
                 } catch (Exception ex) {
                     enviarMensaje(getText("model.crud.error"),
                             getText("model.crud.error.cargar"),
@@ -116,10 +116,10 @@ public abstract class DefaultModel<T> implements Serializable {
     public void btnCrearHandler(ActionEvent event) {
         try {
             if (estado == ESTADO_CRUD.CREAR) {
-                getDao().crear(registro);
+                getService().crear(registro);
                 enviarMensaje(getText("model.crud.exito"), getText("model.crud.creado"), FacesMessage.SEVERITY_INFO);
             } else if (estado == ESTADO_CRUD.MODIFICAR) {
-                getDao().modificar(registro);
+                getService().modificar(registro);
                 enviarMensaje(getText("model.crud.exito"), getText("model.crud.actualizado"), FacesMessage.SEVERITY_INFO);
             } else {
                 enviarMensaje(getText("model.crud.advertencia"), getText("model.crud.accion"), FacesMessage.SEVERITY_WARN);
@@ -135,7 +135,7 @@ public abstract class DefaultModel<T> implements Serializable {
 
     public void btnEliminarHandler(T registroSeleccionado) {
         try {
-            getDao().eliminar(registroSeleccionado);
+            getService().eliminar(registroSeleccionado);
             enviarMensaje(getText("model.crud.exito"), getText("model.crud.eliminado"), FacesMessage.SEVERITY_INFO);
             
             this.estado=ESTADO_CRUD.NADA;

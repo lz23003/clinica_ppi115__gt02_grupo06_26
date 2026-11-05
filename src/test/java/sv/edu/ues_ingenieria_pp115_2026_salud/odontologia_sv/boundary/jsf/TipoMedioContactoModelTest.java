@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.TipoMedioContactoDAO;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.TipoMedioContactoService;
 import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.TipoMedioContacto;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -21,7 +21,7 @@ import static org.mockito.Mockito.lenient;
 public class TipoMedioContactoModelTest {
 
     @Mock 
-    private TipoMedioContactoDAO tipoMedioContactoDao;
+    private TipoMedioContactoService tipoMedioContactoService;
     @Mock
     private FacesContext facesContextMock;
     @Mock 
@@ -41,9 +41,9 @@ public class TipoMedioContactoModelTest {
 
         model = new TipoMedioContactoModel();
 
-        Field daoField = TipoMedioContactoModel.class.getDeclaredField("tipoMedioContactoDao");
+        Field daoField = TipoMedioContactoModel.class.getDeclaredField("tipoMedioContactoService");
         daoField.setAccessible(true);
-        daoField.set(model, tipoMedioContactoDao);
+        daoField.set(model, tipoMedioContactoService);
 
         Field facesField = TipoMedioContactoModel.class.getDeclaredField("FacesContext");
         facesField.setAccessible(true);
@@ -75,8 +75,8 @@ public class TipoMedioContactoModelTest {
     }
 
     @Test
-    public void testGetDao() {
-        assertThat(model.getDao()).isSameAs(tipoMedioContactoDao);
+    public void testGetService() {
+        assertThat(model.getService()).isSameAs(tipoMedioContactoService);
     }
 
     @Test

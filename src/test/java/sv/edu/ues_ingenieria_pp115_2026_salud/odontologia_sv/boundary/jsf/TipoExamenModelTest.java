@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.TipoExamenDAO;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.TipoExamenService;
 import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.TipoExamen;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -21,7 +21,7 @@ import static org.mockito.Mockito.lenient;
 public class TipoExamenModelTest {
 
     @Mock 
-    private TipoExamenDAO tipoExamenDao;
+    private TipoExamenService tipoExamenService;
     @Mock 
     private FacesContext facesContextMock;
     @Mock 
@@ -41,9 +41,9 @@ public class TipoExamenModelTest {
 
         model = new TipoExamenModel();
 
-        Field daoField = TipoExamenModel.class.getDeclaredField("tipoExamenDao");
+        Field daoField = TipoExamenModel.class.getDeclaredField("tipoExamenService");
         daoField.setAccessible(true);
-        daoField.set(model, tipoExamenDao);
+        daoField.set(model, tipoExamenService);
 
         Field facesField = TipoExamenModel.class.getDeclaredField("facesContext");
         facesField.setAccessible(true);
@@ -74,7 +74,7 @@ public class TipoExamenModelTest {
     }
 
     @Test
-    public void testGetDao() {
-        assertThat(model.getDao()).isSameAs(tipoExamenDao);
+    public void testGetService() {
+        assertThat(model.getService()).isSameAs(tipoExamenService);
     }
 }

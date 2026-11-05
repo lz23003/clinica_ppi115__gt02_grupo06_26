@@ -11,14 +11,14 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.primefaces.event.SelectEvent;
-import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.ClinicaDAO;
-import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.ConsultaDAO;
-import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.DefaultDAO;
-import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.PersonaRolDAO;
-import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.ProcedimientoDAO;
-import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.ConsultaProcedimientoDAO;
-import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.ProcedimientoPasoDAO;
-import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.ConsultaProcedimientoPasoDAO;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.ClinicaService;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.ConsultaService;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.DefaultService;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.PersonaRolService;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.ProcedimientoService;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.ConsultaProcedimientoService;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.ProcedimientoPasoService;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.ConsultaProcedimientoPasoService;
 import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.Clinica;
 import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.Consulta;
 import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.ConsultaProcedimiento;
@@ -36,25 +36,25 @@ public class ConsultaModel extends DefaultModel<Consulta> implements Serializabl
     private SesionUsuario sesionUsuario;
 
     @Inject
-    private ConsultaDAO consultaDao;
+    private ConsultaService consultaService;
 
     @Inject
-    private PersonaRolDAO personaRolDao;
+    private PersonaRolService personaRolService;
 
     @Inject
-    private ClinicaDAO clinicaDao;
+    private ClinicaService clinicaService;
 
     @Inject
-    private ProcedimientoDAO procedimientoDao;
+    private ProcedimientoService procedimientoService;
 
     @Inject
-    private ConsultaProcedimientoDAO consultaProcedimientoDao;
+    private ConsultaProcedimientoService consultaProcedimientoService;
 
     @Inject
-    private ProcedimientoPasoDAO procedimientoPasoDao;
+    private ProcedimientoPasoService procedimientoPasoService;
 
     @Inject
-    private ConsultaProcedimientoPasoDAO consultaProcedimientoPasoDao;
+    private ConsultaProcedimientoPasoService consultaProcedimientoPasoService;
 
     private List<PersonaRol> listaPersonaRoles;
     private List<Clinica> listaClinicas;
@@ -74,8 +74,8 @@ public class ConsultaModel extends DefaultModel<Consulta> implements Serializabl
 
     @PostConstruct
     public void inicializar() {
-        listaClinicas = clinicaDao.findRange(0, 100);
-        listaProcedimientos = procedimientoDao.listarActivos();
+        listaClinicas = clinicaService.findRange(0, 100);
+        listaProcedimientos = procedimientoService.listarActivos();
 
         if (listaClinicas != null && !listaClinicas.isEmpty()) {
             String nombreClinicaSesion = sesionUsuario.getClinicaUsuario();
@@ -103,15 +103,15 @@ public class ConsultaModel extends DefaultModel<Consulta> implements Serializabl
 
     public void cargarPersonasDeClinica() {
         if (clinicaTrabajo != null) {
-            listaPersonaRoles = personaRolDao.buscarPorClinica(clinicaTrabajo.getIdClinica());
+            listaPersonaRoles = personaRolService.buscarPorClinica(clinicaTrabajo.getIdClinica());
         } else {
-            listaPersonaRoles = personaRolDao.findRange(0, 1000);
+            listaPersonaRoles = personaRolService.findRange(0, 1000);
         }
     }
 
     public void filtrarConsultas() {
         if (fechaFiltroInicio != null && fechaFiltroFin != null) {
-            List<Consulta> todas = consultaDao.buscarPorRangoFechas(fechaFiltroInicio, fechaFiltroFin);
+            List<Consulta> todas = consultaService.buscarPorRangoFechas(fechaFiltroInicio, fechaFiltroFin);
             if (clinicaFiltro != null) {
                 modeloList = todas.stream().filter(c -> c.getIdPersonaRol() != null
                         && c.getIdPersonaRol().getIdClinica() != null
@@ -121,7 +121,7 @@ public class ConsultaModel extends DefaultModel<Consulta> implements Serializabl
                 modeloList = todas;
             }
         } else {
-            List<Consulta> todas = consultaDao.findRange(0, 1000);
+            List<Consulta> todas = consultaService.findRange(0, 1000);
             if (clinicaFiltro != null) {
                 modeloList = todas.stream().filter(c -> c.getIdPersonaRol() != null
                         && c.getIdPersonaRol().getIdClinica() != null
@@ -141,7 +141,7 @@ public class ConsultaModel extends DefaultModel<Consulta> implements Serializabl
 
     public void cargarProcedimientos() {
         if (registro != null && registro.getIdConsulta() != null) {
-            procedimientosDeConsulta = consultaProcedimientoDao.buscarPorConsulta(registro.getIdConsulta());
+            procedimientosDeConsulta = consultaProcedimientoService.buscarPorConsulta(registro.getIdConsulta());
         }
     }
 
@@ -157,13 +157,13 @@ public class ConsultaModel extends DefaultModel<Consulta> implements Serializabl
     public void guardarProcedimiento() {
         if (nuevoConsultaProcedimiento != null && nuevoConsultaProcedimiento.getIdProcedimiento() != null) {
 
-            ConsultaProcedimiento existente = consultaProcedimientoDao.buscarPorId(nuevoConsultaProcedimiento.getIdConsultaProcedimiento());
+            ConsultaProcedimiento existente = consultaProcedimientoService.buscarPorId(nuevoConsultaProcedimiento.getIdConsultaProcedimiento());
             boolean esNuevo = (existente == null);
 
             if (esNuevo) {
-                consultaProcedimientoDao.crear(nuevoConsultaProcedimiento);
+                consultaProcedimientoService.crear(nuevoConsultaProcedimiento);
 
-                List<ProcedimientoPaso> pasos = procedimientoPasoDao.buscarPorProcedimiento(nuevoConsultaProcedimiento.getIdProcedimiento());
+                List<ProcedimientoPaso> pasos = procedimientoPasoService.buscarPorProcedimiento(nuevoConsultaProcedimiento.getIdProcedimiento());
                 if (pasos != null && !pasos.isEmpty()) {
                     ProcedimientoPaso pasoInicial = pasos.get(0);
                     ConsultaProcedimientoPaso cpp = new ConsultaProcedimientoPaso();
@@ -174,7 +174,7 @@ public class ConsultaModel extends DefaultModel<Consulta> implements Serializabl
                     cpp.setEstado("CREADO");
 
                     if (pasoInicial.getIdRol() != null && clinicaTrabajo != null) {
-                        List<PersonaRol> personal = personaRolDao.buscarPorClinica(clinicaTrabajo.getIdClinica());
+                        List<PersonaRol> personal = personaRolService.buscarPorClinica(clinicaTrabajo.getIdClinica());
 
                         List<PersonaRol> candidatos = personal.stream()
                                 .filter(pr -> pr.getIdRol() != null && pr.getIdRol().getIdRol().equals(pasoInicial.getIdRol().getIdRol()))
@@ -185,20 +185,20 @@ public class ConsultaModel extends DefaultModel<Consulta> implements Serializabl
                         }
                     }
 
-                    consultaProcedimientoPasoDao.crear(cpp);
+                    consultaProcedimientoPasoService.crear(cpp);
 
                     if (nuevoConsultaProcedimiento.getConsultaProcedimientoPasoList() == null) {
                         nuevoConsultaProcedimiento.setConsultaProcedimientoPasoList(new java.util.ArrayList<>());
                     }
                     nuevoConsultaProcedimiento.getConsultaProcedimientoPasoList().add(cpp);
                    
-                    consultaProcedimientoDao.modificar(nuevoConsultaProcedimiento);
+                    consultaProcedimientoService.modificar(nuevoConsultaProcedimiento);
                 }
             } else {
-                consultaProcedimientoDao.modificar(nuevoConsultaProcedimiento);
+                consultaProcedimientoService.modificar(nuevoConsultaProcedimiento);
             }
 
-            registro = consultaDao.buscarPorId(registro.getIdConsulta());
+            registro = consultaService.buscarPorId(registro.getIdConsulta());
             cargarProcedimientos();
 
             if (esNuevo && procedimientosDeConsulta != null) {
@@ -221,14 +221,14 @@ public class ConsultaModel extends DefaultModel<Consulta> implements Serializabl
     public void eliminarProcedimiento(ConsultaProcedimiento cp) {
         if (cp != null) {
             try {
-                List<ConsultaProcedimientoPaso> pasosDependientes = consultaProcedimientoPasoDao.buscarPorConsultaProcedimiento(cp.getIdConsultaProcedimiento());
+                List<ConsultaProcedimientoPaso> pasosDependientes = consultaProcedimientoPasoService.buscarPorConsultaProcedimiento(cp.getIdConsultaProcedimiento());
                 if (pasosDependientes != null && !pasosDependientes.isEmpty()) {
                     for (ConsultaProcedimientoPaso paso : pasosDependientes) {
-                        consultaProcedimientoPasoDao.eliminar(paso);
+                        consultaProcedimientoPasoService.eliminar(paso);
                     }
                 }
 
-                consultaProcedimientoDao.eliminar(cp);
+                consultaProcedimientoService.eliminar(cp);
 
                 cargarProcedimientos();
                 procedimientoSeleccionado = null;
@@ -302,8 +302,8 @@ public class ConsultaModel extends DefaultModel<Consulta> implements Serializabl
     }
 
     @Override
-    protected DefaultDAO<Consulta> getDao() {
-        return consultaDao;
+    protected DefaultService<Consulta> getService() {
+        return consultaService;
     }
 
     @Override
@@ -395,4 +395,6 @@ public class ConsultaModel extends DefaultModel<Consulta> implements Serializabl
     public void setProcedimientoSeleccionado(ConsultaProcedimiento procedimientoSeleccionado) {
         this.procedimientoSeleccionado = procedimientoSeleccionado;
     }
+
+    
 }
