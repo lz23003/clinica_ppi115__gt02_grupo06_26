@@ -35,6 +35,7 @@ public class PersonaRol implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date fechaCreacion;
     @OneToMany(mappedBy = "idPersonaRol", fetch = FetchType.LAZY)
+    @JsonbTransient
     private List<ConsultaProcedimientoPaso> consultaProcedimientoPasoList;
     @JoinColumn(name = "id_clinica", referencedColumnName = "id_clinica")
     @ManyToOne(fetch = FetchType.LAZY)

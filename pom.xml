@@ -136,8 +136,8 @@
                 <artifactId>liberty-maven-plugin</artifactId>
                 <version>3.12.2</version>
                 <configuration>
-                    <installDirectory>/opt/wlp</installDirectory>
-                    <serverName>clinicappi115</serverName>
+                    <installDirectory>/home/martin/OpenLiberty/wlp11_26_0_0_8</installDirectory>
+                    <serverName>galenoSv</serverName>
                 </configuration>
             </plugin>
             

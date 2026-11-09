@@ -38,6 +38,7 @@ public class ProcedimientoPaso implements Serializable {
     private Boolean indicaFin;
     
     @OneToMany(mappedBy = "idProcedimientoPaso", fetch = FetchType.LAZY)
+    @JsonbTransient
     private List<ProcedimientoPasoSecuencia> procedimientoPasoSecuenciaList;
     
     @OneToMany(mappedBy = "idProcedimientoPaso", fetch = FetchType.LAZY)
