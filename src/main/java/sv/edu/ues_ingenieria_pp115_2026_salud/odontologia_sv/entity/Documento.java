@@ -34,10 +34,10 @@ public class Documento implements Serializable {
     @Column(name = "ruta_fisica")
     private String rutaFisica;
     @JoinColumn(name = "id_persona", referencedColumnName = "id_persona")
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     private Persona idPersona;
     @JoinColumn(name = "id_tipo_documento", referencedColumnName = "id_tipo_documento")
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     private TipoDocumento idTipoDocumento;
 
     public Documento() {

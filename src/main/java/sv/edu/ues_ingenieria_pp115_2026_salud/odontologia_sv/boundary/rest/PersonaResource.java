@@ -96,7 +96,7 @@ public class PersonaResource implements Serializable {
         }
 
         try {
-            
+
             nuevo.setIdPersona(UUID.randomUUID());
 
             personaService.crear(nuevo);
@@ -138,7 +138,6 @@ public class PersonaResource implements Serializable {
                         .build();
             }
 
-          
             actual.setNombres(modificado.getNombres());
             actual.setApellidos(modificado.getApellidos());
             actual.setFechaNacimiento(modificado.getFechaNacimiento());
@@ -181,4 +180,34 @@ public class PersonaResource implements Serializable {
                     .build();
         }
     }
+
+    @GET
+    @Path("/buscar")
+    public Response buscarPorDocumento(
+            @QueryParam("tipoDocumento") UUID tipoDocumento,
+            @QueryParam("valorDocumento") String valorDocumento) {
+        try {
+            if (valorDocumento == null || valorDocumento.trim().isEmpty()) {
+                return Response.status(Response.Status.BAD_REQUEST).entity("Documento requerido").build();
+            }
+
+            // Usamos una consulta JPQL personalizada en el servicio para buscar por ambos
+            // Si no la tienes, puedes hacer un findAll y filtrar en Java para salir del paso:
+            List<Persona> todas = personaService.findAll();
+            Persona encontrada = todas.stream()
+                    .filter(p -> p.getDocumentoList() != null && p.getDocumentoList().stream()
+                    .anyMatch(d -> d.getValor().equals(valorDocumento.trim())
+                    && (tipoDocumento == null || d.getIdTipoDocumento().getIdTipoDocumento().equals(tipoDocumento))))
+                    .findFirst()
+                    .orElse(null);
+
+            if (encontrada == null) {
+                return Response.status(Response.Status.NOT_FOUND).entity("No se encontró persona").build();
+            }
+            return Response.ok(encontrada).build();
+        } catch (Exception e) {
+            return Response.status(500).entity("Error: " + e.getMessage()).build();
+        }
+    }
+
 }

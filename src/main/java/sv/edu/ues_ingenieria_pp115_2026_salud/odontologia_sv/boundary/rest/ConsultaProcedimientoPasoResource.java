@@ -9,8 +9,10 @@ import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.ConsultaProc
 
 import java.io.Serializable;
 import java.net.URI;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.ProcedimientoPaso;
 
 @Stateless
 @Path("/consultas-procedimientos-pasos")
@@ -184,4 +186,75 @@ public class ConsultaProcedimientoPasoResource implements Serializable {
                     .build();
         }
     }
+    
+        @PUT
+    @Path("/{id}/estado")
+    public Response cambiarEstado(@PathParam("id") UUID id, @QueryParam("nuevoEstado") String nuevoEstado) {
+        try {
+            ConsultaProcedimientoPaso paso = consultaProcedimientoPasoService.buscarPorId(id);
+            if (paso == null) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity("No se encontró el paso").build();
+            }
+
+            paso.setEstado(nuevoEstado.toUpperCase());
+            
+            // Si es FINALIZADO, le ponemos la fecha de fin actual
+            if ("FINALIZADO".equalsIgnoreCase(nuevoEstado)) {
+                paso.setFechaFin(new java.util.Date());
+            }
+
+            consultaProcedimientoPasoService.modificar(paso);
+
+            return Response.ok(paso)
+                    .header("X-Message", "Estado actualizado a " + nuevoEstado).build();
+        } catch (Exception e) {
+            return Response.status(500).entity("Error al actualizar estado: " + e.getMessage()).build();
+        }
+    }
+    
+        // 1. Endpoint para obtener los pasos de un procedimiento
+    @GET
+    @Path("/procedimiento/{idProcedimiento}")
+    public Response obtenerPasosDeProcedimiento(@PathParam("idProcedimiento") UUID idProcedimiento) {
+        try {
+            List<ProcedimientoPaso> pasos = consultaProcedimientoPasoService.obtenerPasosDeProcedimiento(idProcedimiento);
+            return Response.ok(pasos).build();
+        } catch (Exception e) {
+            return Response.status(500).entity("Error: " + e.getMessage()).build();
+        }
+    }
+
+    // 2. Endpoint para INICIAR una consulta (crea el primer paso automáticamente)
+    @POST
+    @Path("/iniciar")
+    public Response iniciarConsultaProcedimiento(
+            @QueryParam("idConsultaProcedimiento") UUID idConsultaProcedimiento,
+            @QueryParam("idProcedimiento") UUID idProcedimiento,
+            @QueryParam("idPersonaRol") UUID idPersonaRol) {
+        try {
+            // Traemos los pasos del procedimiento
+            List<ProcedimientoPaso> pasos = consultaProcedimientoPasoService.obtenerPasosDeProcedimiento(idProcedimiento);
+            
+            if (pasos.isEmpty()) {
+                return Response.status(400).entity("El procedimiento no tiene pasos definidos.").build();
+            }
+
+            // Tomamos el primer paso
+            ProcedimientoPaso primerPaso = pasos.get(0);
+
+            // Creamos el registro del paso en la consulta
+            ConsultaProcedimientoPaso nuevoPaso = new ConsultaProcedimientoPaso();
+            nuevoPaso.setIdConsultaProcedimientoPaso(UUID.randomUUID());
+            nuevoPaso.setFechaInicio(new Date());
+            nuevoPaso.setEstado("PENDIENTE");
+            
+            
+            return Response.ok(nuevoPaso).build();
+        } catch (Exception e) {
+            return Response.status(500).entity("Error al iniciar: " + e.getMessage()).build();
+        }
+    }
+    
+    
 }

@@ -10,6 +10,7 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.ConsultaProcedimientoPaso;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.ProcedimientoPaso;
 
 
 @Stateless
@@ -86,7 +87,20 @@ public class ConsultaProcedimientoPasoService extends DefaultService<ConsultaPro
         return List.of();
     }
     
-    
+        // Método para obtener todos los pasos de un procedimiento en orden
+    public List<ProcedimientoPaso> obtenerPasosDeProcedimiento(UUID idProcedimiento) {
+        try {
+            String jpql = "SELECT pp FROM ProcedimientoPaso pp " +
+                          "WHERE pp.idProcedimiento.idProcedimiento = :idProc " +
+                          "ORDER BY pp.idProcedimientoPaso ASC";
+            TypedQuery<ProcedimientoPaso> query = em.createQuery(jpql, ProcedimientoPaso.class);
+            query.setParameter("idProc", idProcedimiento);
+            return query.getResultList();
+        } catch (Exception e) {
+            Logger.getLogger(ConsultaProcedimientoPasoService.class.getName()).log(Level.SEVERE, e.getMessage(), e);
+            return List.of();
+        }
+    }
     
     
 }

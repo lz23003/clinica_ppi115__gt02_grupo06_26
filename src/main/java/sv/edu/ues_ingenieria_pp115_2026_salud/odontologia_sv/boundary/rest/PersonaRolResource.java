@@ -181,4 +181,15 @@ public class PersonaRolResource implements Serializable {
                     .build();
         }
     }
+    
+        @GET
+    @Path("/persona/{idPersona}")
+    public Response buscarPorPersona(@PathParam("idPersona") UUID idPersona) {
+        try {
+            List<PersonaRol> lista = personaRolService.buscarPorPersona(idPersona);
+            return Response.ok(lista).build();
+        } catch (Exception e) {
+            return Response.status(500).entity("Error al buscar roles: " + e.getMessage()).build();
+        }
+    }
 }

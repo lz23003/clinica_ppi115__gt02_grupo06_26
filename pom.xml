@@ -35,6 +35,12 @@
             <version>${jakartaee}</version>
             <scope>provided</scope>
         </dependency>
+        
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>pdfbox</artifactId>
+            <version>3.0.5</version>
+        </dependency>
 
         <!-- Source: https://mvnrepository.com/artifact/org.eclipse.persistence/eclipselink -->
         <!--
@@ -60,6 +66,14 @@
             <version>5.10.1</version>
             <scope>test</scope>
         </dependency>
+        
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>pdfbox</artifactId>
+            <version>3.0.7</version>
+        </dependency>
+        
+        
         
         
         

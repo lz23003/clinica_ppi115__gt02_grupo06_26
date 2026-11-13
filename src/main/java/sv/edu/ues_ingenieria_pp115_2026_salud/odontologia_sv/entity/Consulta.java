@@ -48,7 +48,7 @@ public class Consulta implements Serializable {
     @Column(name = "observaciones")
     private String observaciones;
     @JoinColumn(name = "id_persona_rol", referencedColumnName = "id_persona_rol")
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     private PersonaRol idPersonaRol;
     @OneToMany(mappedBy = "idConsulta", fetch = FetchType.LAZY)
     @JsonbTransient

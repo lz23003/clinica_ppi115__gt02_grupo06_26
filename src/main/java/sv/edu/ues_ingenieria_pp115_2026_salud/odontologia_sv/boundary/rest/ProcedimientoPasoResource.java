@@ -96,7 +96,7 @@ public class ProcedimientoPasoResource implements Serializable {
         }
 
         try {
-          
+
             nuevo.setIdProcedimientoPaso(UUID.randomUUID());
 
             procedimientoPasoService.crear(nuevo);
@@ -138,7 +138,6 @@ public class ProcedimientoPasoResource implements Serializable {
                         .build();
             }
 
-           
             actual.setNombre(modificado.getNombre());
             actual.setIndicaFin(modificado.getIndicaFin());
             actual.setIdProcedimiento(modificado.getIdProcedimiento());
@@ -179,6 +178,21 @@ public class ProcedimientoPasoResource implements Serializable {
                     .entity("Error al eliminar el procedimiento-paso")
                     .header("X-Message", "Error al eliminar el procedimiento-paso")
                     .build();
+        }
+    }
+
+    @GET
+    @Path("/procedimiento/{idProcedimiento}")
+    public Response buscarPorProcedimiento(@PathParam("idProcedimiento") UUID idProcedimiento) {
+        try {
+            List<ProcedimientoPaso> lista = procedimientoPasoService.buscarPorProcedimiento(idProcedimiento);
+            if (lista == null || lista.isEmpty()) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity("No hay pasos para este procedimiento").build();
+            }
+            return Response.ok(lista).build();
+        } catch (Exception e) {
+            return Response.status(500).entity("Error al buscar pasos: " + e.getMessage()).build();
         }
     }
 }
