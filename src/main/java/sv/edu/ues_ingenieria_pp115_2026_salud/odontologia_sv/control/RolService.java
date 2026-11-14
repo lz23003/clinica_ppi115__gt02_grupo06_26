@@ -54,12 +54,8 @@ public class RolService extends DefaultService<Rol>{
     
     public List<Rol> findByNombreLikeActivo(final String query, int first, int max) {
     try {
-        if (query != null  && first >= 0 && max > 0) {
-            String jpql = "SELECT r FROM Rol r "
-                    + "WHERE r.activo = true "
-                    + "AND UPPER(r.nombre) LIKE :filtro "
-                    + "ORDER BY r.nombre ASC";
-            TypedQuery<Rol> q = em.createQuery(jpql, Rol.class);
+        if (query != null && query.trim().length() >= 3 && first >= 0 && max > 0) {
+            TypedQuery<Rol> q = em.createNamedQuery("Rol.findByNombreLikeActivo", Rol.class);
             q.setParameter("filtro", "%" + query.trim().toUpperCase() + "%");
             q.setFirstResult(first);
             q.setMaxResults(max);
@@ -67,6 +63,7 @@ public class RolService extends DefaultService<Rol>{
         }
     } catch (Exception ex) {
         Logger.getLogger(RolService.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+        throw new IllegalStateException("No se pudieron buscar roles activos", ex);
     }
     return List.of();
 }

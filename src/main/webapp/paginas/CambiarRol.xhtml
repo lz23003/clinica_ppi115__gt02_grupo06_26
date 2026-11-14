@@ -16,34 +16,30 @@
                 <p:panelGrid columns="2" columnClasses="ui-grid-col-3, ui-grid-col-9" layout="grid" styleClass="ui-noborder" style="margin-bottom: 20px;">
                     
                     <p:outputLabel for="clinica" value="#{crud['entidad.clinica']}" />
-                    <p:selectOneMenu id="clinica" value="#{cambiarRolModel.clinicaSeleccionada}" converter="entityConverter">
-                        <f:selectItem itemLabel="#{crud['mensaje.seleccione']}" itemValue="#{null}" noSelectionOption="true" />
-                        <f:selectItems value="#{cambiarRolModel.clinicasDisponibles}" 
-                                       var="cli" 
-                                       itemLabel="#{cli.nombre}" 
-                                       itemValue="#{cli}" />
-                        <p:ajax update="persona" listener="#{cambiarRolModel.actualizarPersonas}" />
-                    </p:selectOneMenu>
+                    <p:autoComplete id="clinica" value="#{cambiarRolModel.clinicaSeleccionada}"
+                                    completeMethod="#{cambiarRolModel.completarClinica}"
+                                    var="cli" itemLabel="#{cli.nombre}" itemValue="#{cli}"
+                                    converter="entityConverter" minQueryLength="3" queryDelay="300"
+                                    forceSelection="true">
+                        <p:ajax event="itemSelect" update="persona" listener="#{cambiarRolModel.actualizarPersonas}" />
+                    </p:autoComplete>
 
                     <p:outputLabel for="rol" value="#{crud['entidad.rol']}" />
-                    <p:selectOneMenu id="rol" value="#{cambiarRolModel.rolSeleccionado}" converter="entityConverter">
-                        <f:selectItem itemLabel="#{crud['mensaje.seleccione']}" itemValue="#{null}" noSelectionOption="true" />
-                        <f:selectItems value="#{cambiarRolModel.rolesDisponibles}" 
-                                       var="r" 
-                                       itemLabel="#{r.nombre}" 
-                                       itemValue="#{r}" />
-                        <p:ajax update="persona" listener="#{cambiarRolModel.actualizarPersonas}" />
-                    </p:selectOneMenu>
+                    <p:autoComplete id="rol" value="#{cambiarRolModel.rolSeleccionado}"
+                                    completeMethod="#{cambiarRolModel.completarRol}"
+                                    var="r" itemLabel="#{r.nombre}" itemValue="#{r}"
+                                    converter="entityConverter" minQueryLength="3" queryDelay="300"
+                                    forceSelection="true">
+                        <p:ajax event="itemSelect" update="persona" listener="#{cambiarRolModel.actualizarPersonas}" />
+                    </p:autoComplete>
 
                     <p:outputLabel for="persona" value="#{crud['entidad.Persona']}" />
-                    <p:selectOneMenu id="persona" value="#{cambiarRolModel.personaSeleccionada}" converter="entityConverter"
-                                     disabled="#{empty cambiarRolModel.clinicaSeleccionada or empty cambiarRolModel.rolSeleccionado}">
-                        <f:selectItem itemLabel="#{crud['mensaje.seleccione']}" itemValue="#{null}" noSelectionOption="true"/>
-                        <f:selectItems value="#{cambiarRolModel.personasDisponibles}" 
-                                       var="p" 
-                                       itemLabel="#{p.nombres} #{p.apellidos}" 
-                                       itemValue="#{p}" />
-                    </p:selectOneMenu>
+                    <p:autoComplete id="persona" value="#{cambiarRolModel.personaSeleccionada}"
+                                    completeMethod="#{cambiarRolModel.completarPersona}"
+                                    var="p" itemLabel="#{p.nombres} #{p.apellidos}" itemValue="#{p}"
+                                    converter="entityConverter" minQueryLength="3" queryDelay="300"
+                                    forceSelection="true"
+                                    disabled="#{empty cambiarRolModel.clinicaSeleccionada or empty cambiarRolModel.rolSeleccionado}"/>
 
                 </p:panelGrid>
 

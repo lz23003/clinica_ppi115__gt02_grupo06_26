@@ -48,12 +48,12 @@ public class MedioContactoServiceTest {
     public void testBuscarPorPersonaConNullDevuelveListaVacia() {
         List<MedioContacto> resultado = dao.buscarPorPersona(null);
         assertThat(resultado).isEmpty();
-        verify(em, never()).createQuery(anyString(), eq(MedioContacto.class));
+        verify(em, never()).createNamedQuery(anyString(), eq(MedioContacto.class));
     }
 
     @Test
     public void testBuscarPorPersonaConIdValido() {
-        when(em.createQuery(anyString(), eq(MedioContacto.class))).thenReturn(typedQuery);
+        when(em.createNamedQuery(anyString(), eq(MedioContacto.class))).thenReturn(typedQuery);
         when(typedQuery.getResultList()).thenReturn(List.of(mc));
 
         List<MedioContacto> resultado = dao.buscarPorPersona(idPersona);
@@ -64,7 +64,7 @@ public class MedioContactoServiceTest {
 
     @Test
     public void testBuscarPorPersonaConExcepcionDevuelveListaVacia() {
-        when(em.createQuery(anyString(), eq(MedioContacto.class)))
+        when(em.createNamedQuery(anyString(), eq(MedioContacto.class)))
                 .thenThrow(new RuntimeException("Error simulado"));
         assertThat(dao.buscarPorPersona(idPersona)).isEmpty();
     }
@@ -73,12 +73,12 @@ public class MedioContactoServiceTest {
     public void testBuscarPorTipoMedioContactoConNullDevuelveListaVacia() {
         List<MedioContacto> resultado = dao.buscarPorTipoMedioContacto(null);
         assertThat(resultado).isEmpty();
-        verify(em, never()).createQuery(anyString(), eq(MedioContacto.class));
+        verify(em, never()).createNamedQuery(anyString(), eq(MedioContacto.class));
     }
 
     @Test
     public void testBuscarPorTipoMedioContactoConIdValido() {
-        when(em.createQuery(anyString(), eq(MedioContacto.class))).thenReturn(typedQuery);
+        when(em.createNamedQuery(anyString(), eq(MedioContacto.class))).thenReturn(typedQuery);
         when(typedQuery.getResultList()).thenReturn(List.of(mc));
 
         List<MedioContacto> resultado = dao.buscarPorTipoMedioContacto(idTipo);
@@ -88,7 +88,7 @@ public class MedioContactoServiceTest {
 
     @Test
     public void testBuscarPorTipoMedioContactoConExcepcionDevuelveListaVacia() {
-        when(em.createQuery(anyString(), eq(MedioContacto.class)))
+        when(em.createNamedQuery(anyString(), eq(MedioContacto.class)))
                 .thenThrow(new RuntimeException("Error simulado"));
         assertThat(dao.buscarPorTipoMedioContacto(idTipo)).isEmpty();
     }
@@ -97,12 +97,12 @@ public class MedioContactoServiceTest {
     public void testBuscarPorValorConNullDevuelveListaVacia() {
         List<MedioContacto> resultado = dao.buscarPorValor(null);
         assertThat(resultado).isEmpty();
-        verify(em, never()).createQuery(anyString(), eq(MedioContacto.class));
+        verify(em, never()).createNamedQuery(anyString(), eq(MedioContacto.class));
     }
 
     @Test
     public void testBuscarPorValorConValorValido() {
-        when(em.createQuery(anyString(), eq(MedioContacto.class))).thenReturn(typedQuery);
+        when(em.createNamedQuery(anyString(), eq(MedioContacto.class))).thenReturn(typedQuery);
         when(typedQuery.getResultList()).thenReturn(List.of(mc));
 
         List<MedioContacto> resultado = dao.buscarPorValor("7777");
@@ -113,7 +113,7 @@ public class MedioContactoServiceTest {
 
     @Test
     public void testBuscarPorValorConExcepcionDevuelveListaVacia() {
-        when(em.createQuery(anyString(), eq(MedioContacto.class)))
+        when(em.createNamedQuery(anyString(), eq(MedioContacto.class)))
                 .thenThrow(new RuntimeException("Error simulado"));
         assertThat(dao.buscarPorValor("7777")).isEmpty();
     }
@@ -122,12 +122,12 @@ public class MedioContactoServiceTest {
     public void testBuscarPorPersonaYTipoConNullDevuelveListaVacia() {
         List<MedioContacto> resultado = dao.buscarPorPersonaYTipo(null, idTipo);
         assertThat(resultado).isEmpty();
-        verify(em, never()).createQuery(anyString(), eq(MedioContacto.class));
+        verify(em, never()).createNamedQuery(anyString(), eq(MedioContacto.class));
     }
 
     @Test
     public void testBuscarPorPersonaYTipoConValoresValidos() {
-        when(em.createQuery(anyString(), eq(MedioContacto.class))).thenReturn(typedQuery);
+        when(em.createNamedQuery(anyString(), eq(MedioContacto.class))).thenReturn(typedQuery);
         when(typedQuery.getResultList()).thenReturn(List.of(mc));
 
         List<MedioContacto> resultado = dao.buscarPorPersonaYTipo(idPersona, idTipo);
@@ -139,7 +139,7 @@ public class MedioContactoServiceTest {
 
     @Test
     public void testBuscarPorPersonaYTipoConExcepcionDevuelveListaVacia() {
-        when(em.createQuery(anyString(), eq(MedioContacto.class)))
+        when(em.createNamedQuery(anyString(), eq(MedioContacto.class)))
                 .thenThrow(new RuntimeException("Error simulado"));
         assertThat(dao.buscarPorPersonaYTipo(idPersona, idTipo)).isEmpty();
     }

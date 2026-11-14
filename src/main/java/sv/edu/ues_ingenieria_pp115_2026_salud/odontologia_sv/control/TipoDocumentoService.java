@@ -52,8 +52,7 @@ public class TipoDocumentoService extends DefaultService<TipoDocumento> {
     public TipoDocumento buscarPorExpresionRegular(String expresionRegular) {
         try {
             if (expresionRegular != null) {
-                String jpql = "SELECT td FROM TipoDocumento td WHERE td.expresionRegular = :expresionRegular";
-                TypedQuery<TipoDocumento> query = em.createQuery(jpql, TipoDocumento.class);
+                TypedQuery<TipoDocumento> query = em.createNamedQuery("TipoDocumento.findByExpresionRegular", TipoDocumento.class);
                 query.setParameter("expresionRegular", expresionRegular);
 
                 List<TipoDocumento> resultados = query.getResultList();
@@ -67,13 +66,8 @@ public class TipoDocumentoService extends DefaultService<TipoDocumento> {
 
     public List<TipoDocumento> findByNombreLikeActivo(final String query, int first, int max) {
         try {
-            if(query!=null && first>=0 && max>0){
-                String consulta="SELECT td from TipoDocumento td "+
-                        "WHERE td.activo=true "+
-                        "AND UPPER(td.nombre) LIKE :filtro "+
-                        "ORDER BY td.nombre ASC";
-                
-                TypedQuery<TipoDocumento> q=em.createQuery(consulta,TipoDocumento.class);
+            if(query!=null && query.trim().length() >= 3 && first>=0 && max>0){
+                TypedQuery<TipoDocumento> q=em.createNamedQuery("TipoDocumento.findByNombreLikeActivo",TipoDocumento.class);
                 q.setParameter("filtro","%"+query.trim().toUpperCase()+"%");
                 q.setFirstResult(first);
                 q.setMaxResults(max);
@@ -81,7 +75,7 @@ public class TipoDocumentoService extends DefaultService<TipoDocumento> {
             }
         } catch (Exception ex) {
             Logger.getLogger(TipoDocumentoService.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
-
+            throw new IllegalStateException("No se pudieron buscar tipos de documento", ex);
         }
         return List.of();
     }

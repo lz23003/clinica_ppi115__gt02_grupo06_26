@@ -49,6 +49,22 @@ public class ExamenService extends DefaultService<Examen> {
         return List.of();
     }
 
+    public List<Examen> buscarActivosPorNombre(final String query, int first, int max) {
+        if (query == null || query.trim().length() < 3 || first < 0 || max <= 0) {
+            return List.of();
+        }
+        try {
+            TypedQuery<Examen> namedQuery = em.createNamedQuery("Examen.findByNombreLikeActivo", Examen.class);
+            namedQuery.setParameter("filtro", "%" + query.trim().toUpperCase() + "%");
+            namedQuery.setFirstResult(first);
+            namedQuery.setMaxResults(max);
+            return namedQuery.getResultList();
+        } catch (Exception ex) {
+            Logger.getLogger(ExamenService.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+            throw new IllegalStateException("No se pudieron buscar exámenes activos", ex);
+        }
+    }
+
     //Metodos con LIKE
     public List<Examen> findByNombreLike(final String nombre, int first, int max) {
         try {

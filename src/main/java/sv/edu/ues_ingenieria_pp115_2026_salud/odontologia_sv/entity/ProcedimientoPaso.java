@@ -20,8 +20,11 @@ import java.util.UUID;
 @Table(name = "procedimiento_paso", catalog = "odontologia_sv", schema = "public")
 @NamedQueries({
     @NamedQuery(name = "ProcedimientoPaso.findAll", query = "SELECT p FROM ProcedimientoPaso p"),
-    @NamedQuery(name = "ProcedimientoPaso.findByNombre", query = "SELECT p FROM ProcedimientoPaso p WHERE p.nombre = :nombre"),
-    @NamedQuery(name = "ProcedimientoPaso.findByIndicaFin", query = "SELECT p FROM ProcedimientoPaso p WHERE p.indicaFin = :indicaFin")})
+    @NamedQuery(name = "ProcedimientoPaso.findByNombre", query = "SELECT p FROM ProcedimientoPaso p WHERE UPPER(p.nombre) LIKE :nombre"),
+    @NamedQuery(name = "ProcedimientoPaso.findByIndicaFin", query = "SELECT p FROM ProcedimientoPaso p WHERE p.indicaFin = :indicaFin"),
+    @NamedQuery(name = "ProcedimientoPaso.findByProcedimiento", query = "SELECT pp FROM ProcedimientoPaso pp WHERE pp.idProcedimiento.idProcedimiento = :idProcedimiento ORDER BY pp.idProcedimientoPaso ASC"),
+    @NamedQuery(name = "ProcedimientoPaso.findFinales", query = "SELECT pp FROM ProcedimientoPaso pp WHERE pp.indicaFin = true"),
+    @NamedQuery(name = "ProcedimientoPaso.findByRol", query = "SELECT pp FROM ProcedimientoPaso pp WHERE pp.idRol.idRol = :idRol")})
 public class ProcedimientoPaso implements Serializable {
 
     private static final long serialVersionUID = 1L;

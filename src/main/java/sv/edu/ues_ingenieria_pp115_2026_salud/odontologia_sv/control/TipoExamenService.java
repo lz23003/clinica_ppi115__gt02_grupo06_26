@@ -66,15 +66,16 @@ public class TipoExamenService extends DefaultService<TipoExamen> {
 
     public List<TipoExamen> findByNombreLikeActivo(final String query, int first, int max) {
         try {
-            if (query != null  && first >= 0 && max > 0) {
+            if (query != null && query.trim().length() >= 3 && first >= 0 && max > 0) {
                 TypedQuery<TipoExamen> q = em.createNamedQuery("TipoExamen.findByNombreLikeActivo", TipoExamen.class);
-                q.setParameter("nombre", "%" + query.trim().toUpperCase() + "%");
+                q.setParameter("filtro", "%" + query.trim().toUpperCase() + "%");
                 q.setFirstResult(first);
                 q.setMaxResults(max);
                 return q.getResultList();
             }
         } catch (Exception ex) {
             Logger.getLogger(TipoExamenService.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+            throw new IllegalStateException("No se pudieron buscar tipos de examen activos", ex);
         }
         return List.of();
     }

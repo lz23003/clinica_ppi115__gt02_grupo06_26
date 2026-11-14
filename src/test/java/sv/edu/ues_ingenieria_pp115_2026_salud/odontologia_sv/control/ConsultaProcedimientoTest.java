@@ -29,6 +29,9 @@ public class ConsultaProcedimientoTest {
     @Mock
     private TypedQuery<ConsultaProcedimiento> typedQuery;
 
+    @Mock
+    private TypedQuery<Object[]> namesQuery;
+
     @InjectMocks
     private ConsultaProcedimientoService service;
 
@@ -59,27 +62,27 @@ public class ConsultaProcedimientoTest {
         List<ConsultaProcedimiento> resultado = service.buscarPorConsulta(null);
 
         assertThat(resultado).isEmpty();
-        verify(em, never()).createQuery(anyString(), eq(ConsultaProcedimiento.class));
+        verify(em, never()).createNamedQuery(anyString(), eq(ConsultaProcedimiento.class));
     }
 
     @Test
     public void testBuscarPorConsultaConIdValido() {
         List<ConsultaProcedimiento> esperado = List.of(procedimiento);
 
-        when(em.createQuery(anyString(), eq(ConsultaProcedimiento.class))).thenReturn(typedQuery);
+        when(em.createNamedQuery(anyString(), eq(ConsultaProcedimiento.class))).thenReturn(typedQuery);
         when(typedQuery.getResultList()).thenReturn(esperado);
 
         List<ConsultaProcedimiento> resultado = service.buscarPorConsulta(idConsulta);
 
         assertThat(resultado).hasSize(1);
-        verify(em, times(1)).createQuery(anyString(), eq(ConsultaProcedimiento.class));
+        verify(em, times(1)).createNamedQuery(anyString(), eq(ConsultaProcedimiento.class));
         verify(typedQuery, times(1)).setParameter("idConsulta", idConsulta);
         verify(typedQuery, times(1)).getResultList();
     }
 
     @Test
     public void testBuscarPorConsultaConExcepcionDevuelveListaVacia() {
-        when(em.createQuery(anyString(), eq(ConsultaProcedimiento.class)))
+        when(em.createNamedQuery(anyString(), eq(ConsultaProcedimiento.class)))
                 .thenThrow(new RuntimeException("Error simulado"));
 
         List<ConsultaProcedimiento> resultado = service.buscarPorConsulta(idConsulta);
@@ -94,26 +97,26 @@ public class ConsultaProcedimientoTest {
         List<ConsultaProcedimiento> resultado = service.buscarPorProcedimiento(null);
 
         assertThat(resultado).isEmpty();
-        verify(em, never()).createQuery(anyString(), eq(ConsultaProcedimiento.class));
+        verify(em, never()).createNamedQuery(anyString(), eq(ConsultaProcedimiento.class));
     }
 
     @Test
     public void testBuscarPorProcedimientoConIdValido() {
         List<ConsultaProcedimiento> esperado = List.of(procedimiento);
 
-        when(em.createQuery(anyString(), eq(ConsultaProcedimiento.class))).thenReturn(typedQuery);
+        when(em.createNamedQuery(anyString(), eq(ConsultaProcedimiento.class))).thenReturn(typedQuery);
         when(typedQuery.getResultList()).thenReturn(esperado);
 
         List<ConsultaProcedimiento> resultado = service.buscarPorProcedimiento(idProcedimiento);
 
         assertThat(resultado).hasSize(1);
-        verify(em, times(1)).createQuery(anyString(), eq(ConsultaProcedimiento.class));
+        verify(em, times(1)).createNamedQuery(anyString(), eq(ConsultaProcedimiento.class));
         verify(typedQuery, times(1)).setParameter("idProcedimiento", idProcedimiento);
     }
 
     @Test
     public void testBuscarPorProcedimientoConExcepcionDevuelveListaVacia() {
-        when(em.createQuery(anyString(), eq(ConsultaProcedimiento.class)))
+        when(em.createNamedQuery(anyString(), eq(ConsultaProcedimiento.class)))
                 .thenThrow(new RuntimeException("Error simulado"));
 
         List<ConsultaProcedimiento> resultado = service.buscarPorProcedimiento(idProcedimiento);
@@ -127,7 +130,7 @@ public class ConsultaProcedimientoTest {
         List<ConsultaProcedimiento> resultado = service.buscarPorRangoFechas(null, fechaFin);
 
         assertThat(resultado).isEmpty();
-        verify(em, never()).createQuery(anyString(), eq(ConsultaProcedimiento.class));
+        verify(em, never()).createNamedQuery(anyString(), eq(ConsultaProcedimiento.class));
     }
 
     @Test
@@ -135,32 +138,56 @@ public class ConsultaProcedimientoTest {
         List<ConsultaProcedimiento> resultado = service.buscarPorRangoFechas(fechaInicio, null);
 
         assertThat(resultado).isEmpty();
-        verify(em, never()).createQuery(anyString(), eq(ConsultaProcedimiento.class));
+        verify(em, never()).createNamedQuery(anyString(), eq(ConsultaProcedimiento.class));
     }
 
     @Test
     public void testBuscarPorRangoFechasConValoresValidos() {
         List<ConsultaProcedimiento> esperado = List.of(procedimiento);
 
-        when(em.createQuery(anyString(), eq(ConsultaProcedimiento.class))).thenReturn(typedQuery);
+        when(em.createNamedQuery(anyString(), eq(ConsultaProcedimiento.class))).thenReturn(typedQuery);
         when(typedQuery.getResultList()).thenReturn(esperado);
 
         List<ConsultaProcedimiento> resultado = service.buscarPorRangoFechas(fechaInicio, fechaFin);
 
         assertThat(resultado).hasSize(1);
-        verify(em, times(1)).createQuery(anyString(), eq(ConsultaProcedimiento.class));
+        verify(em, times(1)).createNamedQuery(anyString(), eq(ConsultaProcedimiento.class));
         verify(typedQuery, times(1)).setParameter("inicio", fechaInicio);
         verify(typedQuery, times(1)).setParameter("fin", fechaFin);
     }
 
     @Test
     public void testBuscarPorRangoFechasConExcepcionDevuelveListaVacia() {
-        when(em.createQuery(anyString(), eq(ConsultaProcedimiento.class)))
+        when(em.createNamedQuery(anyString(), eq(ConsultaProcedimiento.class)))
                 .thenThrow(new RuntimeException("Error simulado"));
 
         List<ConsultaProcedimiento> resultado = service.buscarPorRangoFechas(fechaInicio, fechaFin);
 
         assertThat(resultado).isEmpty();
+    }
+
+    @Test
+    public void testBuscarNombresPorConsultasAgrupaProcedimientos() {
+        UUID secondConsultationId = UUID.randomUUID();
+        when(em.createNamedQuery(
+                "ConsultaProcedimiento.findProcedureNamesByConsultas", Object[].class))
+                .thenReturn(namesQuery);
+        when(namesQuery.getResultList()).thenReturn(List.of(
+                new Object[]{idConsulta, "Evaluación"},
+                new Object[]{idConsulta, "Limpieza"},
+                new Object[]{secondConsultationId, "Radiografía"}));
+
+        var result = service.buscarNombresPorConsultas(List.of(idConsulta, secondConsultationId));
+
+        assertThat(result.get(idConsulta)).containsExactly("Evaluación", "Limpieza");
+        assertThat(result.get(secondConsultationId)).containsExactly("Radiografía");
+        verify(namesQuery).setParameter("consultaIds", List.of(idConsulta, secondConsultationId));
+    }
+
+    @Test
+    public void testBuscarNombresPorConsultasVaciasNoConsulta() {
+        assertThat(service.buscarNombresPorConsultas(List.of())).isEmpty();
+        verify(em, never()).createNamedQuery(anyString(), eq(Object[].class));
     }
    
 }

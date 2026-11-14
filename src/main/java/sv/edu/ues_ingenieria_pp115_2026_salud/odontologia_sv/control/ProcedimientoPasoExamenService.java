@@ -29,9 +29,7 @@ public class ProcedimientoPasoExamenService extends DefaultService<Procedimiento
     public List<ProcedimientoPasoExamen> buscarPorPaso(UUID idProcedimientoPaso) {
         try {
             if (idProcedimientoPaso != null) {
-                String jpql = "SELECT ppe FROM ProcedimientoPasoExamen ppe " +
-                              "WHERE ppe.idProcedimientoPaso.idProcedimientoPaso = :idPaso";
-                TypedQuery<ProcedimientoPasoExamen> query = em.createQuery(jpql, ProcedimientoPasoExamen.class);
+                TypedQuery<ProcedimientoPasoExamen> query = em.createNamedQuery("ProcedimientoPasoExamen.findByPaso", ProcedimientoPasoExamen.class);
                 query.setParameter("idPaso", idProcedimientoPaso);
                 return query.getResultList();
             }
@@ -44,9 +42,7 @@ public class ProcedimientoPasoExamenService extends DefaultService<Procedimiento
     public List<ProcedimientoPasoExamen> buscarPorExamen(UUID idExamen) {
         try {
             if (idExamen != null) {
-                String jpql = "SELECT ppe FROM ProcedimientoPasoExamen ppe " +
-                              "WHERE ppe.idExamen.idExamen = :idExamen";
-                TypedQuery<ProcedimientoPasoExamen> query = em.createQuery(jpql, ProcedimientoPasoExamen.class);
+                TypedQuery<ProcedimientoPasoExamen> query = em.createNamedQuery("ProcedimientoPasoExamen.findByExamen", ProcedimientoPasoExamen.class);
                 query.setParameter("idExamen", idExamen);
                 return query.getResultList();
             }

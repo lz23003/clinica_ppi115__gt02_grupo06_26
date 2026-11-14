@@ -27,12 +27,34 @@ public class ConsultaService extends DefaultService<Consulta>{
         return em;
 
     }
+
+    public List<Consulta> buscarCitasPublicas(
+            String tipoDocumento, String numeroDocumento, UUID idClinica,
+            Date desde, Date hasta, int maxResultados) {
+        if (tipoDocumento == null || tipoDocumento.isBlank()
+                || numeroDocumento == null || numeroDocumento.isBlank()
+                || idClinica == null || desde == null || hasta == null
+                || !desde.before(hasta) || maxResultados <= 0) {
+            throw new IllegalArgumentException("Los filtros para buscar citas no son válidos");
+        }
+        try {
+            TypedQuery<Consulta> query = em.createNamedQuery("Consulta.findCitasPublicas", Consulta.class);
+            query.setParameter("tipoDocumento", "%" + tipoDocumento.trim().toUpperCase() + "%");
+            query.setParameter("numeroDocumento", numeroDocumento.trim());
+            query.setParameter("idClinica", idClinica);
+            query.setParameter("desde", desde);
+            query.setParameter("hasta", hasta);
+            query.setMaxResults(maxResultados);
+            return query.getResultList();
+        } catch (Exception ex) {
+            Logger.getLogger(ConsultaService.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+            throw new IllegalStateException("No se pudieron buscar las citas", ex);
+        }
+    }
     
     public List<Consulta> buscarPorConsultasActivas(){
         try {
-            String jpql="SELECT c FROM Consulta c WHERE c.fechaFin IS NULL ORDER BY c.fechaInicio ASC";
-            
-            TypedQuery<Consulta> query=em.createQuery(jpql,Consulta.class);
+            TypedQuery<Consulta> query=em.createNamedQuery("Consulta.findActivas",Consulta.class);
             return query.getResultList();
                     
         } catch (Exception ex) {
@@ -48,13 +70,7 @@ public class ConsultaService extends DefaultService<Consulta>{
         try {
             
             if(idPaciente!=null){
-            String jpql="SELECT c FROM Consulta c "+
-                    "JOIN c.idPersonaRol pr "+
-                    "JOIN pr.idPersona p "+
-                    "WHERE p.idPersona= :idPaciente "+
-                    "ORDER BY c.fechaInicio DESC";
-            
-            TypedQuery<Consulta> query=em.createQuery(jpql,Consulta.class);
+            TypedQuery<Consulta> query=em.createNamedQuery("Consulta.findByPaciente",Consulta.class);
             query.setParameter("idPaciente", idPaciente);
             return query.getResultList();
         }
@@ -72,8 +88,7 @@ public class ConsultaService extends DefaultService<Consulta>{
         EntityManager em = getEntityManager();
         try {
             if (inicio != null && fin != null) {
-                String jpql = "SELECT c FROM Consulta c WHERE c.fechaInicio BETWEEN :inicio AND :fin ORDER BY c.fechaInicio ASC";
-                TypedQuery<Consulta> query = em.createQuery(jpql, Consulta.class);
+                TypedQuery<Consulta> query = em.createNamedQuery("Consulta.findByRangoFechas", Consulta.class);
                 query.setParameter("inicio", inicio);
                 query.setParameter("fin", fin);
                 return query.getResultList();
@@ -90,8 +105,7 @@ public class ConsultaService extends DefaultService<Consulta>{
         EntityManager em = getEntityManager();
         try {
             if (idPersonaRol != null) {
-                String jpql = "SELECT c FROM Consulta c WHERE c.idPersonaRol.idPersonaRol = :idPersonaRol ORDER BY c.fechaInicio DESC";
-                TypedQuery<Consulta> query = em.createQuery(jpql, Consulta.class);
+                TypedQuery<Consulta> query = em.createNamedQuery("Consulta.findByPersonaRol", Consulta.class);
                 query.setParameter("idPersonaRol", idPersonaRol);
                 return query.getResultList();
             }

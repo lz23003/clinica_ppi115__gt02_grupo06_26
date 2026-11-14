@@ -110,14 +110,12 @@
                                 </p:selectOneMenu>
 
                                 <p:outputLabel for="idPersonaRol" value="#{crud['campo.paciente']}"/>
-                                <p:selectOneMenu id="idPersonaRol" value="#{consultaModel.registro.idPersonaRol}" 
-                                                 converter="entityConverter" filter="true" filterMatchMode="contains" 
-                                                 required="true" style="width: 100%;">
-                                    <f:selectItem itemLabel="#{crud['mensaje.seleccione']}" itemValue="#{null}" noSelectionOption="true"/>
-                                    <f:selectItems value="#{consultaModel.listaPersonaRoles}" var="rol" 
-                                                   itemLabel="#{consultaModel.obtenerEtiquetaPersona(rol)}" 
-                                                   itemValue="#{rol}"/>
-                                </p:selectOneMenu>
+                                <p:autoComplete id="idPersonaRol" value="#{consultaModel.registro.idPersonaRol}"
+                                                completeMethod="#{consultaModel.completarPersonaRol}"
+                                                var="rol" itemLabel="#{consultaModel.obtenerEtiquetaPersona(rol)}"
+                                                itemValue="#{rol}" converter="entityConverter"
+                                                minQueryLength="3" queryDelay="300" forceSelection="true"
+                                                required="true" style="width: 100%;"/>
 
                                 <p:outputLabel for="fechaInicio" value="#{crud['campo.fechaConsulta']}"/>
                                 <p:datePicker id="fechaInicio" value="#{consultaModel.registro.fechaInicio}" 
@@ -191,12 +189,11 @@
                         <p:inputText value="#{consultaModel.nuevoConsultaProcedimiento.idConsultaProcedimiento}" disabled="true" style="width: 100%;"/>
 
                         <p:outputLabel for="selectProcedimiento" value="#{crud['campo.tipo']}"/>
-                        <p:selectOneMenu id="selectProcedimiento" value="#{consultaModel.nuevoConsultaProcedimiento.idProcedimiento}" 
-                                         filter="true" filterMatchMode="contains" style="width: 100%;" required="true">
-                            <f:selectItem itemLabel="#{crud['mensaje.seleccione']}" itemValue="#{null}" noSelectionOption="true" />
-                            <f:selectItems value="#{consultaModel.listaProcedimientos}" var="proc" 
-                                           itemLabel="#{proc.nombre}" itemValue="#{proc.idProcedimiento}" />
-                        </p:selectOneMenu>
+                        <p:autoComplete id="selectProcedimiento" value="#{consultaModel.procedimientoParaAsignar}"
+                                        completeMethod="#{consultaModel.completarProcedimiento}"
+                                        var="proc" itemLabel="#{proc.nombre}" itemValue="#{proc}"
+                                        converter="entityConverter" minQueryLength="3" queryDelay="300"
+                                        forceSelection="true" style="width: 100%;" required="true"/>
 
                         <p:outputLabel for="fechaInicioProc" value="#{crud['campo.fechaInicio']}"/>
                         <p:datePicker id="fechaInicioProc" value="#{consultaModel.nuevoConsultaProcedimiento.fechaInicio}" 

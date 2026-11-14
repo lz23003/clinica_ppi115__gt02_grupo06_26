@@ -31,10 +31,7 @@ public class ConsultaProcedimientoPasoService extends DefaultService<ConsultaPro
     public List<ConsultaProcedimientoPaso> buscarPorConsultaProcedimiento(UUID idConsultaProcedimiento) {
         try {
             if (idConsultaProcedimiento != null) {
-                String jpql = "SELECT cpp FROM ConsultaProcedimientoPaso cpp " +
-                              "WHERE cpp.idConsultaProcedimiento.idConsultaProcedimiento = :idConsultaProcedimiento " +
-                              "ORDER BY cpp.fechaInicio ASC";
-                TypedQuery<ConsultaProcedimientoPaso> query = em.createQuery(jpql, ConsultaProcedimientoPaso.class);
+                TypedQuery<ConsultaProcedimientoPaso> query = em.createNamedQuery("ConsultaProcedimientoPaso.findByConsultaProcedimiento", ConsultaProcedimientoPaso.class);
                 query.setParameter("idConsultaProcedimiento", idConsultaProcedimiento);
                 return query.getResultList();
             }
@@ -47,8 +44,7 @@ public class ConsultaProcedimientoPasoService extends DefaultService<ConsultaPro
     public List<ConsultaProcedimientoPaso> buscarPorEstado(String estado) {
         try {
             if (estado != null) {
-                String jpql = "SELECT cpp FROM ConsultaProcedimientoPaso cpp WHERE cpp.estado = :estado";
-                TypedQuery<ConsultaProcedimientoPaso> query = em.createQuery(jpql, ConsultaProcedimientoPaso.class);
+                TypedQuery<ConsultaProcedimientoPaso> query = em.createNamedQuery("ConsultaProcedimientoPaso.findByEstado", ConsultaProcedimientoPaso.class);
                 query.setParameter("estado", estado.trim().toUpperCase());
                 return query.getResultList();
             }
@@ -61,9 +57,7 @@ public class ConsultaProcedimientoPasoService extends DefaultService<ConsultaPro
     public List<ConsultaProcedimientoPaso> buscarPorPersonaRol(UUID idPersonaRol) {
         try {
             if (idPersonaRol != null) {
-                String jpql = "SELECT cpp FROM ConsultaProcedimientoPaso cpp " +
-                              "WHERE cpp.idPersonaRol.idPersonaRol = :idPersonaRol";
-                TypedQuery<ConsultaProcedimientoPaso> query = em.createQuery(jpql, ConsultaProcedimientoPaso.class);
+                TypedQuery<ConsultaProcedimientoPaso> query = em.createNamedQuery("ConsultaProcedimientoPaso.findByPersonaRol", ConsultaProcedimientoPaso.class);
                 query.setParameter("idPersonaRol", idPersonaRol);
                 return query.getResultList();
             }
@@ -75,10 +69,7 @@ public class ConsultaProcedimientoPasoService extends DefaultService<ConsultaPro
 
     public List<ConsultaProcedimientoPaso> buscarPendientes() {
         try {
-            String jpql = "SELECT cpp FROM ConsultaProcedimientoPaso cpp " +
-                          "WHERE cpp.estado = 'PENDIENTE' " +
-                          "ORDER BY cpp.fechaInicio ASC";
-            TypedQuery<ConsultaProcedimientoPaso> query = em.createQuery(jpql, ConsultaProcedimientoPaso.class);
+            TypedQuery<ConsultaProcedimientoPaso> query = em.createNamedQuery("ConsultaProcedimientoPaso.findPendientes", ConsultaProcedimientoPaso.class);
             return query.getResultList();
         } catch (Exception ex) {
             Logger.getLogger(ConsultaProcedimientoPasoService.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);

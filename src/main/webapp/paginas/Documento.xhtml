@@ -56,16 +56,20 @@
                     <p:panelGrid columns="2">
                      
                         <p:outputLabel for="persona" value="#{crud['campo.persona']}"/>
-                        <p:selectOneMenu id="persona" value="#{documentoModel.registro.idPersona}" converter="entityConverter" filter="true" filterMatchMode="contains" required="true" requiredMessage="#{crud['mensaje.requerido']}">
-                            <f:selectItem itemLabel="-- Seleccione una Persona --" itemValue="#{null}" noSelectionOption="true"/>
-                            <f:selectItems value="#{documentoModel.listaPersonas}" var="per" itemLabel="#{per.nombres} #{per.apellidos}" itemValue="#{per}"/>
-                        </p:selectOneMenu>
+                        <p:autoComplete id="persona" value="#{documentoModel.registro.idPersona}"
+                                        completeMethod="#{documentoModel.completarPersona}"
+                                        var="per" itemLabel="#{per.nombres} #{per.apellidos}" itemValue="#{per}"
+                                        converter="entityConverter" minQueryLength="3" queryDelay="300"
+                                        forceSelection="true" required="true"
+                                        requiredMessage="#{crud['mensaje.requerido']}"/>
                         
                         <p:outputLabel for="tipo" value="#{crud['entidad.tipoDocumento']}"/>
-                        <p:selectOneMenu id="tipo" value="#{documentoModel.registro.idTipoDocumento}" converter="entityConverter" filter="true" filterMatchMode="contains" required="true" requiredMessage="#{crud['mensaje.requerido']}">
-                            <f:selectItem itemLabel="-- Seleccione un Tipo --" itemValue="#{null}" noSelectionOption="true"/>
-                            <f:selectItems value="#{documentoModel.listaTiposDocumento}" var="tipo" itemLabel="#{tipo.nombre}" itemValue="#{tipo}"/>
-                        </p:selectOneMenu>
+                        <p:autoComplete id="tipo" value="#{documentoModel.registro.idTipoDocumento}"
+                                        completeMethod="#{documentoModel.completarTipoDocumento}"
+                                        var="tipo" itemLabel="#{tipo.nombre}" itemValue="#{tipo}"
+                                        converter="entityConverter" minQueryLength="3" queryDelay="300"
+                                        forceSelection="true" required="true"
+                                        requiredMessage="#{crud['mensaje.requerido']}"/>
                         
                         <p:outputLabel for="valor" value="#{crud['campo.valor']}"/>
                         <p:inputText id="valor" value="#{documentoModel.registro.valor}" required="true" requiredMessage="#{crud['mensaje.requerido']}" size="40"/>

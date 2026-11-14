@@ -23,7 +23,9 @@ import java.util.UUID;
 @NamedQueries({
     @NamedQuery(name = "ExamenTipoExamen.findAll", query = "SELECT e FROM ExamenTipoExamen e"),
     @NamedQuery(name = "ExamenTipoExamen.findByFechaCreacion", query = "SELECT e FROM ExamenTipoExamen e WHERE e.fechaCreacion = :fechaCreacion"),
-    @NamedQuery(name = "ExamenTipoExamen.findByObservaciones", query = "SELECT e FROM ExamenTipoExamen e WHERE e.observaciones = :observaciones")})
+    @NamedQuery(name = "ExamenTipoExamen.findByObservaciones", query = "SELECT e FROM ExamenTipoExamen e WHERE e.observaciones = :observaciones"),
+    @NamedQuery(name = "ExamenTipoExamen.findByExamen", query = "SELECT ete FROM ExamenTipoExamen ete WHERE ete.idExamen.idExamen = :idExamen"),
+    @NamedQuery(name = "ExamenTipoExamen.findByTipoExamen", query = "SELECT ete FROM ExamenTipoExamen ete WHERE ete.idTipoExamen.idTipoExamen = :idTipoExamen")})
 public class ExamenTipoExamen implements Serializable {
 
     private static final long serialVersionUID = 1L;

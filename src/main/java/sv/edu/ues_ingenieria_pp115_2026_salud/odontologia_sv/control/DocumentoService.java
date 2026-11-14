@@ -29,8 +29,7 @@ public class DocumentoService extends DefaultService<Documento>{
     public List<Documento> buscarPorPersona(UUID idPersona) {
         try {
             if (idPersona != null) {
-                String jpql = "SELECT d FROM Documento d WHERE d.idPersona.idPersona = :idPersona";
-                TypedQuery<Documento> query = em.createQuery(jpql, Documento.class);
+                TypedQuery<Documento> query = em.createNamedQuery("Documento.findByPersona", Documento.class);
                 query.setParameter("idPersona", idPersona);
                 return query.getResultList();
             }
@@ -43,8 +42,7 @@ public class DocumentoService extends DefaultService<Documento>{
     public List<Documento> buscarPorTipoDocumento(UUID idTipoDocumento) {
         try {
             if (idTipoDocumento != null) {
-                String jpql = "SELECT d FROM Documento d WHERE d.idTipoDocumento.idTipoDocumento = :idTipoDocumento";
-                TypedQuery<Documento> query = em.createQuery(jpql, Documento.class);
+                TypedQuery<Documento> query = em.createNamedQuery("Documento.findByTipoDocumento", Documento.class);
                 query.setParameter("idTipoDocumento", idTipoDocumento);
                 return query.getResultList();
             }
@@ -57,8 +55,7 @@ public class DocumentoService extends DefaultService<Documento>{
     public Documento buscarPorValor(String valor) {
         try {
             if (valor != null) {
-                String jpql = "SELECT d FROM Documento d WHERE d.valor = :valor";
-                TypedQuery<Documento> query = em.createQuery(jpql, Documento.class);
+                TypedQuery<Documento> query = em.createNamedQuery("Documento.findByValor", Documento.class);
                 query.setParameter("valor", valor.trim());
                 
                 List<Documento> resultados = query.getResultList();
@@ -73,10 +70,7 @@ public class DocumentoService extends DefaultService<Documento>{
     public List<Documento> buscarPorPersonaYTipo(UUID idPersona, UUID idTipoDocumento) {
         try {
             if (idPersona != null && idTipoDocumento != null) {
-                String jpql = "SELECT d FROM Documento d " +
-                              "WHERE d.idPersona.idPersona = :idPersona " +
-                              "AND d.idTipoDocumento.idTipoDocumento = :idTipoDocumento";
-                TypedQuery<Documento> query = em.createQuery(jpql, Documento.class);
+                TypedQuery<Documento> query = em.createNamedQuery("Documento.findByPersonaYTipo", Documento.class);
                 query.setParameter("idPersona", idPersona);
                 query.setParameter("idTipoDocumento", idTipoDocumento);
                 return query.getResultList();

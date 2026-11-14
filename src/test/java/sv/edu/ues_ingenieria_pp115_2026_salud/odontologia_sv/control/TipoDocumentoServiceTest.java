@@ -166,7 +166,7 @@ public class TipoDocumentoServiceTest {
         assertThat(resultado).isNull();
 
         // Y NO se consultó al EntityManager
-        verify(em, never()).createQuery(anyString(), any(Class.class));
+        verify(em, never()).createNamedQuery(anyString(), any(Class.class));
     }
 
     @Test
@@ -174,7 +174,7 @@ public class TipoDocumentoServiceTest {
         // given
         List<TipoDocumento> esperado = List.of(tipoDui);
 
-        when(em.createQuery(anyString(), any(Class.class))).thenReturn(typedQuery);
+        when(em.createNamedQuery(anyString(), any(Class.class))).thenReturn(typedQuery);
         when(typedQuery.getResultList()).thenReturn(esperado);
 
         // when
@@ -191,7 +191,7 @@ public class TipoDocumentoServiceTest {
     @Test
     public void testBuscarPorExpresionRegularSinResultadosDevuelveNull() {
         // given: la consulta devuelve lista vacía
-        when(em.createQuery(anyString(), any(Class.class))).thenReturn(typedQuery);
+        when(em.createNamedQuery(anyString(), any(Class.class))).thenReturn(typedQuery);
         when(typedQuery.getResultList()).thenReturn(List.of());
 
         // when
@@ -204,7 +204,7 @@ public class TipoDocumentoServiceTest {
     @Test
     public void testBuscarPorExpresionRegularConExcepcionDevuelveNull() {
         // given
-        when(em.createQuery(anyString(), any(Class.class)))
+        when(em.createNamedQuery(anyString(), any(Class.class)))
                 .thenThrow(new RuntimeException("Error simulado"));
 
         // when

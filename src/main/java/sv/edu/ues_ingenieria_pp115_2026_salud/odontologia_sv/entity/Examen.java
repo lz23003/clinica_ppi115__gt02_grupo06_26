@@ -20,10 +20,11 @@ import java.util.UUID;
 @Table(name = "examen", catalog = "odontologia_sv", schema = "public")
 @NamedQueries({
     @NamedQuery(name = "Examen.findAll", query = "SELECT e FROM Examen e"),
-    @NamedQuery(name = "Examen.findByNombre", query = "SELECT e FROM Examen e WHERE e.nombre = :nombre"),
+    @NamedQuery(name = "Examen.findByNombre", query = "SELECT e FROM Examen e WHERE UPPER(e.nombre) LIKE :nombre"),
     @NamedQuery(name = "Examen.findByActivo", query = "SELECT e FROM Examen e WHERE e.activo = :activo"),
     @NamedQuery(name = "Examen.findByObservaciones", query = "SELECT e FROM Examen e WHERE e.observaciones = :observaciones"),
-    @NamedQuery(name ="Examen.findByNombreLike", query ="SELECT e FROM Examen e WHERE UPPER(e.nombre) LIKE :nombre")
+    @NamedQuery(name ="Examen.findByNombreLike", query ="SELECT e FROM Examen e WHERE UPPER(e.nombre) LIKE :nombre"),
+    @NamedQuery(name = "Examen.findByNombreLikeActivo", query = "SELECT e FROM Examen e WHERE e.activo = true AND UPPER(e.nombre) LIKE :filtro ORDER BY e.nombre ASC")
         
 })
 public class Examen implements Serializable {

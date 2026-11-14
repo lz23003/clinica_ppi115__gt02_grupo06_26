@@ -7,6 +7,9 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
 import java.util.Date;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -31,8 +34,7 @@ public class ConsultaProcedimientoService extends DefaultService<ConsultaProcedi
      public List<ConsultaProcedimiento> buscarPorConsulta(UUID idConsulta) {
         try {
             if (idConsulta != null) {
-                String jpql = "SELECT cp FROM ConsultaProcedimiento cp WHERE cp.idConsulta.idConsulta = :idConsulta";
-                TypedQuery<ConsultaProcedimiento> query = em.createQuery(jpql, ConsultaProcedimiento.class);
+                TypedQuery<ConsultaProcedimiento> query = em.createNamedQuery("ConsultaProcedimiento.findByConsulta", ConsultaProcedimiento.class);
                 query.setParameter("idConsulta", idConsulta);
                 return query.getResultList();
             }
@@ -41,14 +43,33 @@ public class ConsultaProcedimientoService extends DefaultService<ConsultaProcedi
         }
         return List.of();
     }
+
+    public Map<UUID, List<String>> buscarNombresPorConsultas(List<UUID> consultaIds) {
+        if (consultaIds == null || consultaIds.isEmpty()) {
+            return Map.of();
+        }
+        try {
+            TypedQuery<Object[]> query = em.createNamedQuery(
+                    "ConsultaProcedimiento.findProcedureNamesByConsultas", Object[].class);
+            query.setParameter("consultaIds", consultaIds);
+            Map<UUID, List<String>> namesByConsultation = new LinkedHashMap<>();
+            for (Object[] row : query.getResultList()) {
+                UUID consultaId = (UUID) row[0];
+                String nombre = (String) row[1];
+                namesByConsultation.computeIfAbsent(consultaId, ignored -> new ArrayList<>()).add(nombre);
+            }
+            return namesByConsultation;
+        } catch (Exception ex) {
+            Logger.getLogger(ConsultaProcedimientoService.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+            throw new IllegalStateException("No se pudieron cargar los procedimientos de las citas", ex);
+        }
+    }
      
     
    public List<ConsultaProcedimiento> buscarPorProcedimiento(UUID idProcedimiento) {
         try {
             if (idProcedimiento != null) {
-                // Nota: idProcedimiento es Object por el problema de FK faltante
-                String jpql = "SELECT cp FROM ConsultaProcedimiento cp WHERE cp.idProcedimiento = :idProcedimiento";
-                TypedQuery<ConsultaProcedimiento> query = em.createQuery(jpql, ConsultaProcedimiento.class);
+                TypedQuery<ConsultaProcedimiento> query = em.createNamedQuery("ConsultaProcedimiento.findByProcedimiento", ConsultaProcedimiento.class);
                 query.setParameter("idProcedimiento", idProcedimiento);
                 return query.getResultList();
             }
@@ -64,9 +85,7 @@ public class ConsultaProcedimientoService extends DefaultService<ConsultaProcedi
    public List<ConsultaProcedimiento> buscarPorRangoFechas(Date inicio, Date fin) {
         try {
             if (inicio != null && fin != null) {
-                String jpql = "SELECT cp FROM ConsultaProcedimiento cp " +
-                              "WHERE cp.fechaInicio BETWEEN :inicio AND :fin";
-                TypedQuery<ConsultaProcedimiento> query = em.createQuery(jpql, ConsultaProcedimiento.class);
+                TypedQuery<ConsultaProcedimiento> query = em.createNamedQuery("ConsultaProcedimiento.findByRangoFechas", ConsultaProcedimiento.class);
                 query.setParameter("inicio", inicio);
                 query.setParameter("fin", fin);
                 return query.getResultList();

@@ -29,9 +29,7 @@ public class ProcedimientoPasoSecuenciaService extends DefaultService<Procedimie
     public List<ProcedimientoPasoSecuencia> buscarPorPaso(UUID idProcedimientoPaso) {
         try {
             if (idProcedimientoPaso != null) {
-                String jpql = "SELECT pps FROM ProcedimientoPasoSecuencia pps " +
-                              "WHERE pps.idProcedimientoPaso.idProcedimientoPaso = :idPaso";
-                TypedQuery<ProcedimientoPasoSecuencia> query = em.createQuery(jpql, ProcedimientoPasoSecuencia.class);
+                TypedQuery<ProcedimientoPasoSecuencia> query = em.createNamedQuery("ProcedimientoPasoSecuencia.findByPaso", ProcedimientoPasoSecuencia.class);
                 query.setParameter("idPaso", idProcedimientoPaso);
                 return query.getResultList();
             }
@@ -44,10 +42,7 @@ public class ProcedimientoPasoSecuenciaService extends DefaultService<Procedimie
     public ProcedimientoPasoSecuencia buscarSiguientePaso(UUID idProcedimientoPaso) {
         try {
             if (idProcedimientoPaso != null) {
-                String jpql = "SELECT pps FROM ProcedimientoPasoSecuencia pps " +
-                              "WHERE pps.idProcedimientoPaso.idProcedimientoPaso = :idPaso " +
-                              "AND pps.tipoSecuencia = 'SIGUIENTE'";
-                TypedQuery<ProcedimientoPasoSecuencia> query = em.createQuery(jpql, ProcedimientoPasoSecuencia.class);
+                TypedQuery<ProcedimientoPasoSecuencia> query = em.createNamedQuery("ProcedimientoPasoSecuencia.findSiguientePaso", ProcedimientoPasoSecuencia.class);
                 query.setParameter("idPaso", idProcedimientoPaso);
                 
                 List<ProcedimientoPasoSecuencia> resultados = query.getResultList();

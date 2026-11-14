@@ -20,7 +20,10 @@ import java.util.UUID;
 @NamedQueries({
     @NamedQuery(name = "Documento.findAll", query = "SELECT d FROM Documento d"),
     @NamedQuery(name = "Documento.findByValor", query = "SELECT d FROM Documento d WHERE d.valor = :valor"),
-    @NamedQuery(name = "Documento.findByRutaFisica", query = "SELECT d FROM Documento d WHERE d.rutaFisica = :rutaFisica")})
+    @NamedQuery(name = "Documento.findByRutaFisica", query = "SELECT d FROM Documento d WHERE d.rutaFisica = :rutaFisica"),
+    @NamedQuery(name = "Documento.findByPersona", query = "SELECT d FROM Documento d WHERE d.idPersona.idPersona = :idPersona"),
+    @NamedQuery(name = "Documento.findByTipoDocumento", query = "SELECT d FROM Documento d WHERE d.idTipoDocumento.idTipoDocumento = :idTipoDocumento"),
+    @NamedQuery(name = "Documento.findByPersonaYTipo", query = "SELECT d FROM Documento d WHERE d.idPersona.idPersona = :idPersona AND d.idTipoDocumento.idTipoDocumento = :idTipoDocumento")})
 public class Documento implements Serializable {
 
     private static final long serialVersionUID = 1L;

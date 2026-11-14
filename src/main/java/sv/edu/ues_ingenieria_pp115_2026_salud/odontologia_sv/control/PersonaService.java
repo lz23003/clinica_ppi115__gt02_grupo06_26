@@ -55,9 +55,7 @@ public class PersonaService extends DefaultService<Persona>{
     public Persona buscarPorDocumento(String valorDocumento){
         try{
             if(valorDocumento!=null){
-                var jpql="SELECT p FROM Persona p JOIN p.documentoList d WHERE d.valor= :valor";
-   
-                TypedQuery<Persona> q=em.createQuery(jpql,Persona.class);
+                TypedQuery<Persona> q=em.createNamedQuery("Persona.findByDocumento",Persona.class);
                 q.setParameter("valor",valorDocumento.trim());
                 var resultado=q.getResultList();
                 return resultado.isEmpty() ? null: resultado.get(0);
@@ -68,6 +66,22 @@ public class PersonaService extends DefaultService<Persona>{
 
         }
         return null;
+    }
+
+    public List<Persona> buscarPorNombreCompleto(final String query, int first, int max) {
+        if (query == null || query.trim().length() < 3 || first < 0 || max <= 0) {
+            return List.of();
+        }
+        try {
+            TypedQuery<Persona> namedQuery = em.createNamedQuery("Persona.findByNombreCompleto", Persona.class);
+            namedQuery.setParameter("filtro", "%" + query.trim().toUpperCase() + "%");
+            namedQuery.setFirstResult(first);
+            namedQuery.setMaxResults(max);
+            return namedQuery.getResultList();
+        } catch (Exception ex) {
+            Logger.getLogger(PersonaService.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+            throw new IllegalStateException("No se pudieron buscar personas por nombre", ex);
+        }
     }
     
     

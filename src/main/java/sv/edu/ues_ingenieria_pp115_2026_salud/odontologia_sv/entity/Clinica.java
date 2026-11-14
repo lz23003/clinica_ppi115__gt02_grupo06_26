@@ -22,10 +22,11 @@ import java.util.UUID;
 @Table(name = "clinica", catalog = "odontologia_sv", schema = "public")
 @NamedQueries({
     @NamedQuery(name = "Clinica.findAll", query = "SELECT c FROM Clinica c"),
-    @NamedQuery(name = "Clinica.findByNombre", query = "SELECT c FROM Clinica c WHERE c.nombre = :nombre"),
+    @NamedQuery(name = "Clinica.findByNombre", query = "SELECT c FROM Clinica c WHERE UPPER(c.nombre) LIKE :nombre"),
     @NamedQuery(name = "Clinica.findByActivo", query = "SELECT c FROM Clinica c WHERE c.activo = :activo"),
     @NamedQuery(name = "Clinica.findByTipo", query = "SELECT c FROM Clinica c WHERE c.tipo = :tipo"),
-    @NamedQuery(name = "Clinica.findByComentarios", query = "SELECT c FROM Clinica c WHERE c.comentarios = :comentarios")})
+    @NamedQuery(name = "Clinica.findByComentarios", query = "SELECT c FROM Clinica c WHERE c.comentarios = :comentarios"),
+    @NamedQuery(name = "Clinica.findByNombreLikeActiva", query = "SELECT c FROM Clinica c WHERE c.activo = true AND UPPER(c.nombre) LIKE :filtro ORDER BY c.nombre ASC")})
 public class Clinica implements Serializable {
 
     private static final long serialVersionUID = 1L;

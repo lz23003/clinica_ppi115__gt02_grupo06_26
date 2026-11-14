@@ -29,8 +29,7 @@ public class ExamenTipoExamenService extends DefaultService<ExamenTipoExamen>{
     public List<ExamenTipoExamen> buscarPorExamen(UUID idExamen) {
         try {
             if (idExamen != null) {
-                String jpql = "SELECT ete FROM ExamenTipoExamen ete WHERE ete.idExamen.idExamen = :idExamen";
-                TypedQuery<ExamenTipoExamen> query = em.createQuery(jpql, ExamenTipoExamen.class);
+                TypedQuery<ExamenTipoExamen> query = em.createNamedQuery("ExamenTipoExamen.findByExamen", ExamenTipoExamen.class);
                 query.setParameter("idExamen", idExamen);
                 return query.getResultList();
             }
@@ -43,8 +42,7 @@ public class ExamenTipoExamenService extends DefaultService<ExamenTipoExamen>{
     public List<ExamenTipoExamen> buscarPorTipoExamen(UUID idTipoExamen) {
         try {
             if (idTipoExamen != null) {
-                String jpql = "SELECT ete FROM ExamenTipoExamen ete WHERE ete.idTipoExamen.idTipoExamen = :idTipoExamen";
-                TypedQuery<ExamenTipoExamen> query = em.createQuery(jpql, ExamenTipoExamen.class);
+                TypedQuery<ExamenTipoExamen> query = em.createNamedQuery("ExamenTipoExamen.findByTipoExamen", ExamenTipoExamen.class);
                 query.setParameter("idTipoExamen", idTipoExamen);
                 return query.getResultList();
             }

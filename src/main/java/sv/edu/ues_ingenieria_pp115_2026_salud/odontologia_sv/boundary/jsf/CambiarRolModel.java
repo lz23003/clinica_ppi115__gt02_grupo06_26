@@ -1,18 +1,15 @@
 package sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.boundary.jsf;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.application.FacesMessage;
 
 import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.ClinicaService;
-import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.PersonaService;
 import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.PersonaRolService;
 import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.RolService;
 import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.Clinica;
@@ -32,37 +29,38 @@ public class CambiarRolModel implements Serializable {
     @Inject
     private RolService rolService;
     @Inject
-    private PersonaService personaService;
-    @Inject
     private PersonaRolService personaRolService;
-
-    private List<Clinica> clinicasDisponibles;
-    private List<Rol> rolesDisponibles;
-    private List<Persona> personasDisponibles;
 
     private Clinica clinicaSeleccionada;
     private Rol rolSeleccionado;
     private Persona personaSeleccionada;
-
-    @PostConstruct
-    public void init() {
-        clinicasDisponibles = clinicaService.listarActivas();
-        rolesDisponibles = rolService.listarActivos();      
-        personasDisponibles = new ArrayList<>(); 
-    }
     
     public void actualizarPersonas() {
-        personasDisponibles = new ArrayList<>();
-        
-        if (clinicaSeleccionada != null && rolSeleccionado != null) {
-            List<PersonaRol> asignaciones = personaRolService.buscarPorClinica(clinicaSeleccionada.getIdClinica());
-            
-            for (PersonaRol pr : asignaciones) {
-                if (pr.getIdRol().equals(rolSeleccionado) && !personasDisponibles.contains(pr.getIdPersona())) {
-                    personasDisponibles.add(pr.getIdPersona());
-                }
-            }
+        personaSeleccionada = null;
+    }
+
+    public List<Clinica> completarClinica(String query) {
+        return clinicaService.findByNombreLikeActiva(query, 0, 10);
+    }
+
+    public List<Rol> completarRol(String query) {
+        return rolService.findByNombreLikeActivo(query, 0, 10);
+    }
+
+    public List<Persona> completarPersona(String query) {
+        if (clinicaSeleccionada == null || rolSeleccionado == null) {
+            return List.of();
         }
+        return personaRolService.buscarPorClinicaRolYNombre(
+                        clinicaSeleccionada.getIdClinica(),
+                        rolSeleccionado.getIdRol(),
+                        query,
+                        0,
+                        10)
+                .stream()
+                .map(PersonaRol::getIdPersona)
+                .distinct()
+                .toList();
     }
 
     public void aplicarCambioRol() {
@@ -80,18 +78,6 @@ public class CambiarRolModel implements Serializable {
         
         context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, summary, detail));
     }
-    }
-
-    public List<Clinica> getClinicasDisponibles() {
-        return clinicasDisponibles;
-    }
-
-    public List<Rol> getRolesDisponibles() {
-        return rolesDisponibles;
-    }
-
-    public List<Persona> getPersonasDisponibles() {
-        return personasDisponibles;
     }
 
     public Clinica getClinicaSeleccionada() {

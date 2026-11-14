@@ -20,10 +20,11 @@ import java.util.UUID;
 @Table(name = "tipo_medio_contacto", catalog = "odontologia_sv", schema = "public")
 @NamedQueries({
     @NamedQuery(name = "TipoMedioContacto.findAll", query = "SELECT t FROM TipoMedioContacto t"),
-    @NamedQuery(name = "TipoMedioContacto.findByNombre", query = "SELECT t FROM TipoMedioContacto t WHERE t.nombre = :nombre"),
+    @NamedQuery(name = "TipoMedioContacto.findByNombre", query = "SELECT t FROM TipoMedioContacto t WHERE UPPER(t.nombre) LIKE :nombre"),
     @NamedQuery(name = "TipoMedioContacto.findByIndicaciones", query = "SELECT t FROM TipoMedioContacto t WHERE t.indicaciones = :indicaciones"),
     @NamedQuery(name = "TipoMedioContacto.findByExpresionRegular", query = "SELECT t FROM TipoMedioContacto t WHERE t.expresionRegular = :expresionRegular"),
-    @NamedQuery(name = "TipoMedioContacto.findByActivo", query = "SELECT t FROM TipoMedioContacto t WHERE t.activo = :activo")})
+    @NamedQuery(name = "TipoMedioContacto.findByActivo", query = "SELECT t FROM TipoMedioContacto t WHERE t.activo = :activo"),
+    @NamedQuery(name = "TipoMedioContacto.findByNombreLikeActivo", query = "SELECT tmc FROM TipoMedioContacto tmc WHERE tmc.activo = true AND UPPER(tmc.nombre) LIKE :filtro ORDER BY tmc.nombre ASC")})
 public class TipoMedioContacto implements Serializable {
 
     private static final long serialVersionUID = 1L;

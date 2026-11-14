@@ -23,7 +23,11 @@ import java.util.UUID;
 @NamedQueries({
     @NamedQuery(name = "MedioContacto.findAll", query = "SELECT m FROM MedioContacto m"),
     @NamedQuery(name = "MedioContacto.findByValor", query = "SELECT m FROM MedioContacto m WHERE m.valor = :valor"),
-    @NamedQuery(name = "MedioContacto.findByFechaCreacion", query = "SELECT m FROM MedioContacto m WHERE m.fechaCreacion = :fechaCreacion")})
+    @NamedQuery(name = "MedioContacto.findByFechaCreacion", query = "SELECT m FROM MedioContacto m WHERE m.fechaCreacion = :fechaCreacion"),
+    @NamedQuery(name = "MedioContacto.findByPersona", query = "SELECT mc FROM MedioContacto mc WHERE mc.idPersona.idPersona = :idPersona"),
+    @NamedQuery(name = "MedioContacto.findByTipoMedioContacto", query = "SELECT mc FROM MedioContacto mc WHERE mc.idTipoMedioContacto.idTipoMedioContacto = :idTipoMedioContacto"),
+    @NamedQuery(name = "MedioContacto.findByValorLike", query = "SELECT mc FROM MedioContacto mc WHERE mc.valor LIKE :valor"),
+    @NamedQuery(name = "MedioContacto.findByPersonaYTipo", query = "SELECT mc FROM MedioContacto mc WHERE mc.idPersona.idPersona = :idPersona AND mc.idTipoMedioContacto.idTipoMedioContacto = :idTipoMedioContacto")})
 public class MedioContacto implements Serializable {
 
     private static final long serialVersionUID = 1L;

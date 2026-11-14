@@ -66,12 +66,8 @@ public class ClinicaService extends DefaultService<Clinica> {
     
     public List<Clinica> findByNombreLikeActiva(final String query, int first, int max) {
     try {
-        if (query != null  && first >= 0 && max > 0) {
-            String jpql = "SELECT c FROM Clinica c "
-                    + "WHERE c.activo = true "
-                    + "AND UPPER(c.nombre) LIKE :filtro "
-                    + "ORDER BY c.nombre ASC";
-            TypedQuery<Clinica> q = em.createQuery(jpql, Clinica.class);
+        if (query != null && query.trim().length() >= 3 && first >= 0 && max > 0) {
+            TypedQuery<Clinica> q = em.createNamedQuery("Clinica.findByNombreLikeActiva", Clinica.class);
             q.setParameter("filtro", "%" + query.trim().toUpperCase() + "%");
             q.setFirstResult(first);
             q.setMaxResults(max);
@@ -79,6 +75,7 @@ public class ClinicaService extends DefaultService<Clinica> {
         }
     } catch (Exception ex) {
         Logger.getLogger(ClinicaService.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+        throw new IllegalStateException("No se pudieron buscar clínicas activas", ex);
     }
     return List.of();
 }

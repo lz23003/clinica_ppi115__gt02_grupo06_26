@@ -29,8 +29,7 @@ public class MedioContactoService extends DefaultService<MedioContacto>{
      public List<MedioContacto> buscarPorPersona(UUID idPersona) {
         try {
             if (idPersona != null) {
-                String jpql = "SELECT mc FROM MedioContacto mc WHERE mc.idPersona.idPersona = :idPersona";
-                TypedQuery<MedioContacto> query = em.createQuery(jpql, MedioContacto.class);
+                TypedQuery<MedioContacto> query = em.createNamedQuery("MedioContacto.findByPersona", MedioContacto.class);
                 query.setParameter("idPersona", idPersona);
                 return query.getResultList();
             }
@@ -43,9 +42,7 @@ public class MedioContactoService extends DefaultService<MedioContacto>{
     public List<MedioContacto> buscarPorTipoMedioContacto(UUID idTipoMedioContacto) {
         try {
             if (idTipoMedioContacto != null) {
-                String jpql = "SELECT mc FROM MedioContacto mc " +
-                              "WHERE mc.idTipoMedioContacto.idTipoMedioContacto = :idTipoMedioContacto";
-                TypedQuery<MedioContacto> query = em.createQuery(jpql, MedioContacto.class);
+                TypedQuery<MedioContacto> query = em.createNamedQuery("MedioContacto.findByTipoMedioContacto", MedioContacto.class);
                 query.setParameter("idTipoMedioContacto", idTipoMedioContacto);
                 return query.getResultList();
             }
@@ -58,8 +55,7 @@ public class MedioContactoService extends DefaultService<MedioContacto>{
     public List<MedioContacto> buscarPorValor(String valor) {
         try {
             if (valor != null) {
-                String jpql = "SELECT mc FROM MedioContacto mc WHERE mc.valor LIKE :valor";
-                TypedQuery<MedioContacto> query = em.createQuery(jpql, MedioContacto.class);
+                TypedQuery<MedioContacto> query = em.createNamedQuery("MedioContacto.findByValorLike", MedioContacto.class);
                 query.setParameter("valor", "%" + valor.trim() + "%");
                 return query.getResultList();
             }
@@ -72,10 +68,7 @@ public class MedioContactoService extends DefaultService<MedioContacto>{
     public List<MedioContacto> buscarPorPersonaYTipo(UUID idPersona, UUID idTipoMedioContacto) {
         try {
             if (idPersona != null && idTipoMedioContacto != null) {
-                String jpql = "SELECT mc FROM MedioContacto mc " +
-                              "WHERE mc.idPersona.idPersona = :idPersona " +
-                              "AND mc.idTipoMedioContacto.idTipoMedioContacto = :idTipoMedioContacto";
-                TypedQuery<MedioContacto> query = em.createQuery(jpql, MedioContacto.class);
+                TypedQuery<MedioContacto> query = em.createNamedQuery("MedioContacto.findByPersonaYTipo", MedioContacto.class);
                 query.setParameter("idPersona", idPersona);
                 query.setParameter("idTipoMedioContacto", idTipoMedioContacto);
                 return query.getResultList();

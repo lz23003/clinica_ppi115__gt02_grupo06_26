@@ -47,8 +47,23 @@ public class ProcedimientoService extends DefaultService<Procedimiento>{
         } catch (Exception ex) {
             Logger.getLogger(ProcedimientoService.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
         }
-        
         return List.of();
+    }
+
+    public List<Procedimiento> buscarActivosPorNombre(final String query, int first, int max) {
+        if (query == null || query.trim().length() < 3 || first < 0 || max <= 0) {
+            return List.of();
+        }
+        try {
+            TypedQuery<Procedimiento> namedQuery = em.createNamedQuery("Procedimiento.findByNombreLikeActivo", Procedimiento.class);
+            namedQuery.setParameter("filtro", "%" + query.trim().toUpperCase() + "%");
+            namedQuery.setFirstResult(first);
+            namedQuery.setMaxResults(max);
+            return namedQuery.getResultList();
+        } catch (Exception ex) {
+            Logger.getLogger(ProcedimientoService.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+            throw new IllegalStateException("No se pudieron buscar procedimientos activos", ex);
+        }
     }
     
     

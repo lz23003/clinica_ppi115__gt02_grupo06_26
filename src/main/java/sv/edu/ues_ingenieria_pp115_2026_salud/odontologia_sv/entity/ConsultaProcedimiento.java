@@ -28,7 +28,11 @@ import java.util.UUID;
     @NamedQuery(name = "ConsultaProcedimiento.findAll", query = "SELECT c FROM ConsultaProcedimiento c"),
     @NamedQuery(name = "ConsultaProcedimiento.findByFechaInicio", query = "SELECT c FROM ConsultaProcedimiento c WHERE c.fechaInicio = :fechaInicio"),
     @NamedQuery(name = "ConsultaProcedimiento.findByFechaFin", query = "SELECT c FROM ConsultaProcedimiento c WHERE c.fechaFin = :fechaFin"),
-    @NamedQuery(name = "ConsultaProcedimiento.findByObservaciones", query = "SELECT c FROM ConsultaProcedimiento c WHERE c.observaciones = :observaciones")})
+    @NamedQuery(name = "ConsultaProcedimiento.findByObservaciones", query = "SELECT c FROM ConsultaProcedimiento c WHERE c.observaciones = :observaciones"),
+    @NamedQuery(name = "ConsultaProcedimiento.findByConsulta", query = "SELECT cp FROM ConsultaProcedimiento cp WHERE cp.idConsulta.idConsulta = :idConsulta"),
+    @NamedQuery(name = "ConsultaProcedimiento.findProcedureNamesByConsultas", query = "SELECT cp.idConsulta.idConsulta, p.nombre FROM ConsultaProcedimiento cp, Procedimiento p WHERE cp.idProcedimiento = p.idProcedimiento AND cp.idConsulta.idConsulta IN :consultaIds ORDER BY cp.idConsulta.idConsulta, p.nombre"),
+    @NamedQuery(name = "ConsultaProcedimiento.findByProcedimiento", query = "SELECT cp FROM ConsultaProcedimiento cp WHERE cp.idProcedimiento = :idProcedimiento"),
+    @NamedQuery(name = "ConsultaProcedimiento.findByRangoFechas", query = "SELECT cp FROM ConsultaProcedimiento cp WHERE cp.fechaInicio BETWEEN :inicio AND :fin")})
 public class ConsultaProcedimiento implements Serializable {
 
     private static final long serialVersionUID = 1L;

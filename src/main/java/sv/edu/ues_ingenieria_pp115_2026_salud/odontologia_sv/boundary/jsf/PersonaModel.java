@@ -56,18 +56,14 @@ public class PersonaModel extends DefaultModel<Persona> implements Serializable 
     private Documento documentoRegistro;
     private ESTADO_CRUD documentoEstado = ESTADO_CRUD.NADA;
     private List<Documento> documentosAsignados = new ArrayList<>();
-    private List<TipoDocumento> tiposDocumentoDisponibles;
 
     private MedioContacto medioContactoRegistro;
     private ESTADO_CRUD medioContactoEstado = ESTADO_CRUD.NADA;
     private List<MedioContacto> mediosContactoAsignados = new ArrayList<>();
-    private List<TipoMedioContacto> tiposMedioContactoDisponibles;
 
     private PersonaRol personaRolRegistro;
     private ESTADO_CRUD personaRolEstado = ESTADO_CRUD.NADA;
     private List<PersonaRol> rolesAsignados = new ArrayList<>();
-    private List<Rol> rolesDisponibles;
-    private List<Clinica> clinicasDisponibles;
     private Clinica clinicaSeleccionada;
 
     private int activa = 0;
@@ -499,10 +495,6 @@ public class PersonaModel extends DefaultModel<Persona> implements Serializable 
         this.documentosAsignados = l;
     }
 
-    public List<TipoDocumento> getTiposDocumentoDisponibles() {
-        return tiposDocumentoDisponibles;
-    }
-
     public MedioContacto getMedioContactoRegistro() {
         return medioContactoRegistro;
     }
@@ -527,10 +519,6 @@ public class PersonaModel extends DefaultModel<Persona> implements Serializable 
         this.mediosContactoAsignados = l;
     }
 
-    public List<TipoMedioContacto> getTiposMedioContactoDisponibles() {
-        return tiposMedioContactoDisponibles;
-    }
-
     public PersonaRol getPersonaRolRegistro() {
         return personaRolRegistro;
     }
@@ -553,14 +541,6 @@ public class PersonaModel extends DefaultModel<Persona> implements Serializable 
 
     public void setRolesAsignados(List<PersonaRol> l) {
         this.rolesAsignados = l;
-    }
-
-    public List<Rol> getRolesDisponibles() {
-        return rolesDisponibles;
-    }
-
-    public List<Clinica> getClinicasDisponibles() {
-        return clinicasDisponibles;
     }
 
     public Clinica getClinicaSeleccionada() {

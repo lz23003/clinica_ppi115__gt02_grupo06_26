@@ -113,10 +113,12 @@
                                     <p:inputText id="nombrePaso" value="#{procedimientoModel.pasoRegistro.nombre}" required="true" style="width: 100%;"/>
 
                                     <p:outputLabel for="rolPaso" value="#{crud['campo.aCargoDe']}: *"/>
-                                    <p:selectOneMenu id="rolPaso" value="#{procedimientoModel.pasoRegistro.idRol}" converter="entityConverter" required="true" style="width: 100%;" disabled="#{procedimientoModel.pasoEstado == 'MODIFICAR'}">
-                                        <f:selectItem itemLabel="#{crud['mensaje.seleccione']}" itemValue="#{null}" noSelectionOption="true"/>
-                                        <f:selectItems value="#{procedimientoModel.rolesDisponibles}" var="rol" itemLabel="#{rol.nombre}" itemValue="#{rol}"/>
-                                    </p:selectOneMenu>
+                                    <p:autoComplete id="rolPaso" value="#{procedimientoModel.pasoRegistro.idRol}"
+                                                    completeMethod="#{procedimientoModel.completarRol}"
+                                                    var="rol" itemLabel="#{rol.nombre}" itemValue="#{rol}"
+                                                    converter="entityConverter" minQueryLength="3" queryDelay="300"
+                                                    forceSelection="true" required="true" style="width: 100%;"
+                                                    disabled="#{procedimientoModel.pasoEstado == 'MODIFICAR'}"/>
 
                                     <p:outputLabel for="dependeDe" value="#{crud['campo.dependeDe']}:"/>
                                     <p:inputText id="dependeDe" value="#{procedimientoModel.nombrePasoDependencia}" disabled="true" style="width: 100%;"/>
@@ -155,12 +157,11 @@
                                         <p:panel id="panelFormExamen" rendered="#{procedimientoModel.examenEstado != 'NADA'}" styleClass="ui-noborder">
                                             <p:panelGrid columns="2" styleClass="ui-noborder">
                                                 <p:outputLabel for="idExamen" value="#{crud['entidad.examen']}"/>
-                                                <p:selectOneMenu id="idExamen" value="#{procedimientoModel.examenRegistro.idExamen}" 
-                                                                 converter="entityConverter" filter="true" filterMatchMode="contains" required="true" style="width: 250px;">
-                                                    <f:selectItem itemLabel="#{crud['mensaje.seleccione']}" itemValue="#{null}" noSelectionOption="true"/>
-                                                    <f:selectItems value="#{procedimientoModel.examenesDisponibles}" var="examen" 
-                                                                   itemLabel="#{examen.nombre}" itemValue="#{examen}"/>
-                                                </p:selectOneMenu>
+                                                <p:autoComplete id="idExamen" value="#{procedimientoModel.examenRegistro.idExamen}"
+                                                                completeMethod="#{procedimientoModel.completarExamen}"
+                                                                var="examen" itemLabel="#{examen.nombre}" itemValue="#{examen}"
+                                                                converter="entityConverter" minQueryLength="3" queryDelay="300"
+                                                                forceSelection="true" required="true" style="width: 250px;"/>
                                             </p:panelGrid>
 
                                             <div style="display: flex; gap: 10px; margin-top: 15px;">

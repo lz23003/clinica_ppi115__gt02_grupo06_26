@@ -25,7 +25,10 @@ import java.util.UUID;
     @NamedQuery(name = "ConsultaProcedimientoPaso.findAll", query = "SELECT c FROM ConsultaProcedimientoPaso c"),
     @NamedQuery(name = "ConsultaProcedimientoPaso.findByFechaInicio", query = "SELECT c FROM ConsultaProcedimientoPaso c WHERE c.fechaInicio = :fechaInicio"),
     @NamedQuery(name = "ConsultaProcedimientoPaso.findByFechaFin", query = "SELECT c FROM ConsultaProcedimientoPaso c WHERE c.fechaFin = :fechaFin"),
-    @NamedQuery(name = "ConsultaProcedimientoPaso.findByEstado", query = "SELECT c FROM ConsultaProcedimientoPaso c WHERE c.estado = :estado")})
+    @NamedQuery(name = "ConsultaProcedimientoPaso.findByEstado", query = "SELECT c FROM ConsultaProcedimientoPaso c WHERE c.estado = :estado"),
+    @NamedQuery(name = "ConsultaProcedimientoPaso.findByConsultaProcedimiento", query = "SELECT cpp FROM ConsultaProcedimientoPaso cpp WHERE cpp.idConsultaProcedimiento.idConsultaProcedimiento = :idConsultaProcedimiento ORDER BY cpp.fechaInicio ASC"),
+    @NamedQuery(name = "ConsultaProcedimientoPaso.findByPersonaRol", query = "SELECT cpp FROM ConsultaProcedimientoPaso cpp WHERE cpp.idPersonaRol.idPersonaRol = :idPersonaRol"),
+    @NamedQuery(name = "ConsultaProcedimientoPaso.findPendientes", query = "SELECT cpp FROM ConsultaProcedimientoPaso cpp WHERE cpp.estado = 'PENDIENTE' ORDER BY cpp.fechaInicio ASC")})
 public class ConsultaProcedimientoPaso implements Serializable {
 
     private static final long serialVersionUID = 1L;

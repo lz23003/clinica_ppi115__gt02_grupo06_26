@@ -20,9 +20,10 @@ import java.util.UUID;
 @Table(name = "rol", catalog = "odontologia_sv", schema = "public")
 @NamedQueries({
     @NamedQuery(name = "Rol.findAll", query = "SELECT r FROM Rol r"),
-    @NamedQuery(name = "Rol.findByNombre", query = "SELECT r FROM Rol r WHERE r.nombre = :nombre"),
+    @NamedQuery(name = "Rol.findByNombre", query = "SELECT r FROM Rol r WHERE UPPER(r.nombre) LIKE :nombre"),
     @NamedQuery(name = "Rol.findByActivo", query = "SELECT r FROM Rol r WHERE r.activo = :activo"),
-    @NamedQuery(name = "Rol.findByObservaciones", query = "SELECT r FROM Rol r WHERE r.observaciones = :observaciones")})
+    @NamedQuery(name = "Rol.findByObservaciones", query = "SELECT r FROM Rol r WHERE r.observaciones = :observaciones"),
+    @NamedQuery(name = "Rol.findByNombreLikeActivo", query = "SELECT r FROM Rol r WHERE r.activo = true AND UPPER(r.nombre) LIKE :filtro ORDER BY r.nombre ASC")})
 public class Rol implements Serializable {
 
     private static final long serialVersionUID = 1L;

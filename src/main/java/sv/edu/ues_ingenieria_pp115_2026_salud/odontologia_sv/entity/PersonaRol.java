@@ -24,7 +24,14 @@ import java.util.UUID;
 @Table(name = "persona_rol", catalog = "odontologia_sv", schema = "public")
 @NamedQueries({
     @NamedQuery(name = "PersonaRol.findAll", query = "SELECT p FROM PersonaRol p"),
-    @NamedQuery(name = "PersonaRol.findByFechaCreacion", query = "SELECT p FROM PersonaRol p WHERE p.fechaCreacion = :fechaCreacion")})
+    @NamedQuery(name = "PersonaRol.findByFechaCreacion", query = "SELECT p FROM PersonaRol p WHERE p.fechaCreacion = :fechaCreacion"),
+    @NamedQuery(name = "PersonaRol.findByPersona", query = "SELECT pr FROM PersonaRol pr WHERE pr.idPersona.idPersona = :idPersona"),
+    @NamedQuery(name = "PersonaRol.findByRol", query = "SELECT pr FROM PersonaRol pr WHERE pr.idRol.idRol = :idRol"),
+    @NamedQuery(name = "PersonaRol.findByClinica", query = "SELECT pr FROM PersonaRol pr WHERE pr.idClinica.idClinica = :idClinica"),
+    @NamedQuery(name = "PersonaRol.findByPersonaYRol", query = "SELECT pr FROM PersonaRol pr WHERE pr.idPersona.idPersona = :idPersona AND pr.idRol.idRol = :idRol"),
+    @NamedQuery(name = "PersonaRol.findActiveByDocumento", query = "SELECT DISTINCT pr FROM PersonaRol pr JOIN FETCH pr.idPersona p JOIN FETCH pr.idRol r JOIN FETCH pr.idClinica c JOIN p.documentoList d JOIN d.idTipoDocumento td WHERE d.valor = :numeroDocumento AND UPPER(td.nombre) LIKE :tipoDocumento AND td.activo = true AND r.activo = true AND c.activo = true"),
+    @NamedQuery(name = "PersonaRol.findByClinicaRolNombre", query = "SELECT DISTINCT pr FROM PersonaRol pr JOIN FETCH pr.idPersona p LEFT JOIN FETCH p.documentoList WHERE pr.idClinica.idClinica = :idClinica AND pr.idRol.idRol = :idRol AND UPPER(CONCAT(CONCAT(p.nombres, ' '), p.apellidos)) LIKE :filtro ORDER BY p.apellidos, p.nombres"),
+    @NamedQuery(name = "PersonaRol.findByClinicaPersonaNombre", query = "SELECT DISTINCT pr FROM PersonaRol pr JOIN FETCH pr.idPersona p LEFT JOIN FETCH p.documentoList WHERE pr.idClinica.idClinica = :idClinica AND UPPER(CONCAT(CONCAT(p.nombres, ' '), p.apellidos)) LIKE :filtro ORDER BY p.apellidos, p.nombres")})
 public class PersonaRol implements Serializable {
 
     private static final long serialVersionUID = 1L;

@@ -23,10 +23,12 @@ import java.util.UUID;
 @Table(name = "persona", catalog = "odontologia_sv", schema = "public")
 @NamedQueries({
     @NamedQuery(name = "Persona.findAll", query = "SELECT p FROM Persona p"),
-    @NamedQuery(name = "Persona.findByNombres", query = "SELECT p FROM Persona p WHERE p.nombres = :nombres"),
-    @NamedQuery(name = "Persona.findByApellidos", query = "SELECT p FROM Persona p WHERE p.apellidos = :apellidos"),
+    @NamedQuery(name = "Persona.findByNombres", query = "SELECT p FROM Persona p WHERE UPPER(p.nombres) LIKE :nombres"),
+    @NamedQuery(name = "Persona.findByApellidos", query = "SELECT p FROM Persona p WHERE UPPER(p.apellidos) LIKE :apellidos"),
     @NamedQuery(name = "Persona.findByFechaNacimiento", query = "SELECT p FROM Persona p WHERE p.fechaNacimiento = :fechaNacimiento"),
-    @NamedQuery(name = "Persona.findByFechaCreacion", query = "SELECT p FROM Persona p WHERE p.fechaCreacion = :fechaCreacion")})
+    @NamedQuery(name = "Persona.findByFechaCreacion", query = "SELECT p FROM Persona p WHERE p.fechaCreacion = :fechaCreacion"),
+    @NamedQuery(name = "Persona.findByDocumento", query = "SELECT DISTINCT p FROM Persona p JOIN p.documentoList d WHERE d.valor = :valor"),
+    @NamedQuery(name = "Persona.findByNombreCompleto", query = "SELECT p FROM Persona p WHERE UPPER(CONCAT(CONCAT(p.nombres, ' '), p.apellidos)) LIKE :filtro ORDER BY p.apellidos, p.nombres")})
 public class Persona implements Serializable {
 
     private static final long serialVersionUID = 1L;

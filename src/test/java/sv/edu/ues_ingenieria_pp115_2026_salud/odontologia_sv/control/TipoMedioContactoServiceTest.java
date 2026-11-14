@@ -132,14 +132,14 @@ public class TipoMedioContactoServiceTest {
         TipoMedioContacto resultado = dao.buscarPorExpresionRegular(null);
 
         assertThat(resultado).isNull();
-        verify(em, never()).createQuery(anyString(), any(Class.class));
+        verify(em, never()).createNamedQuery(anyString(), any(Class.class));
     }
 
     @Test
     public void testBuscarPorExpresionRegularConValorValido() {
         List<TipoMedioContacto> esperado = List.of(tipoTelefono);
 
-        when(em.createQuery(anyString(), any(Class.class))).thenReturn(typedQuery);
+        when(em.createNamedQuery(anyString(), any(Class.class))).thenReturn(typedQuery);
         when(typedQuery.getResultList()).thenReturn(esperado);
 
         TipoMedioContacto resultado = dao.buscarPorExpresionRegular("^[67]\\d{3}-\\d{4}$");
@@ -151,7 +151,7 @@ public class TipoMedioContactoServiceTest {
 
     @Test
     public void testBuscarPorExpresionRegularSinResultadosDevuelveNull() {
-        when(em.createQuery(anyString(), any(Class.class))).thenReturn(typedQuery);
+        when(em.createNamedQuery(anyString(), any(Class.class))).thenReturn(typedQuery);
         when(typedQuery.getResultList()).thenReturn(List.of());
 
         TipoMedioContacto resultado = dao.buscarPorExpresionRegular("inexistente");
@@ -161,7 +161,7 @@ public class TipoMedioContactoServiceTest {
 
     @Test
     public void testBuscarPorExpresionRegularConExcepcionDevuelveNull() {
-        when(em.createQuery(anyString(), any(Class.class)))
+        when(em.createNamedQuery(anyString(), any(Class.class)))
                 .thenThrow(new RuntimeException("Error simulado"));
 
         TipoMedioContacto resultado = dao.buscarPorExpresionRegular("^.*$");

@@ -50,13 +50,13 @@ public class PersonaRolServiceTest {
     public void testBuscarPorPersonaConNullDevuelveListaVacia() {
         List<PersonaRol> resultado = dao.buscarPorPersona(null);
         assertThat(resultado).isEmpty();
-        verify(em, never()).createQuery(anyString(), eq(PersonaRol.class));
+        verify(em, never()).createNamedQuery(anyString(), eq(PersonaRol.class));
     }
 
     @Test
     @DisplayName("buscarPorPersona(id) consulta con parámetro")
     public void testBuscarPorPersonaConIdValido() {
-        when(em.createQuery(anyString(), eq(PersonaRol.class))).thenReturn(typedQuery);
+        when(em.createNamedQuery(anyString(), eq(PersonaRol.class))).thenReturn(typedQuery);
         when(typedQuery.getResultList()).thenReturn(List.of(pr));
 
         List<PersonaRol> resultado = dao.buscarPorPersona(idPersona);
@@ -67,7 +67,7 @@ public class PersonaRolServiceTest {
 
     @Test
     public void testBuscarPorPersonaConExcepcionDevuelveListaVacia() {
-        when(em.createQuery(anyString(), eq(PersonaRol.class)))
+        when(em.createNamedQuery(anyString(), eq(PersonaRol.class)))
                 .thenThrow(new RuntimeException("Error simulado"));
         assertThat(dao.buscarPorPersona(idPersona)).isEmpty();
     }
@@ -77,12 +77,12 @@ public class PersonaRolServiceTest {
     public void testBuscarPorRolConNullDevuelveListaVacia() {
         List<PersonaRol> resultado = dao.buscarPorRol(null);
         assertThat(resultado).isEmpty();
-        verify(em, never()).createQuery(anyString(), eq(PersonaRol.class));
+        verify(em, never()).createNamedQuery(anyString(), eq(PersonaRol.class));
     }
 
     @Test
     public void testBuscarPorRolConIdValido() {
-        when(em.createQuery(anyString(), eq(PersonaRol.class))).thenReturn(typedQuery);
+        when(em.createNamedQuery(anyString(), eq(PersonaRol.class))).thenReturn(typedQuery);
         when(typedQuery.getResultList()).thenReturn(List.of(pr));
 
         List<PersonaRol> resultado = dao.buscarPorRol(idRol);
@@ -93,7 +93,7 @@ public class PersonaRolServiceTest {
 
     @Test
     public void testBuscarPorRolConExcepcionDevuelveListaVacia() {
-        when(em.createQuery(anyString(), eq(PersonaRol.class)))
+        when(em.createNamedQuery(anyString(), eq(PersonaRol.class)))
                 .thenThrow(new RuntimeException("Error simulado"));
         assertThat(dao.buscarPorRol(idRol)).isEmpty();
     }
@@ -102,12 +102,12 @@ public class PersonaRolServiceTest {
     public void testBuscarPorClinicaConNullDevuelveListaVacia() {
         List<PersonaRol> resultado = dao.buscarPorClinica(null);
         assertThat(resultado).isEmpty();
-        verify(em, never()).createQuery(anyString(), eq(PersonaRol.class));
+        verify(em, never()).createNamedQuery(anyString(), eq(PersonaRol.class));
     }
 
     @Test
     public void testBuscarPorClinicaConIdValido() {
-        when(em.createQuery(anyString(), eq(PersonaRol.class))).thenReturn(typedQuery);
+        when(em.createNamedQuery(anyString(), eq(PersonaRol.class))).thenReturn(typedQuery);
         when(typedQuery.getResultList()).thenReturn(List.of(pr));
 
         List<PersonaRol> resultado = dao.buscarPorClinica(idClinica);
@@ -118,7 +118,7 @@ public class PersonaRolServiceTest {
 
     @Test
     public void testBuscarPorClinicaConExcepcionDevuelveListaVacia() {
-        when(em.createQuery(anyString(), eq(PersonaRol.class)))
+        when(em.createNamedQuery(anyString(), eq(PersonaRol.class)))
                 .thenThrow(new RuntimeException("Error simulado"));
         assertThat(dao.buscarPorClinica(idClinica)).isEmpty();
     }
@@ -127,12 +127,12 @@ public class PersonaRolServiceTest {
     public void testBuscarPorPersonaYRolConNullDevuelveNull() {
         PersonaRol resultado = dao.buscarPorPersonaYRol(null, idRol);
         assertThat(resultado).isNull();
-        verify(em, never()).createQuery(anyString(), eq(PersonaRol.class));
+        verify(em, never()).createNamedQuery(anyString(), eq(PersonaRol.class));
     }
 
     @Test
     public void testBuscarPorPersonaYRolConValoresValidos() {
-        when(em.createQuery(anyString(), eq(PersonaRol.class))).thenReturn(typedQuery);
+        when(em.createNamedQuery(anyString(), eq(PersonaRol.class))).thenReturn(typedQuery);
         when(typedQuery.getResultList()).thenReturn(List.of(pr));
 
         PersonaRol resultado = dao.buscarPorPersonaYRol(idPersona, idRol);
@@ -144,7 +144,7 @@ public class PersonaRolServiceTest {
 
     @Test
     public void testBuscarPorPersonaYRolSinResultadosDevuelveNull() {
-        when(em.createQuery(anyString(), eq(PersonaRol.class))).thenReturn(typedQuery);
+        when(em.createNamedQuery(anyString(), eq(PersonaRol.class))).thenReturn(typedQuery);
         when(typedQuery.getResultList()).thenReturn(List.of());
 
         PersonaRol resultado = dao.buscarPorPersonaYRol(idPersona, idRol);
@@ -153,8 +153,27 @@ public class PersonaRolServiceTest {
 
     @Test
     public void testBuscarPorPersonaYRolConExcepcionDevuelveNull() {
-        when(em.createQuery(anyString(), eq(PersonaRol.class)))
+        when(em.createNamedQuery(anyString(), eq(PersonaRol.class)))
                 .thenThrow(new RuntimeException("Error simulado"));
         assertThat(dao.buscarPorPersonaYRol(idPersona, idRol)).isNull();
+    }
+
+    @Test
+    public void testBuscarAsignacionesActivasPorDocumentoNormalizaFiltros() {
+        when(em.createNamedQuery("PersonaRol.findActiveByDocumento", PersonaRol.class))
+                .thenReturn(typedQuery);
+        when(typedQuery.getResultList()).thenReturn(List.of(pr));
+
+        List<PersonaRol> resultado = dao.buscarAsignacionesActivasPorDocumento(" DUI ", " 01234567-8 ");
+
+        assertThat(resultado).containsExactly(pr);
+        verify(typedQuery).setParameter("tipoDocumento", "%DUI%");
+        verify(typedQuery).setParameter("numeroDocumento", "01234567-8");
+    }
+
+    @Test
+    public void testBuscarAsignacionesActivasPorDocumentoRechazaFiltrosVacios() {
+        assertThat(dao.buscarAsignacionesActivasPorDocumento("DUI", " ")).isEmpty();
+        verify(em, never()).createNamedQuery(anyString(), eq(PersonaRol.class));
     }
 }

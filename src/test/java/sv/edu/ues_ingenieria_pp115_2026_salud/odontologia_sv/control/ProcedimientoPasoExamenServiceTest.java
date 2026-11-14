@@ -49,13 +49,13 @@ public class ProcedimientoPasoExamenServiceTest {
     public void testBuscarPorPasoConNullDevuelveListaVacia() {
         List<ProcedimientoPasoExamen> resultado = dao.buscarPorPaso(null);
         assertThat(resultado).isEmpty();
-        verify(em, never()).createQuery(anyString(), eq(ProcedimientoPasoExamen.class));
+        verify(em, never()).createNamedQuery(anyString(), eq(ProcedimientoPasoExamen.class));
     }
 
     @Test
     public void testBuscarPorPasoConIdValido() {
         List<ProcedimientoPasoExamen> esperado = List.of(ppe);
-        when(em.createQuery(anyString(), eq(ProcedimientoPasoExamen.class))).thenReturn(typedQuery);
+        when(em.createNamedQuery(anyString(), eq(ProcedimientoPasoExamen.class))).thenReturn(typedQuery);
         when(typedQuery.getResultList()).thenReturn(esperado);
 
         List<ProcedimientoPasoExamen> resultado = dao.buscarPorPaso(idPaso);
@@ -66,7 +66,7 @@ public class ProcedimientoPasoExamenServiceTest {
 
     @Test
     public void testBuscarPorPasoConExcepcionDevuelveListaVacia() {
-        when(em.createQuery(anyString(), eq(ProcedimientoPasoExamen.class)))
+        when(em.createNamedQuery(anyString(), eq(ProcedimientoPasoExamen.class)))
                 .thenThrow(new RuntimeException("Error simulado"));
         List<ProcedimientoPasoExamen> resultado = dao.buscarPorPaso(idPaso);
         assertThat(resultado).isEmpty();
@@ -76,13 +76,13 @@ public class ProcedimientoPasoExamenServiceTest {
     public void testBuscarPorExamenConNullDevuelveListaVacia() {
         List<ProcedimientoPasoExamen> resultado = dao.buscarPorExamen(null);
         assertThat(resultado).isEmpty();
-        verify(em, never()).createQuery(anyString(), eq(ProcedimientoPasoExamen.class));
+        verify(em, never()).createNamedQuery(anyString(), eq(ProcedimientoPasoExamen.class));
     }
 
     @Test
     public void testBuscarPorExamenConIdValido() {
         List<ProcedimientoPasoExamen> esperado = List.of(ppe);
-        when(em.createQuery(anyString(), eq(ProcedimientoPasoExamen.class))).thenReturn(typedQuery);
+        when(em.createNamedQuery(anyString(), eq(ProcedimientoPasoExamen.class))).thenReturn(typedQuery);
         when(typedQuery.getResultList()).thenReturn(esperado);
 
         List<ProcedimientoPasoExamen> resultado = dao.buscarPorExamen(idExamen);
@@ -93,7 +93,7 @@ public class ProcedimientoPasoExamenServiceTest {
 
     @Test
     public void testBuscarPorExamenConExcepcionDevuelveListaVacia() {
-        when(em.createQuery(anyString(), eq(ProcedimientoPasoExamen.class)))
+        when(em.createNamedQuery(anyString(), eq(ProcedimientoPasoExamen.class)))
                 .thenThrow(new RuntimeException("Error simulado"));
         List<ProcedimientoPasoExamen> resultado = dao.buscarPorExamen(idExamen);
         assertThat(resultado).isEmpty();

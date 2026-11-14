@@ -48,13 +48,13 @@ public class ProcedimientoPasoSecuenciaServiceTest {
     public void testBuscarPorPasoConNullDevuelveListaVacia() {
         List<ProcedimientoPasoSecuencia> resultado = dao.buscarPorPaso(null);
         assertThat(resultado).isEmpty();
-        verify(em, never()).createQuery(anyString(), eq(ProcedimientoPasoSecuencia.class));
+        verify(em, never()).createNamedQuery(anyString(), eq(ProcedimientoPasoSecuencia.class));
     }
 
     @Test
     public void testBuscarPorPasoConIdValido() {
         List<ProcedimientoPasoSecuencia> esperado = List.of(secuencia);
-        when(em.createQuery(anyString(), eq(ProcedimientoPasoSecuencia.class))).thenReturn(typedQuery);
+        when(em.createNamedQuery(anyString(), eq(ProcedimientoPasoSecuencia.class))).thenReturn(typedQuery);
         when(typedQuery.getResultList()).thenReturn(esperado);
 
         List<ProcedimientoPasoSecuencia> resultado = dao.buscarPorPaso(idPaso);
@@ -65,7 +65,7 @@ public class ProcedimientoPasoSecuenciaServiceTest {
 
     @Test
     public void testBuscarPorPasoConExcepcionDevuelveListaVacia() {
-        when(em.createQuery(anyString(), eq(ProcedimientoPasoSecuencia.class)))
+        when(em.createNamedQuery(anyString(), eq(ProcedimientoPasoSecuencia.class)))
                 .thenThrow(new RuntimeException("Error simulado"));
         List<ProcedimientoPasoSecuencia> resultado = dao.buscarPorPaso(idPaso);
         assertThat(resultado).isEmpty();
@@ -75,13 +75,13 @@ public class ProcedimientoPasoSecuenciaServiceTest {
     public void testBuscarSiguientePasoConNullDevuelveNull() {
         ProcedimientoPasoSecuencia resultado = dao.buscarSiguientePaso(null);
         assertThat(resultado).isNull();
-        verify(em, never()).createQuery(anyString(), eq(ProcedimientoPasoSecuencia.class));
+        verify(em, never()).createNamedQuery(anyString(), eq(ProcedimientoPasoSecuencia.class));
     }
 
     @Test
     public void testBuscarSiguientePasoConIdValido() {
         List<ProcedimientoPasoSecuencia> esperado = List.of(secuencia);
-        when(em.createQuery(anyString(), eq(ProcedimientoPasoSecuencia.class))).thenReturn(typedQuery);
+        when(em.createNamedQuery(anyString(), eq(ProcedimientoPasoSecuencia.class))).thenReturn(typedQuery);
         when(typedQuery.getResultList()).thenReturn(esperado);
 
         ProcedimientoPasoSecuencia resultado = dao.buscarSiguientePaso(idPaso);
@@ -92,7 +92,7 @@ public class ProcedimientoPasoSecuenciaServiceTest {
 
     @Test
     public void testBuscarSiguientePasoSinResultadosDevuelveNull() {
-        when(em.createQuery(anyString(), eq(ProcedimientoPasoSecuencia.class))).thenReturn(typedQuery);
+        when(em.createNamedQuery(anyString(), eq(ProcedimientoPasoSecuencia.class))).thenReturn(typedQuery);
         when(typedQuery.getResultList()).thenReturn(List.of());
 
         ProcedimientoPasoSecuencia resultado = dao.buscarSiguientePaso(idPaso);
@@ -101,7 +101,7 @@ public class ProcedimientoPasoSecuenciaServiceTest {
 
     @Test
     public void testBuscarSiguientePasoConExcepcionDevuelveNull() {
-        when(em.createQuery(anyString(), eq(ProcedimientoPasoSecuencia.class)))
+        when(em.createNamedQuery(anyString(), eq(ProcedimientoPasoSecuencia.class)))
                 .thenThrow(new RuntimeException("Error simulado"));
         ProcedimientoPasoSecuencia resultado = dao.buscarSiguientePaso(idPaso);
         assertThat(resultado).isNull();

@@ -29,10 +29,7 @@ public class ProcedimientoPasoService extends DefaultService<ProcedimientoPaso>{
     public List<ProcedimientoPaso> buscarPorProcedimiento(UUID idProcedimiento) {
         try {
             if (idProcedimiento != null) {
-                String jpql = "SELECT pp FROM ProcedimientoPaso pp " +
-                              "WHERE pp.idProcedimiento.idProcedimiento = :idProcedimiento " +
-                              "ORDER BY pp.idProcedimientoPaso ASC";
-                TypedQuery<ProcedimientoPaso> query = em.createQuery(jpql, ProcedimientoPaso.class);
+                TypedQuery<ProcedimientoPaso> query = em.createNamedQuery("ProcedimientoPaso.findByProcedimiento", ProcedimientoPaso.class);
                 query.setParameter("idProcedimiento", idProcedimiento);
                 return query.getResultList();
             }
@@ -58,8 +55,7 @@ public class ProcedimientoPasoService extends DefaultService<ProcedimientoPaso>{
     
      public List<ProcedimientoPaso> buscarPasosFinales() {
         try {
-            String jpql = "SELECT pp FROM ProcedimientoPaso pp WHERE pp.indicaFin = true";
-            TypedQuery<ProcedimientoPaso> query = em.createQuery(jpql, ProcedimientoPaso.class);
+            TypedQuery<ProcedimientoPaso> query = em.createNamedQuery("ProcedimientoPaso.findFinales", ProcedimientoPaso.class);
             return query.getResultList();
         } catch (Exception ex) {
             Logger.getLogger(ProcedimientoPasoService.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
@@ -70,8 +66,7 @@ public class ProcedimientoPasoService extends DefaultService<ProcedimientoPaso>{
      public List<ProcedimientoPaso> buscarPorRol(UUID idRol) {
         try {
             if (idRol != null) {
-                String jpql = "SELECT pp FROM ProcedimientoPaso pp WHERE pp.idRol.idRol = :idRol";
-                TypedQuery<ProcedimientoPaso> query = em.createQuery(jpql, ProcedimientoPaso.class);
+                TypedQuery<ProcedimientoPaso> query = em.createNamedQuery("ProcedimientoPaso.findByRol", ProcedimientoPaso.class);
                 query.setParameter("idRol", idRol);
                 return query.getResultList();
             }

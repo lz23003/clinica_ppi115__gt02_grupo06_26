@@ -48,12 +48,12 @@ public class DocumentoServiceTest {
     public void testBuscarPorPersonaConNullDevuelveListaVacia() {
         List<Documento> resultado = dao.buscarPorPersona(null);
         assertThat(resultado).isEmpty();
-        verify(em, never()).createQuery(anyString(), eq(Documento.class));
+        verify(em, never()).createNamedQuery(anyString(), eq(Documento.class));
     }
 
     @Test
     public void testBuscarPorPersonaConIdValido() {
-        when(em.createQuery(anyString(), eq(Documento.class))).thenReturn(typedQuery);
+        when(em.createNamedQuery(anyString(), eq(Documento.class))).thenReturn(typedQuery);
         when(typedQuery.getResultList()).thenReturn(List.of(doc));
 
         List<Documento> resultado = dao.buscarPorPersona(idPersona);
@@ -64,7 +64,7 @@ public class DocumentoServiceTest {
 
     @Test
     public void testBuscarPorPersonaConExcepcionDevuelveListaVacia() {
-        when(em.createQuery(anyString(), eq(Documento.class)))
+        when(em.createNamedQuery(anyString(), eq(Documento.class)))
                 .thenThrow(new RuntimeException("Error simulado"));
         assertThat(dao.buscarPorPersona(idPersona)).isEmpty();
     }
@@ -73,12 +73,12 @@ public class DocumentoServiceTest {
     public void testBuscarPorTipoDocumentoConNullDevuelveListaVacia() {
         List<Documento> resultado = dao.buscarPorTipoDocumento(null);
         assertThat(resultado).isEmpty();
-        verify(em, never()).createQuery(anyString(), eq(Documento.class));
+        verify(em, never()).createNamedQuery(anyString(), eq(Documento.class));
     }
 
     @Test
     public void testBuscarPorTipoDocumentoConIdValido() {
-        when(em.createQuery(anyString(), eq(Documento.class))).thenReturn(typedQuery);
+        when(em.createNamedQuery(anyString(), eq(Documento.class))).thenReturn(typedQuery);
         when(typedQuery.getResultList()).thenReturn(List.of(doc));
 
         List<Documento> resultado = dao.buscarPorTipoDocumento(idTipoDoc);
@@ -89,7 +89,7 @@ public class DocumentoServiceTest {
 
     @Test
     public void testBuscarPorTipoDocumentoConExcepcionDevuelveListaVacia() {
-        when(em.createQuery(anyString(), eq(Documento.class)))
+        when(em.createNamedQuery(anyString(), eq(Documento.class)))
                 .thenThrow(new RuntimeException("Error simulado"));
         assertThat(dao.buscarPorTipoDocumento(idTipoDoc)).isEmpty();
     }
@@ -98,12 +98,12 @@ public class DocumentoServiceTest {
     public void testBuscarPorValorConNullDevuelveNull() {
         Documento resultado = dao.buscarPorValor(null);
         assertThat(resultado).isNull();
-        verify(em, never()).createQuery(anyString(), eq(Documento.class));
+        verify(em, never()).createNamedQuery(anyString(), eq(Documento.class));
     }
 
     @Test
     public void testBuscarPorValorConValorValido() {
-        when(em.createQuery(anyString(), eq(Documento.class))).thenReturn(typedQuery);
+        when(em.createNamedQuery(anyString(), eq(Documento.class))).thenReturn(typedQuery);
         when(typedQuery.getResultList()).thenReturn(List.of(doc));
 
         Documento resultado = dao.buscarPorValor("01234567-8");
@@ -114,7 +114,7 @@ public class DocumentoServiceTest {
 
     @Test
     public void testBuscarPorValorSinResultadosDevuelveNull() {
-        when(em.createQuery(anyString(), eq(Documento.class))).thenReturn(typedQuery);
+        when(em.createNamedQuery(anyString(), eq(Documento.class))).thenReturn(typedQuery);
         when(typedQuery.getResultList()).thenReturn(List.of());
 
         Documento resultado = dao.buscarPorValor("inexistente");
@@ -123,7 +123,7 @@ public class DocumentoServiceTest {
 
     @Test
     public void testBuscarPorValorConExcepcionDevuelveNull() {
-        when(em.createQuery(anyString(), eq(Documento.class)))
+        when(em.createNamedQuery(anyString(), eq(Documento.class)))
                 .thenThrow(new RuntimeException("Error simulado"));
         assertThat(dao.buscarPorValor("x")).isNull();
     }
@@ -132,12 +132,12 @@ public class DocumentoServiceTest {
     public void testBuscarPorPersonaYTipoConNullDevuelveListaVacia() {
         List<Documento> resultado = dao.buscarPorPersonaYTipo(null, idTipoDoc);
         assertThat(resultado).isEmpty();
-        verify(em, never()).createQuery(anyString(), eq(Documento.class));
+        verify(em, never()).createNamedQuery(anyString(), eq(Documento.class));
     }
 
     @Test
     public void testBuscarPorPersonaYTipoConValoresValidos() {
-        when(em.createQuery(anyString(), eq(Documento.class))).thenReturn(typedQuery);
+        when(em.createNamedQuery(anyString(), eq(Documento.class))).thenReturn(typedQuery);
         when(typedQuery.getResultList()).thenReturn(List.of(doc));
 
         List<Documento> resultado = dao.buscarPorPersonaYTipo(idPersona, idTipoDoc);
@@ -149,7 +149,7 @@ public class DocumentoServiceTest {
 
     @Test
     public void testBuscarPorPersonaYTipoConExcepcionDevuelveListaVacia() {
-        when(em.createQuery(anyString(), eq(Documento.class)))
+        when(em.createNamedQuery(anyString(), eq(Documento.class)))
                 .thenThrow(new RuntimeException("Error simulado"));
         assertThat(dao.buscarPorPersonaYTipo(idPersona, idTipoDoc)).isEmpty();
     }

@@ -53,8 +53,7 @@ public class TipoMedioContactoService extends DefaultService<TipoMedioContacto> 
     public TipoMedioContacto buscarPorExpresionRegular(String expresionRegular) {
         try {
             if (expresionRegular != null) {
-                String jpql = "SELECT tmc FROM TipoMedioContacto tmc WHERE tmc.expresionRegular = :expresionRegular";
-                TypedQuery<TipoMedioContacto> query = em.createQuery(jpql, TipoMedioContacto.class);
+                TypedQuery<TipoMedioContacto> query = em.createNamedQuery("TipoMedioContacto.findByExpresionRegular", TipoMedioContacto.class);
                 query.setParameter("expresionRegular", expresionRegular);
 
                 List<TipoMedioContacto> resultados = query.getResultList();
@@ -68,12 +67,8 @@ public class TipoMedioContactoService extends DefaultService<TipoMedioContacto> 
     
     public List<TipoMedioContacto> findByNombreLikeActivo(final String query, int first, int max) {
     try {
-        if (query != null  && first >= 0 && max > 0) {
-            String jpql = "SELECT tmc FROM TipoMedioContacto tmc "
-                    + "WHERE tmc.activo = true "
-                    + "AND UPPER(tmc.nombre) LIKE :filtro "
-                    + "ORDER BY tmc.nombre ASC";
-            TypedQuery<TipoMedioContacto> q = em.createQuery(jpql, TipoMedioContacto.class);
+        if (query != null && query.trim().length() >= 3 && first >= 0 && max > 0) {
+            TypedQuery<TipoMedioContacto> q = em.createNamedQuery("TipoMedioContacto.findByNombreLikeActivo", TipoMedioContacto.class);
             q.setParameter("filtro", "%" + query.trim().toUpperCase() + "%");
             q.setFirstResult(first);
             q.setMaxResults(max);
@@ -81,6 +76,7 @@ public class TipoMedioContactoService extends DefaultService<TipoMedioContacto> 
         }
     } catch (Exception ex) {
         Logger.getLogger(TipoMedioContactoService.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+        throw new IllegalStateException("No se pudieron buscar tipos de medio de contacto", ex);
     }
     return List.of();
 }

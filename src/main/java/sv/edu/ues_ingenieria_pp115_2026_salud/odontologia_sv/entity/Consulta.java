@@ -28,7 +28,12 @@ import java.util.UUID;
     @NamedQuery(name = "Consulta.findByFechaInicio", query = "SELECT c FROM Consulta c WHERE c.fechaInicio = :fechaInicio"),
     @NamedQuery(name = "Consulta.findByFechaFin", query = "SELECT c FROM Consulta c WHERE c.fechaFin = :fechaFin"),
     @NamedQuery(name = "Consulta.findByReferenciaExterna", query = "SELECT c FROM Consulta c WHERE c.referenciaExterna = :referenciaExterna"),
-    @NamedQuery(name = "Consulta.findByObservaciones", query = "SELECT c FROM Consulta c WHERE c.observaciones = :observaciones")})
+    @NamedQuery(name = "Consulta.findByObservaciones", query = "SELECT c FROM Consulta c WHERE c.observaciones = :observaciones"),
+    @NamedQuery(name = "Consulta.findActivas", query = "SELECT c FROM Consulta c WHERE c.fechaFin IS NULL ORDER BY c.fechaInicio ASC"),
+    @NamedQuery(name = "Consulta.findCitasPublicas", query = "SELECT DISTINCT c FROM Consulta c JOIN FETCH c.idPersonaRol pr JOIN FETCH pr.idClinica cli JOIN pr.idPersona p JOIN p.documentoList d JOIN d.idTipoDocumento td WHERE d.valor = :numeroDocumento AND UPPER(td.nombre) LIKE :tipoDocumento AND cli.idClinica = :idClinica AND c.fechaInicio >= :desde AND c.fechaInicio < :hasta ORDER BY c.fechaInicio ASC"),
+    @NamedQuery(name = "Consulta.findByPaciente", query = "SELECT c FROM Consulta c JOIN c.idPersonaRol pr JOIN pr.idPersona p WHERE p.idPersona = :idPaciente ORDER BY c.fechaInicio DESC"),
+    @NamedQuery(name = "Consulta.findByRangoFechas", query = "SELECT c FROM Consulta c WHERE c.fechaInicio BETWEEN :inicio AND :fin ORDER BY c.fechaInicio ASC"),
+    @NamedQuery(name = "Consulta.findByPersonaRol", query = "SELECT c FROM Consulta c WHERE c.idPersonaRol.idPersonaRol = :idPersonaRol ORDER BY c.fechaInicio DESC")})
 public class Consulta implements Serializable {
 
     private static final long serialVersionUID = 1L;

@@ -56,10 +56,6 @@ public class ConsultaModel extends DefaultModel<Consulta> implements Serializabl
     @Inject
     private ConsultaProcedimientoPasoService consultaProcedimientoPasoService;
 
-    private List<PersonaRol> listaPersonaRoles;
-    private List<Clinica> listaClinicas;
-    private List<Procedimiento> listaProcedimientos;
-
     private Date fechaFiltroInicio;
     private Date fechaFiltroFin;
     private Clinica clinicaFiltro;
@@ -69,20 +65,18 @@ public class ConsultaModel extends DefaultModel<Consulta> implements Serializabl
     private Clinica clinicaTrabajo;
 
     private ConsultaProcedimiento nuevoConsultaProcedimiento;
+    private Procedimiento procedimientoParaAsignar;
     private List<Consulta> modeloList;
     private List<ConsultaProcedimiento> procedimientosDeConsulta;
 
     @PostConstruct
     public void inicializar() {
-        listaClinicas = clinicaService.findRange(0, 100);
-        listaProcedimientos = procedimientoService.listarActivos();
-
-        if (listaClinicas != null && !listaClinicas.isEmpty()) {
-            String nombreClinicaSesion = sesionUsuario.getClinicaUsuario();
-            clinicaTrabajo = listaClinicas.stream()
+        String nombreClinicaSesion = sesionUsuario.getClinicaUsuario();
+        if (nombreClinicaSesion != null && nombreClinicaSesion.trim().length() >= 3) {
+            clinicaTrabajo = clinicaService.findByNombreLikeActiva(nombreClinicaSesion, 0, 10).stream()
                     .filter(c -> c.getNombre() != null && c.getNombre().equalsIgnoreCase(nombreClinicaSesion))
                     .findFirst()
-                    .orElse(listaClinicas.get(0));
+                    .orElse(null);
             clinicaFiltro = clinicaTrabajo;
         }
 
@@ -97,16 +91,18 @@ public class ConsultaModel extends DefaultModel<Consulta> implements Serializabl
         cal.set(java.util.Calendar.SECOND, 59);
         fechaFiltroFin = cal.getTime();
 
-        cargarPersonasDeClinica();
         filtrarConsultas();
     }
 
-    public void cargarPersonasDeClinica() {
-        if (clinicaTrabajo != null) {
-            listaPersonaRoles = personaRolService.buscarPorClinica(clinicaTrabajo.getIdClinica());
-        } else {
-            listaPersonaRoles = personaRolService.findRange(0, 1000);
+    public List<PersonaRol> completarPersonaRol(String query) {
+        if (clinicaTrabajo == null) {
+            return List.of();
         }
+        return personaRolService.buscarPorClinicaYNombre(clinicaTrabajo.getIdClinica(), query, 0, 10);
+    }
+
+    public List<Procedimiento> completarProcedimiento(String query) {
+        return procedimientoService.buscarActivosPorNombre(query, 0, 10);
     }
 
     public void filtrarConsultas() {
@@ -149,12 +145,16 @@ public class ConsultaModel extends DefaultModel<Consulta> implements Serializabl
         nuevoConsultaProcedimiento = new ConsultaProcedimiento();
         nuevoConsultaProcedimiento.setIdConsultaProcedimiento(UUID.randomUUID());
         nuevoConsultaProcedimiento.setFechaInicio(new Date());
+        procedimientoParaAsignar = null;
         if (registro != null) {
             nuevoConsultaProcedimiento.setIdConsulta(registro);
         }
     }
 
     public void guardarProcedimiento() {
+        if (nuevoConsultaProcedimiento != null && procedimientoParaAsignar != null) {
+            nuevoConsultaProcedimiento.setIdProcedimiento(procedimientoParaAsignar.getIdProcedimiento());
+        }
         if (nuevoConsultaProcedimiento != null && nuevoConsultaProcedimiento.getIdProcedimiento() != null) {
 
             ConsultaProcedimiento existente = consultaProcedimientoService.buscarPorId(nuevoConsultaProcedimiento.getIdConsultaProcedimiento());
@@ -211,11 +211,14 @@ public class ConsultaModel extends DefaultModel<Consulta> implements Serializabl
 
             nuevoConsultaProcedimiento = null;
             procedimientoSeleccionado = null;
+            procedimientoParaAsignar = null;
         }
     }
 
     public void prepararModificarProcedimiento(ConsultaProcedimiento cp) {
         this.nuevoConsultaProcedimiento = cp;
+        this.procedimientoParaAsignar = cp == null || cp.getIdProcedimiento() == null
+                ? null : procedimientoService.buscarPorId(cp.getIdProcedimiento());
     }
 
     public void eliminarProcedimiento(ConsultaProcedimiento cp) {
@@ -248,6 +251,7 @@ public class ConsultaModel extends DefaultModel<Consulta> implements Serializabl
 
     public void cancelarProcedimiento() {
         nuevoConsultaProcedimiento = null;
+        procedimientoParaAsignar = null;
     }
 
     public String obtenerEtiquetaPersona(PersonaRol pr) {
@@ -272,16 +276,14 @@ public class ConsultaModel extends DefaultModel<Consulta> implements Serializabl
         if (idProcedimiento == null) {
             return "";
         }
-        for (Procedimiento p : listaProcedimientos) {
-            if (p.getIdProcedimiento().equals(idProcedimiento)) {
-                return p.getNombre();
-            }
-        }
-        return getText("app.desconocido");
+        Procedimiento procedimiento = procedimientoService.buscarPorId(idProcedimiento);
+        return procedimiento == null ? getText("app.desconocido") : procedimiento.getNombre();
     }
 
     public void onProcedimientoSelect(SelectEvent<ConsultaProcedimiento> event) {
         this.nuevoConsultaProcedimiento = event.getObject();
+        this.procedimientoParaAsignar = event.getObject().getIdProcedimiento() == null
+                ? null : procedimientoService.buscarPorId(event.getObject().getIdProcedimiento());
     }
 
     @Override
@@ -324,10 +326,6 @@ public class ConsultaModel extends DefaultModel<Consulta> implements Serializabl
         return getText("entidad.consulta");
     }
 
-    public List<PersonaRol> getListaPersonaRoles() {
-        return listaPersonaRoles;
-    }
-
     public Date getFechaFiltroInicio() {
         return fechaFiltroInicio;
     }
@@ -360,12 +358,12 @@ public class ConsultaModel extends DefaultModel<Consulta> implements Serializabl
         this.criterioBusqueda = criterioBusqueda;
     }
 
-    public List<Clinica> getListaClinicas() {
-        return listaClinicas;
+    public Procedimiento getProcedimientoParaAsignar() {
+        return procedimientoParaAsignar;
     }
 
-    public List<Procedimiento> getListaProcedimientos() {
-        return listaProcedimientos;
+    public void setProcedimientoParaAsignar(Procedimiento procedimientoParaAsignar) {
+        this.procedimientoParaAsignar = procedimientoParaAsignar;
     }
 
     public ConsultaProcedimiento getNuevoConsultaProcedimiento() {

@@ -20,12 +20,12 @@ import java.util.UUID;
 @Table(name = "tipo_examen", catalog = "odontologia_sv", schema = "public")
 @NamedQueries({
     @NamedQuery(name = "TipoExamen.findAll", query = "SELECT t FROM TipoExamen t"),
-    @NamedQuery(name = "TipoExamen.findByNombre", query = "SELECT t FROM TipoExamen t WHERE t.nombre = :nombre"),
+    @NamedQuery(name = "TipoExamen.findByNombre", query = "SELECT t FROM TipoExamen t WHERE UPPER(t.nombre) LIKE :nombre"),
     @NamedQuery(name = "TipoExamen.findByActivo", query = "SELECT t FROM TipoExamen t WHERE t.activo = :activo"),
     @NamedQuery(name = "TipoExamen.findByObservaciones", query = "SELECT t FROM TipoExamen t WHERE t.observaciones = :observaciones"),
     @NamedQuery(name="TipoExamen.findByNombreLike", query="SELECT t FROM TipoExamen t WHERE UPPER(t.nombre) LIKE :nombre"),
     @NamedQuery(name = "TipoExamen.findByNombreLikeActivo",
-                query = "SELECT t FROM TipoExamen t  WHERE t.activo = true AND UPPER(t.nombre) LIKE :nombre ORDER BY t.nombre ASC")
+                query = "SELECT t FROM TipoExamen t WHERE t.activo = true AND UPPER(t.nombre) LIKE :filtro ORDER BY t.nombre ASC")
         
 })
 public class TipoExamen implements Serializable {

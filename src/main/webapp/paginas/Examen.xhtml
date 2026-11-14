@@ -131,7 +131,8 @@
                                                         itemLabel="#{te.nombre}"
                                                         itemValue="#{te}"
                                                         converter="entityConverter"
-                                                        dropdown="true"
+                                                        minQueryLength="3"
+                                                        queryDelay="300"
                                                         forceSelection="true"
                                                         disabled="#{examenModel.examenTipoExamenEstado == 'MODIFICAR'}"
                                                         required="true"/>

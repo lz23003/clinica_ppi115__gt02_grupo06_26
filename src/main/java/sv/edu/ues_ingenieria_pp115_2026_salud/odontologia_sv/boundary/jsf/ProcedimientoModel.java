@@ -55,20 +55,16 @@ public class ProcedimientoModel extends DefaultModel<Procedimiento> implements S
     private ESTADO_CRUD pasoEstado = ESTADO_CRUD.NADA;
     private List<ProcedimientoPaso> pasosAsignados = new ArrayList<>();
     private UUID idPasoDependencia;
-    private List<Rol> rolesDisponibles;
 
     private ProcedimientoPasoExamen examenRegistro;
     private ESTADO_CRUD examenEstado = ESTADO_CRUD.NADA;
     private List<ProcedimientoPasoExamen> examenesAsignados = new ArrayList<>();
-    private List<Examen> examenesDisponibles;
 
     private int activa = 0;
 
     @PostConstruct
     public void init() {
         super.inicializador();
-        rolesDisponibles = rolService.listarActivos();
-        examenesDisponibles = examenService.listarActivos();
     }
 
     public void onTabChange(TabChangeEvent event) {
@@ -481,8 +477,8 @@ public class ProcedimientoModel extends DefaultModel<Procedimiento> implements S
         this.idPasoDependencia = idPasoDependencia;
     }
 
-    public List<Rol> getRolesDisponibles() {
-        return rolesDisponibles;
+    public List<Rol> completarRol(String query) {
+        return rolService.findByNombreLikeActivo(query, 0, 10);
     }
 
     public ProcedimientoPasoExamen getExamenRegistro() {
@@ -501,7 +497,7 @@ public class ProcedimientoModel extends DefaultModel<Procedimiento> implements S
         return examenesAsignados;
     }
 
-    public List<Examen> getExamenesDisponibles() {
-        return examenesDisponibles;
+    public List<Examen> completarExamen(String query) {
+        return examenService.buscarActivosPorNombre(query, 0, 10);
     }
 }
