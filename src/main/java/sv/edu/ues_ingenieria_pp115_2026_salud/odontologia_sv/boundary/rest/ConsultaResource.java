@@ -14,6 +14,7 @@ import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.Consulta;
 
 import java.io.Serializable;
 import java.net.URI;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -379,6 +380,46 @@ public class ConsultaResource implements Serializable {
         } catch (Exception e) {
             e.printStackTrace();
             return Response.status(500).entity("Error al generar PDF: " + e.getMessage()).build();
+        }
+    }
+
+    @PUT
+    @Path("/{id}/guardar-notas")
+    public Response guardarNotas(@PathParam("id") UUID id,
+            @QueryParam("diagnostico") String diagnostico,
+            @QueryParam("plan") String plan) {
+        try {
+            Consulta c = consultaService.buscarPorId(id);
+            if (c == null) {
+                return Response.status(404).entity("Consulta no encontrada").build();
+            }
+
+            // Concatenamos las notas en el campo observaciones
+            String notas = "DIAGNÓSTICO: " + diagnostico + " | PLAN: " + plan;
+            c.setObservaciones(notas);
+
+            consultaService.modificar(c);
+            return Response.ok(c).build();
+        } catch (Exception e) {
+            return Response.status(500).entity("Error al guardar notas: " + e.getMessage()).build();
+        }
+    }
+
+    @PUT
+    @Path("/{id}/finalizar")
+    public Response finalizarConsulta(@PathParam("id") UUID id) {
+        try {
+            Consulta c = consultaService.buscarPorId(id);
+            if (c == null) {
+                return Response.status(404).entity("Consulta no encontrada").build();
+            }
+
+            c.setFechaFin(new Date()); // Marcamos la fecha de alta
+            consultaService.modificar(c);
+
+            return Response.ok(c).build();
+        } catch (Exception e) {
+            return Response.status(500).entity("Error al finalizar: " + e.getMessage()).build();
         }
     }
 }

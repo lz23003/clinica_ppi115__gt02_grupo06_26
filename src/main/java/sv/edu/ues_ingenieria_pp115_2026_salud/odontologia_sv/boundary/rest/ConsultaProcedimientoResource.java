@@ -182,4 +182,6 @@ public class ConsultaProcedimientoResource implements Serializable {
                     .build();
         }
     }
+    
+    
 }

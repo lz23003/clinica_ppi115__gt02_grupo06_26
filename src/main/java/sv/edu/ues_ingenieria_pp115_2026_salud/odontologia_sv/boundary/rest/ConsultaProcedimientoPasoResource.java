@@ -12,6 +12,8 @@ import java.net.URI;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.ConsultaProcedimiento;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.PersonaRol;
 import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.ProcedimientoPaso;
 
 @Stateless
@@ -98,7 +100,7 @@ public class ConsultaProcedimientoPasoResource implements Serializable {
         }
 
         try {
-           
+
             nuevo.setIdConsultaProcedimientoPaso(UUID.randomUUID());
 
             consultaProcedimientoPasoService.crear(nuevo);
@@ -140,7 +142,6 @@ public class ConsultaProcedimientoPasoResource implements Serializable {
                         .build();
             }
 
-            
             actual.setFechaInicio(modificado.getFechaInicio());
             actual.setFechaFin(modificado.getFechaFin());
             actual.setEstado(modificado.getEstado());
@@ -186,8 +187,8 @@ public class ConsultaProcedimientoPasoResource implements Serializable {
                     .build();
         }
     }
-    
-        @PUT
+
+    @PUT
     @Path("/{id}/estado")
     public Response cambiarEstado(@PathParam("id") UUID id, @QueryParam("nuevoEstado") String nuevoEstado) {
         try {
@@ -198,7 +199,7 @@ public class ConsultaProcedimientoPasoResource implements Serializable {
             }
 
             paso.setEstado(nuevoEstado.toUpperCase());
-            
+
             // Si es FINALIZADO, le ponemos la fecha de fin actual
             if ("FINALIZADO".equalsIgnoreCase(nuevoEstado)) {
                 paso.setFechaFin(new java.util.Date());
@@ -212,8 +213,8 @@ public class ConsultaProcedimientoPasoResource implements Serializable {
             return Response.status(500).entity("Error al actualizar estado: " + e.getMessage()).build();
         }
     }
-    
-        // 1. Endpoint para obtener los pasos de un procedimiento
+
+    // 1. Endpoint para obtener los pasos de un procedimiento
     @GET
     @Path("/procedimiento/{idProcedimiento}")
     public Response obtenerPasosDeProcedimiento(@PathParam("idProcedimiento") UUID idProcedimiento) {
@@ -235,7 +236,7 @@ public class ConsultaProcedimientoPasoResource implements Serializable {
         try {
             // Traemos los pasos del procedimiento
             List<ProcedimientoPaso> pasos = consultaProcedimientoPasoService.obtenerPasosDeProcedimiento(idProcedimiento);
-            
+
             if (pasos.isEmpty()) {
                 return Response.status(400).entity("El procedimiento no tiene pasos definidos.").build();
             }
@@ -248,13 +249,75 @@ public class ConsultaProcedimientoPasoResource implements Serializable {
             nuevoPaso.setIdConsultaProcedimientoPaso(UUID.randomUUID());
             nuevoPaso.setFechaInicio(new Date());
             nuevoPaso.setEstado("PENDIENTE");
-            
-            
+
             return Response.ok(nuevoPaso).build();
         } catch (Exception e) {
             return Response.status(500).entity("Error al iniciar: " + e.getMessage()).build();
         }
     }
+
+ 
+
+    @GET
+    @Path("/consulta/{idConsultaProcedimiento}")
+    public Response buscarPorConsultaProcedimiento(@PathParam("idConsultaProcedimiento") UUID idConsultaProcedimiento) {
+        try {
+            List<ConsultaProcedimientoPaso> lista = consultaProcedimientoPasoService.buscarPorConsultaProcedimiento(idConsultaProcedimiento);
+            return Response.ok(lista).build();
+        } catch (Exception e) {
+            return Response.status(500).entity("Error: " + e.getMessage()).build();
+        }
+    }
     
+        @POST
+    @Path("/avanzar/{idConsultaProcedimiento}")
+    public Response avanzarSiguientePaso(
+            @PathParam("idConsultaProcedimiento") UUID idConsultaProcedimiento,
+            @QueryParam("idPasoActual") UUID idPasoActual,
+            @QueryParam("idSiguientePaso") UUID idSiguientePaso,
+            @QueryParam("idPersonaRol") UUID idPersonaRol) {
+        try {
+            // 1. Finalizar el paso actual (si existe)
+            if (idPasoActual != null) {
+                ConsultaProcedimientoPaso pasoActual = consultaProcedimientoPasoService.buscarPorId(idPasoActual);
+                if (pasoActual != null) {
+                    pasoActual.setEstado("FINALIZADO");
+                    pasoActual.setFechaFin(new java.util.Date());
+                    consultaProcedimientoPasoService.modificar(pasoActual);
+                }
+            }
+
+            // 2. Crear el nuevo paso en la Base de Datos
+            if (idSiguientePaso != null) {
+                ConsultaProcedimientoPaso nuevoPaso = new ConsultaProcedimientoPaso();
+                nuevoPaso.setIdConsultaProcedimientoPaso(UUID.randomUUID());
+                nuevoPaso.setFechaInicio(new java.util.Date());
+                nuevoPaso.setEstado("PENDIENTE");
+
+                ProcedimientoPaso pp = new ProcedimientoPaso();
+                pp.setIdProcedimientoPaso(idSiguientePaso);
+                nuevoPaso.setIdProcedimientoPaso(pp);
+
+                ConsultaProcedimiento cp = new ConsultaProcedimiento();
+                cp.setIdConsultaProcedimiento(idConsultaProcedimiento);
+                nuevoPaso.setIdConsultaProcedimiento(cp);
+
+                if (idPersonaRol != null) {
+                    PersonaRol pr = new PersonaRol();
+                    pr.setIdPersonaRol(idPersonaRol);
+                    nuevoPaso.setIdPersonaRol(pr);
+                }
+
+                consultaProcedimientoPasoService.crear(nuevoPaso);
+                
+                return Response.status(201).entity(nuevoPaso).build();
+            }
+
+            return Response.ok().build();
+        } catch (Exception e) {
+            return Response.status(500).entity("Error al avanzar: " + e.getMessage()).build();
+        }
+    }
     
+       
 }

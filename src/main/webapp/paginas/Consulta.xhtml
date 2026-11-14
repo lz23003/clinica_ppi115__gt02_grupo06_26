@@ -4,7 +4,8 @@
       xmlns:h="jakarta.faces.html"
       xmlns:f="jakarta.faces.core"
       xmlns:ui="jakarta.faces.facelets"
-      xmlns:p="primefaces">
+      xmlns:p="primefaces"
+      xmlns:g="jakarta.faces.composite/crud">
 
     <ui:composition template="/WEB-INF/plantillas/PlantillaPrincipal.xhtml">
         <ui:define name="titulo">#{crud['consulta.titulo']}</ui:define>
@@ -84,7 +85,7 @@
                                      actionListener="#{consultaModel.btnNuevoHandler}" 
                                      update=":formTable" 
                                      disabled="#{sesionUsuario.clinicaUsuario eq 'Ninguna Clínica'}" 
-                                     icon="pi pi-plus" />                 
+                                     icon="pi pi-plus" styleClass="ui-button-success"/>                 
 
                 </p:panel>
 
@@ -93,6 +94,13 @@
 
                     <p:commandButton value="#{crud['boton.cancelar']}" actionListener="#{consultaModel.btnCancelarHandler}" 
                                      update=":formTable" icon="pi pi-arrow-left" style="margin-bottom: 10px;" immediate="true" />
+
+                    <!-- AQUI ESTAN LOS BOTONES DE GUARDAR Y ELIMINAR -->
+                    <div style="margin-bottom: 15px;">
+                        <g:botonesTop model="#{consultaModel}"
+                                      estado="#{consultaModel.estado}"
+                                      formPrincipal="formTable" />
+                    </div>
 
                     <p:tabView id="tabViewConsulta" style="margin-top: 15px;">
                         <p:tab title="#{crud['consulta.tab.detalle']}">
