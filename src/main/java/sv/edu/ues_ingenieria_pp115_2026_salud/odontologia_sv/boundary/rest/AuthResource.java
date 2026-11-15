@@ -11,6 +11,7 @@ import jakarta.ws.rs.core.Response;
 import java.util.List;
 import java.util.Map;
 import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.PersonaRolService;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.JwtTokenService;
 import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.PersonaRol;
 
 @Stateless
@@ -21,6 +22,9 @@ public class AuthResource {
 
     @Inject
     private PersonaRolService personaRolService;
+
+    @Inject
+    private JwtTokenService jwtTokenService;
 
     @POST
     @Path("/login")
@@ -50,6 +54,11 @@ public class AuthResource {
                     .entity(Map.of("message", "El documento no está asociado a una asignación activa de empleado."))
                     .build();
         }
+        if (!jwtTokenService.isConfigured()) {
+            return Response.status(Response.Status.SERVICE_UNAVAILABLE)
+                    .entity(Map.of("message", "El servidor no tiene configurada la firma de sesiones."))
+                    .build();
+        }
 
         PersonaRol firstAssignment = assignments.get(0);
         var person = firstAssignment.getIdPersona();
@@ -67,7 +76,8 @@ public class AuthResource {
         return Response.ok(new LoginResponse(
                 true,
                 "Identidad y asignación activa validadas.",
-                employee))
+                employee,
+                jwtTokenService.issueToken(person.getIdPersona())))
                 .build();
     }
 }

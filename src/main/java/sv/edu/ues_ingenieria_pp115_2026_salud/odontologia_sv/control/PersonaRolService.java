@@ -97,6 +97,20 @@ public class PersonaRolService extends DefaultService<PersonaRol>{
         }
     }
 
+    public List<PersonaRol> buscarAsignacionesActivasPorPersona(UUID idPersona) {
+        if (idPersona == null) {
+            return List.of();
+        }
+        try {
+            return em.createNamedQuery("PersonaRol.findActiveByPersona", PersonaRol.class)
+                    .setParameter("idPersona", idPersona)
+                    .getResultList();
+        } catch (Exception ex) {
+            Logger.getLogger(PersonaRolService.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+            throw new IllegalStateException("No se pudieron validar las asignaciones activas del empleado", ex);
+        }
+    }
+
     public List<PersonaRol> buscarPorClinicaRolYNombre(UUID idClinica, UUID idRol, String nombre, int first, int max) {
         if (idClinica == null || idRol == null || nombre == null || nombre.trim().length() < 3
                 || first < 0 || max <= 0) {

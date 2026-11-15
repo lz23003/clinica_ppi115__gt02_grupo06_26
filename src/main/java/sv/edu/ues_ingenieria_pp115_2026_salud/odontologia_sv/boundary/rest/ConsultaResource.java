@@ -9,6 +9,10 @@ import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.Consulta;
 
 import java.io.Serializable;
 import java.net.URI;
+import java.time.DateTimeException;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -18,24 +22,46 @@ import java.util.UUID;
 @Consumes(MediaType.APPLICATION_JSON)
 public class ConsultaResource implements Serializable {
 
+    private static final ZoneId CLINIC_ZONE = ZoneId.of("America/El_Salvador");
+
     @Inject
     private ConsultaService consultaService;
 
     @Inject
     private UriInfo uriInfo;
 
-    // GET /api/consultas?first=0&max=50
+    // GET /api/consultas?first=0&max=50 or /api/consultas?idClinica=...&idRol=...&desde=...&hasta=...
     @GET
     public Response listar(
             @QueryParam("first") @DefaultValue("0") int first,
-            @QueryParam("max") @DefaultValue("50") int max) {
+            @QueryParam("max") @DefaultValue("50") int max,
+            @QueryParam("idClinica") String idClinica,
+            @QueryParam("idRol") String idRol,
+            @QueryParam("desde") String desde,
+            @QueryParam("hasta") String hasta) {
 
         try {
+            if (hasValue(idClinica) || hasValue(idRol) || hasValue(desde) || hasValue(hasta)) {
+                List<Consulta> lista = consultaService.buscarDashboardPorFiltros(
+                        parseUuid(idClinica, "idClinica"),
+                        parseUuid(idRol, "idRol"),
+                        parseDateStart(desde),
+                        parseDateEndExclusive(hasta));
+                return Response.ok(lista)
+                        .header("X-Total-Count", lista.size())
+                        .header("X-Message", "Listado de consultas filtrado")
+                        .build();
+            }
+
             List<Consulta> lista = consultaService.findRange(first, max);
             int total = consultaService.count();
             return Response.ok(lista)
                     .header("X-Total-Count", total)
                     .header("X-Message", "Listado paginado de las consultas")
+                    .build();
+        } catch (DateTimeException | IllegalArgumentException e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(java.util.Map.of("message", "Los filtros de consulta no tienen un formato válido."))
                     .build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
@@ -43,6 +69,29 @@ public class ConsultaResource implements Serializable {
                     .header("X-Message", "Error al listar las consultas")
                     .build();
         }
+    }
+
+    private boolean hasValue(String value) {
+        return value != null && !value.isBlank();
+    }
+
+    private UUID parseUuid(String value, String field) {
+        if (!hasValue(value)) return null;
+        try {
+            return UUID.fromString(value);
+        } catch (IllegalArgumentException ex) {
+            throw new IllegalArgumentException("El filtro " + field + " no es válido.", ex);
+        }
+    }
+
+    private Date parseDateStart(String value) {
+        if (!hasValue(value)) return null;
+        return Date.from(LocalDate.parse(value).atStartOfDay(CLINIC_ZONE).toInstant());
+    }
+
+    private Date parseDateEndExclusive(String value) {
+        if (!hasValue(value)) return null;
+        return Date.from(LocalDate.parse(value).plusDays(1).atStartOfDay(CLINIC_ZONE).toInstant());
     }
 
     // GET /api/consultas/all
@@ -74,6 +123,9 @@ public class ConsultaResource implements Serializable {
                         .header("X-Message", "No se encontro la consulta con id " + id)
                         .build();
             }
+            entidad.setExamenIds(entidad.getExamenes().stream()
+                    .map(sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.Examen::getIdExamen)
+                    .toList());
             return Response.ok(entidad)
                     .header("X-Message", "Consulta encontrado")
                     .build();
@@ -139,16 +191,34 @@ public class ConsultaResource implements Serializable {
             }
 
          
-            actual.setFechaInicio(modificado.getFechaInicio());
-            actual.setFechaFin(modificado.getFechaFin());
-            actual.setReferenciaExterna(modificado.getReferenciaExterna());
-            actual.setObservaciones(modificado.getObservaciones());
-            actual.setIdPersonaRol(modificado.getIdPersonaRol());
+            if (modificado.getFechaInicio() != null) {
+                actual.setFechaInicio(modificado.getFechaInicio());
+            }
+            if (modificado.getFechaFin() != null) {
+                actual.setFechaFin(modificado.getFechaFin());
+            }
+            if (modificado.getReferenciaExterna() != null) {
+                actual.setReferenciaExterna(modificado.getReferenciaExterna());
+            }
+            if (modificado.getObservaciones() != null) {
+                actual.setObservaciones(modificado.getObservaciones());
+            }
+            if (modificado.getIdPersonaRol() != null) {
+                actual.setIdPersonaRol(modificado.getIdPersonaRol());
+            }
+            if (modificado.getExamenIds() != null) {
+                consultaService.actualizarExamenes(actual, modificado.getExamenIds());
+            }
 
             Consulta actualizado = consultaService.modificar(actual);
+            actualizado.setExamenIds(actual.getExamenIds());
 
             return Response.ok(actualizado)
                     .header("X-Message", "Consulta actualizado")
+                    .build();
+        } catch (IllegalArgumentException e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(java.util.Map.of("message", e.getMessage()))
                     .build();
         } catch (Exception e) {
             return Response.status(500)

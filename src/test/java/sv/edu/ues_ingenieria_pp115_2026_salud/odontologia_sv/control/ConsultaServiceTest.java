@@ -21,6 +21,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.Consulta;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.Examen;
 
 @ExtendWith(MockitoExtension.class)
 public class ConsultaServiceTest {
@@ -164,6 +165,37 @@ public class ConsultaServiceTest {
     }
 
     @Test
+    @DisplayName("Busca consultas por clínica, rol y rango de fechas sin paginación")
+    public void testBuscarDashboardPorFiltros() {
+        UUID idClinica = UUID.randomUUID();
+        UUID idRol = UUID.randomUUID();
+        Date desde = new Date(1_700_000_000_000L);
+        Date hasta = new Date(1_700_086_400_000L);
+        List<Consulta> expected = List.of(consultaActiva);
+
+        when(em.createNamedQuery("Consulta.buscarDashboardPorFiltros", Consulta.class)).thenReturn(typedQuery);
+        when(typedQuery.getResultList()).thenReturn(expected);
+
+        List<Consulta> actual = service.buscarDashboardPorFiltros(idClinica, idRol, desde, hasta);
+
+        assertThat(actual).containsExactly(consultaActiva);
+        verify(typedQuery).setParameter("idClinica", idClinica);
+        verify(typedQuery).setParameter("idRol", idRol);
+        verify(typedQuery).setParameter("desde", desde);
+        verify(typedQuery).setParameter("hasta", hasta);
+        verify(typedQuery).getResultList();
+    }
+
+    @Test
+    @DisplayName("Rechaza un rango de fechas vacío o invertido")
+    public void testBuscarDashboardPorFiltrosRechazaRangoInvalido() {
+        org.assertj.core.api.Assertions.assertThatThrownBy(() ->
+                service.buscarDashboardPorFiltros(null, null, fechaFin, fechaInicio))
+                .isInstanceOf(IllegalArgumentException.class);
+        verify(em, never()).createNamedQuery(anyString(), eq(Consulta.class));
+    }
+
+    @Test
     public void testBuscarCitasPublicasAplicaFiltrosYLimite() {
         UUID clinicId = UUID.randomUUID();
         Date start = new Date(System.currentTimeMillis() - 86400000L);
@@ -189,6 +221,31 @@ public class ConsultaServiceTest {
                 service.buscarCitasPublicas("DUI", "123", UUID.randomUUID(), fechaFin, fechaInicio, 100))
                 .isInstanceOf(IllegalArgumentException.class);
         verify(em, never()).createNamedQuery(anyString(), eq(Consulta.class));
+    }
+
+    @Test
+    public void actualizaRelacionDeExamenesPorSusIdentificadores() {
+        UUID examId = UUID.randomUUID();
+        Examen exam = new Examen(examId);
+        exam.setActivo(true);
+
+        when(em.find(Examen.class, examId)).thenReturn(exam);
+        service.actualizarExamenes(consultaActiva, List.of(examId));
+
+        assertThat(consultaActiva.getExamenes()).containsExactly(exam);
+        assertThat(consultaActiva.getExamenIds()).containsExactly(examId);
+        verify(em).find(Examen.class, examId);
+    }
+
+    @Test
+    public void rechazaExamenInexistenteOInactivo() {
+        UUID examId = UUID.randomUUID();
+        when(em.find(Examen.class, examId)).thenReturn(null);
+
+        org.assertj.core.api.Assertions.assertThatThrownBy(() ->
+                service.actualizarExamenes(consultaActiva, List.of(examId)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("no existe o está inactivo");
     }
 
 

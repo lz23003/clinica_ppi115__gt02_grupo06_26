@@ -22,8 +22,13 @@ replay_pid*
 # ====================================================================
 # HERRAMIENTAS DE CONSTRUCCIÓN (BUILD TOOLS)
 # ====================================================================
+# Dependencias instaladas (npm)
+node_modules/
+
 # Maven
 target/
+src/GalenoFE/coverage/
+src/GalenoFE/.nyc_output/
 pom.xml.tag
 pom.xml.releaseBackup
 pom.xml.next

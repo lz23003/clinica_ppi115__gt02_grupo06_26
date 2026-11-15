@@ -10,6 +10,7 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.Consulta;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.Examen;
 
 @Stateless
 public class ConsultaService extends DefaultService<Consulta>{
@@ -26,6 +27,49 @@ public class ConsultaService extends DefaultService<Consulta>{
     protected EntityManager getEntityManager() {
         return em;
 
+    }
+
+    public void actualizarExamenes(Consulta consulta, List<UUID> examenIds) {
+        if (consulta == null || examenIds == null) {
+            throw new IllegalArgumentException("La consulta y la lista de exámenes son obligatorias.");
+        }
+
+        List<Examen> selectedExams = new java.util.ArrayList<>();
+        for (UUID examenId : new java.util.LinkedHashSet<>(examenIds)) {
+            if (examenId == null) {
+                throw new IllegalArgumentException("La lista contiene un identificador de examen inválido.");
+            }
+            Examen examen = em.find(Examen.class, examenId);
+            if (examen == null || !Boolean.TRUE.equals(examen.getActivo())) {
+                throw new IllegalArgumentException("Uno de los exámenes seleccionados no existe o está inactivo.");
+            }
+            selectedExams.add(examen);
+        }
+        consulta.setExamenes(selectedExams);
+        consulta.setExamenIds(examenIds);
+    }
+
+    public List<Consulta> buscarDashboardPorFiltros(UUID idClinica, UUID idRol, Date desde, Date hasta) {
+        if (desde != null && hasta != null && !desde.before(hasta)) {
+            throw new IllegalArgumentException("El rango de fechas no es válido.");
+        }
+        TypedQuery<Consulta> query = em.createNamedQuery("Consulta.buscarDashboardPorFiltros", Consulta.class);
+        query.setParameter("idClinica", idClinica);
+        query.setParameter("idRol", idRol);
+        query.setParameter("desde", desde);
+        query.setParameter("hasta", hasta);
+        return query.getResultList();
+    }
+
+    public Object[] buscarContextoPorConsulta(UUID idConsulta) {
+        if (idConsulta == null) {
+            return null;
+        }
+        List<Object[]> contexts = em.createNamedQuery("Consulta.findContextById", Object[].class)
+                .setParameter("idConsulta", idConsulta)
+                .setMaxResults(1)
+                .getResultList();
+        return contexts.isEmpty() ? null : contexts.get(0);
     }
 
     public List<Consulta> buscarCitasPublicas(

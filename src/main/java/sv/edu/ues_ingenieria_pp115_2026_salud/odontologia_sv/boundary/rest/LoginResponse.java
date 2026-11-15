@@ -8,6 +8,7 @@ public class LoginResponse {
     private boolean identityValidated;
     private String message;
     private Employee employee;
+    private String accessToken;
 
     public LoginResponse() {
     }
@@ -16,6 +17,19 @@ public class LoginResponse {
         this.identityValidated = identityValidated;
         this.message = message;
         this.employee = employee;
+    }
+
+    public LoginResponse(boolean identityValidated, String message, Employee employee, String accessToken) {
+        this(identityValidated, message, employee);
+        this.accessToken = accessToken;
+    }
+
+    public String getAccessToken() {
+        return accessToken;
+    }
+
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
     }
 
     public boolean isIdentityValidated() {

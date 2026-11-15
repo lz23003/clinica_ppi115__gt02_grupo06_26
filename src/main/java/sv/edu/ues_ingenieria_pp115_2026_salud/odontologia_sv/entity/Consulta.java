@@ -7,17 +7,21 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.NamedQueries;
 import jakarta.persistence.NamedQuery;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import jakarta.persistence.Transient;
 import jakarta.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.UUID;
 
 
@@ -31,6 +35,8 @@ import java.util.UUID;
     @NamedQuery(name = "Consulta.findByObservaciones", query = "SELECT c FROM Consulta c WHERE c.observaciones = :observaciones"),
     @NamedQuery(name = "Consulta.findActivas", query = "SELECT c FROM Consulta c WHERE c.fechaFin IS NULL ORDER BY c.fechaInicio ASC"),
     @NamedQuery(name = "Consulta.findCitasPublicas", query = "SELECT DISTINCT c FROM Consulta c JOIN FETCH c.idPersonaRol pr JOIN FETCH pr.idClinica cli JOIN pr.idPersona p JOIN p.documentoList d JOIN d.idTipoDocumento td WHERE d.valor = :numeroDocumento AND UPPER(td.nombre) LIKE :tipoDocumento AND cli.idClinica = :idClinica AND c.fechaInicio >= :desde AND c.fechaInicio < :hasta ORDER BY c.fechaInicio ASC"),
+    @NamedQuery(name = "Consulta.buscarDashboardPorFiltros", query = "SELECT c FROM Consulta c WHERE (:idClinica IS NULL OR c.idPersonaRol.idClinica.idClinica = :idClinica) AND (:idRol IS NULL OR c.idPersonaRol.idRol.idRol = :idRol) AND (:desde IS NULL OR c.fechaInicio >= :desde) AND (:hasta IS NULL OR c.fechaInicio < :hasta) ORDER BY c.fechaInicio ASC"),
+    @NamedQuery(name = "Consulta.findContextById", query = "SELECT c.idPersonaRol.idClinica.idClinica, c.idPersonaRol.idRol.idRol FROM Consulta c WHERE c.idConsulta = :idConsulta"),
     @NamedQuery(name = "Consulta.findByPaciente", query = "SELECT c FROM Consulta c JOIN c.idPersonaRol pr JOIN pr.idPersona p WHERE p.idPersona = :idPaciente ORDER BY c.fechaInicio DESC"),
     @NamedQuery(name = "Consulta.findByRangoFechas", query = "SELECT c FROM Consulta c WHERE c.fechaInicio BETWEEN :inicio AND :fin ORDER BY c.fechaInicio ASC"),
     @NamedQuery(name = "Consulta.findByPersonaRol", query = "SELECT c FROM Consulta c WHERE c.idPersonaRol.idPersonaRol = :idPersonaRol ORDER BY c.fechaInicio DESC")})
@@ -58,6 +64,16 @@ public class Consulta implements Serializable {
     @OneToMany(mappedBy = "idConsulta", fetch = FetchType.LAZY)
     @JsonbTransient
     private List<ConsultaProcedimiento> consultaProcedimientoList;
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "consulta_examen",
+            schema = "public",
+            joinColumns = @JoinColumn(name = "id_consulta", referencedColumnName = "id_consulta"),
+            inverseJoinColumns = @JoinColumn(name = "id_examen", referencedColumnName = "id_examen"))
+    @JsonbTransient
+    private List<Examen> examenes;
+    @Transient
+    private List<UUID> examenIds;
 
     public Consulta() {
     }
@@ -120,6 +136,28 @@ public class Consulta implements Serializable {
 
     public void setConsultaProcedimientoList(List<ConsultaProcedimiento> consultaProcedimientoList) {
         this.consultaProcedimientoList = consultaProcedimientoList;
+    }
+
+    public List<Examen> getExamenes() {
+        return examenes;
+    }
+
+    public void setExamenes(List<Examen> examenes) {
+        this.examenes = examenes;
+    }
+
+    public List<UUID> getExamenIds() {
+        if (examenIds != null) {
+            return examenIds;
+        }
+        if (examenes == null) return null;
+        return examenes.stream()
+                .map(Examen::getIdExamen)
+                .toList();
+    }
+
+    public void setExamenIds(List<UUID> examenIds) {
+        this.examenIds = examenIds == null ? null : new ArrayList<>(examenIds);
     }
 
     @Override

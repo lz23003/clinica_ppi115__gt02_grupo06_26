@@ -36,6 +36,12 @@
             <scope>provided</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>pdfbox</artifactId>
+            <version>3.0.5</version>
+        </dependency>
+
         <!-- Source: https://mvnrepository.com/artifact/org.eclipse.persistence/eclipselink -->
         <!--
         <dependency>
