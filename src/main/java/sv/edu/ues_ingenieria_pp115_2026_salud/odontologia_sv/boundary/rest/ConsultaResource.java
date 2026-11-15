@@ -1,6 +1,5 @@
 package sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.boundary.rest;
 
-
 import java.text.SimpleDateFormat;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
@@ -21,6 +20,16 @@ import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.boundary.rest.dto.ConsultaDetalleDTO;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.ConsultaProcedimientoPasoService;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.ConsultaProcedimientoService;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.ProcedimientoService;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.Clinica;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.ConsultaProcedimiento;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.ConsultaProcedimientoPaso;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.Persona;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.PersonaRol;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.Procedimiento;
 
 @Stateless
 @Path("/consultas")
@@ -28,8 +37,17 @@ import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
 @Consumes(MediaType.APPLICATION_JSON)
 public class ConsultaResource implements Serializable {
 
-    @Inject
-    private ConsultaService consultaService;
+ @Inject
+private ProcedimientoService procedimientoService;
+
+@Inject
+private ConsultaProcedimientoService consultaProcedimientoService;
+
+@Inject
+private ConsultaProcedimientoPasoService consultaProcedimientoPasoService;
+
+@Inject
+private ConsultaService consultaService;
 
     @Inject
     private UriInfo uriInfo;
@@ -420,6 +438,123 @@ public class ConsultaResource implements Serializable {
             return Response.status(500).entity("Error al finalizar: " + e.getMessage()).build();
         }
     }
+
+   @GET
+@Path("/por-clinica-rol")
+public Response buscarPorClinicaYRol(
+        @QueryParam("idClinica") UUID idClinica,
+        @QueryParam("idRol") UUID idRol,
+        @QueryParam("fechaInicio") String fechaInicioStr,
+        @QueryParam("fechaFin") String fechaFinStr) {
+    try {
+        if (idClinica == null) {
+            return Response.status(400).entity("idClinica requerido").build();
+        }
+        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd");
+        Date inicio = (fechaInicioStr != null && !fechaInicioStr.isEmpty()) ? sdf.parse(fechaInicioStr) : null;
+        Date fin = (fechaFinStr != null && !fechaFinStr.isEmpty()) ? sdf.parse(fechaFinStr) : null;
+
+        if (fin != null) {
+            java.util.Calendar cal = java.util.Calendar.getInstance();
+            cal.setTime(fin);
+            cal.set(java.util.Calendar.HOUR_OF_DAY, 23);
+            cal.set(java.util.Calendar.MINUTE, 59);
+            cal.set(java.util.Calendar.SECOND, 59);
+            fin = cal.getTime();
+        }
+
+        List<Consulta> lista = consultaService.buscarPorClinicaYRol(idClinica, idRol, inicio, fin);
+        return Response.ok(lista).build();
+    } catch (Exception e) {
+        return Response.status(500).entity("Error: " + e.getMessage()).build();
+    }
+}
+
+@GET
+@Path("/{id}/detalle-completo")
+public Response detalleCompleto(@PathParam("id") UUID id) {
+    try {
+        Consulta c = consultaService.buscarPorId(id);
+        if (c == null) return Response.status(404).entity("Consulta no encontrada").build();
+
+        ConsultaDetalleDTO dto = new ConsultaDetalleDTO();
+        dto.idConsulta = c.getIdConsulta();
+        dto.fechaInicio = c.getFechaInicio() != null ? c.getFechaInicio().toInstant().toString() : null;
+        dto.fechaFin = c.getFechaFin() != null ? c.getFechaFin().toInstant().toString() : null;
+        dto.referenciaExterna = c.getReferenciaExterna();
+        dto.observaciones = c.getObservaciones();
+
+        if (c.getIdPersonaRol() != null) {
+            Persona p = c.getIdPersonaRol().getIdPersona();
+            if (p != null) {
+                dto.paciente = new ConsultaDetalleDTO.PersonaDetalleDTO();
+                dto.paciente.idPersona = p.getIdPersona();
+                dto.paciente.nombres = p.getNombres();
+                dto.paciente.apellidos = p.getApellidos();
+                dto.paciente.fechaNacimiento = p.getFechaNacimiento() != null
+                        ? p.getFechaNacimiento().toInstant().toString() : null;
+            }
+            Clinica cli = c.getIdPersonaRol().getIdClinica();
+            if (cli != null) {
+                dto.clinica = new ConsultaDetalleDTO.ClinicaDetalleDTO();
+                dto.clinica.idClinica = cli.getIdClinica();
+                dto.clinica.nombre = cli.getNombre();
+            }
+        }
+
+        List<ConsultaProcedimiento> cps = consultaProcedimientoService.buscarPorConsulta(id);
+        dto.procedimientos = new java.util.ArrayList<>();
+
+        for (ConsultaProcedimiento cp : cps) {
+            ConsultaDetalleDTO.ProcedimientoDetalleDTO pd = new ConsultaDetalleDTO.ProcedimientoDetalleDTO();
+            pd.idConsultaProcedimiento = cp.getIdConsultaProcedimiento();
+            pd.idProcedimiento = cp.getIdProcedimiento();
+            pd.fechaInicio = cp.getFechaInicio() != null ? cp.getFechaInicio().toInstant().toString() : null;
+            pd.fechaFin = cp.getFechaFin() != null ? cp.getFechaFin().toInstant().toString() : null;
+            pd.observaciones = cp.getObservaciones();
+
+            Procedimiento proc = procedimientoService.buscarPorId(cp.getIdProcedimiento());
+            if (proc != null) pd.nombreProcedimiento = proc.getNombre();
+
+            pd.pasos = new java.util.ArrayList<>();
+            List<ConsultaProcedimientoPaso> pasos = consultaProcedimientoPasoService.buscarPorConsultaProcedimiento(cp.getIdConsultaProcedimiento());
+
+            for (ConsultaProcedimientoPaso paso : pasos) {
+                ConsultaDetalleDTO.PasoDetalleDTO psd = new ConsultaDetalleDTO.PasoDetalleDTO();
+                psd.idConsultaProcedimientoPaso = paso.getIdConsultaProcedimientoPaso();
+                psd.estado = paso.getEstado();
+                psd.fechaInicio = paso.getFechaInicio() != null ? paso.getFechaInicio().toInstant().toString() : null;
+                psd.fechaFin = paso.getFechaFin() != null ? paso.getFechaFin().toInstant().toString() : null;
+                psd.valor = paso.getValor();
+
+                if (paso.getIdProcedimientoPaso() != null) {
+                    psd.idProcedimientoPaso = paso.getIdProcedimientoPaso().getIdProcedimientoPaso();
+                    psd.nombrePaso = paso.getIdProcedimientoPaso().getNombre();
+                }
+                if (paso.getIdPersonaRol() != null) {
+                    PersonaRol pr = paso.getIdPersonaRol();
+                    if (pr.getIdPersona() != null) {
+                        psd.realizadoPor = new ConsultaDetalleDTO.PersonaDetalleDTO();
+                        psd.realizadoPor.idPersona = pr.getIdPersona().getIdPersona();
+                        psd.realizadoPor.nombres = pr.getIdPersona().getNombres();
+                        psd.realizadoPor.apellidos = pr.getIdPersona().getApellidos();
+                    }
+                    if (pr.getIdRol() != null) {
+                        psd.idRolRealizador = pr.getIdRol().getIdRol();
+                        psd.nombreRolRealizador = pr.getIdRol().getNombre();
+                    }
+                }
+                pd.pasos.add(psd);
+            }
+            dto.procedimientos.add(pd);
+        }
+
+        return Response.ok(dto).build();
+    } catch (Exception e) {
+        e.printStackTrace();
+        return Response.status(500).entity("Error: " + e.getMessage()).build();
+    }
+}
     
-    
+
 }

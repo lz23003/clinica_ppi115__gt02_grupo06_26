@@ -101,6 +101,33 @@ public class ConsultaService extends DefaultService<Consulta>{
         return List.of();
     }
 
-    
+    public List<Consulta> buscarPorClinicaYRol(UUID idClinica, UUID idRol, Date inicio, Date fin) {
+    try {
+        StringBuilder jpql = new StringBuilder(
+            "SELECT DISTINCT c FROM Consulta c " +
+            "JOIN c.idPersonaRol pr " +
+            "WHERE pr.idClinica.idClinica = :idClinica ");
+
+        if (idRol != null) {
+            jpql.append("AND EXISTS (SELECT 1 FROM ConsultaProcedimiento cp " +
+                        "JOIN ConsultaProcedimientoPaso cpp ON cpp.idConsultaProcedimiento = cp " +
+                        "WHERE cp.idConsulta = c AND cpp.idPersonaRol.idRol.idRol = :idRol) ");
+        }
+        if (inicio != null) jpql.append("AND c.fechaInicio >= :inicio ");
+        if (fin != null)    jpql.append("AND c.fechaInicio <= :fin ");
+        jpql.append("ORDER BY c.fechaInicio DESC");
+
+        TypedQuery<Consulta> q = em.createQuery(jpql.toString(), Consulta.class);
+        q.setParameter("idClinica", idClinica);
+        if (idRol != null)  q.setParameter("idRol", idRol);
+        if (inicio != null) q.setParameter("inicio", inicio);
+        if (fin != null)    q.setParameter("fin", fin);
+
+        return q.getResultList();
+    } catch (Exception ex) {
+        Logger.getLogger(ConsultaService.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+        return List.of();
+    }
+}
     
 }

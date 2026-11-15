@@ -192,7 +192,7 @@ public class ProcedimientoPasoResource implements Serializable {
             }
             return Response.ok(lista).build();
         } catch (Exception e) {
-            return Response.status(500).entity("Error al buscar pasos: " + e.getMessage()).build();
+            return Response.status(500).entity("Error: " + e.getMessage()).build();
         }
     }
 }
