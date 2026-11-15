@@ -1,8 +1,6 @@
 package sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.boundary.rest;
 
-import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
+
 import java.text.SimpleDateFormat;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
@@ -422,4 +420,6 @@ public class ConsultaResource implements Serializable {
             return Response.status(500).entity("Error al finalizar: " + e.getMessage()).build();
         }
     }
+    
+    
 }

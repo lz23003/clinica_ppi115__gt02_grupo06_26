@@ -6,7 +6,6 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.*;
 import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.ConsultaProcedimientoService;
 import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.ConsultaProcedimiento;
-
 import java.io.Serializable;
 import java.net.URI;
 import java.util.List;
@@ -20,6 +19,7 @@ public class ConsultaProcedimientoResource implements Serializable {
 
     @Inject
     private ConsultaProcedimientoService consultaProcedimientoService;
+    
 
     @Inject
     private UriInfo uriInfo;
@@ -182,6 +182,8 @@ public class ConsultaProcedimientoResource implements Serializable {
                     .build();
         }
     }
+    
+
     
     
 }

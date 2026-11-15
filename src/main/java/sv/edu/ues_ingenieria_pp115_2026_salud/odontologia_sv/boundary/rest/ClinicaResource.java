@@ -12,7 +12,6 @@ import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
-
 @Stateless
 @Path("/clinicas")
 @Produces(MediaType.APPLICATION_JSON)
@@ -140,7 +139,6 @@ public class ClinicaResource implements Serializable {
                         .build();
             }
 
-           
             actual.setNombre(modificado.getNombre());
             actual.setActivo(modificado.getActivo());
             actual.setTipo(modificado.getTipo());
@@ -180,6 +178,21 @@ public class ClinicaResource implements Serializable {
             return Response.status(500)
                     .entity("Error al eliminar la clinica")
                     .header("X-Message", "Error al eliminar la clinica")
+                    .build();
+        }
+    }
+
+    @GET
+    @Path("/activas")
+    public Response listarActivas() {
+        try {
+            List<Clinica> lista = clinicaService.listarActivas();
+            return Response.ok(lista)
+                    .header("X-Message", "Listado de clinicas activas")
+                    .build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Error al listar las clinicas activas")
                     .build();
         }
     }

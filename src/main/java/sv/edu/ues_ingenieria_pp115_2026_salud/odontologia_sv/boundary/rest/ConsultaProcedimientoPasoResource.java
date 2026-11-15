@@ -15,6 +15,8 @@ import java.util.UUID;
 import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.ConsultaProcedimiento;
 import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.PersonaRol;
 import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.ProcedimientoPaso;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.ProcedimientoPasoService;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.PersonaRolService;
 
 @Stateless
 @Path("/consultas-procedimientos-pasos")
@@ -24,6 +26,11 @@ public class ConsultaProcedimientoPasoResource implements Serializable {
 
     @Inject
     private ConsultaProcedimientoPasoService consultaProcedimientoPasoService;
+    @Inject
+    private ProcedimientoPasoService procedimientoPasoService;
+
+    @Inject
+    private PersonaRolService personaRolService;
 
     @Inject
     private UriInfo uriInfo;
@@ -256,8 +263,6 @@ public class ConsultaProcedimientoPasoResource implements Serializable {
         }
     }
 
- 
-
     @GET
     @Path("/consulta/{idConsultaProcedimiento}")
     public Response buscarPorConsultaProcedimiento(@PathParam("idConsultaProcedimiento") UUID idConsultaProcedimiento) {
@@ -268,56 +273,83 @@ public class ConsultaProcedimientoPasoResource implements Serializable {
             return Response.status(500).entity("Error: " + e.getMessage()).build();
         }
     }
-    
-        @POST
-    @Path("/avanzar/{idConsultaProcedimiento}")
+
+    @POST
+    @Path("/siguiente/{idConsultaProcedimiento}")
     public Response avanzarSiguientePaso(
             @PathParam("idConsultaProcedimiento") UUID idConsultaProcedimiento,
             @QueryParam("idPasoActual") UUID idPasoActual,
-            @QueryParam("idSiguientePaso") UUID idSiguientePaso,
-            @QueryParam("idPersonaRol") UUID idPersonaRol) {
+            @QueryParam("idSiguientePaso") UUID idSiguientePaso) {
         try {
-            // 1. Finalizar el paso actual (si existe)
+            // 1. Finalizar el paso actual
             if (idPasoActual != null) {
                 ConsultaProcedimientoPaso pasoActual = consultaProcedimientoPasoService.buscarPorId(idPasoActual);
                 if (pasoActual != null) {
                     pasoActual.setEstado("FINALIZADO");
-                    pasoActual.setFechaFin(new java.util.Date());
+                    pasoActual.setFechaFin(new Date());
                     consultaProcedimientoPasoService.modificar(pasoActual);
                 }
             }
 
-            // 2. Crear el nuevo paso en la Base de Datos
-            if (idSiguientePaso != null) {
-                ConsultaProcedimientoPaso nuevoPaso = new ConsultaProcedimientoPaso();
-                nuevoPaso.setIdConsultaProcedimientoPaso(UUID.randomUUID());
-                nuevoPaso.setFechaInicio(new java.util.Date());
-                nuevoPaso.setEstado("PENDIENTE");
-
-                ProcedimientoPaso pp = new ProcedimientoPaso();
-                pp.setIdProcedimientoPaso(idSiguientePaso);
-                nuevoPaso.setIdProcedimientoPaso(pp);
-
-                ConsultaProcedimiento cp = new ConsultaProcedimiento();
-                cp.setIdConsultaProcedimiento(idConsultaProcedimiento);
-                nuevoPaso.setIdConsultaProcedimiento(cp);
-
-                if (idPersonaRol != null) {
-                    PersonaRol pr = new PersonaRol();
-                    pr.setIdPersonaRol(idPersonaRol);
-                    nuevoPaso.setIdPersonaRol(pr);
-                }
-
-                consultaProcedimientoPasoService.crear(nuevoPaso);
-                
-                return Response.status(201).entity(nuevoPaso).build();
+            // 2. Crear el nuevo paso
+            if (idSiguientePaso == null) {
+                return Response.status(400).entity("El ID del siguiente paso es requerido.").build();
             }
 
-            return Response.ok().build();
+            ConsultaProcedimientoPaso nuevoPaso = new ConsultaProcedimientoPaso();
+            nuevoPaso.setIdConsultaProcedimientoPaso(UUID.randomUUID());
+            nuevoPaso.setFechaInicio(new Date());
+            nuevoPaso.setEstado("PENDIENTE");
+
+            // Asignar el ProcedimientoPaso
+            ProcedimientoPaso pp = new ProcedimientoPaso();
+            pp.setIdProcedimientoPaso(idSiguientePaso);
+            nuevoPaso.setIdProcedimientoPaso(pp);
+
+            // Asignar la ConsultaProcedimiento
+            ConsultaProcedimiento cp = new ConsultaProcedimiento();
+            cp.setIdConsultaProcedimiento(idConsultaProcedimiento);
+            nuevoPaso.setIdConsultaProcedimiento(cp);
+
+            // 🔥 ASIGNACIÓN REAL: Buscar a alguien con el rol requerido por el paso
+            ProcedimientoPaso pasoBD = procedimientoPasoService.buscarPorId(idSiguientePaso);
+            if (pasoBD == null || pasoBD.getIdRol() == null) {
+                return Response.status(400).entity("El paso no tiene un rol asignado en la base de datos.").build();
+            }
+
+            List<PersonaRol> candidatos = personaRolService.buscarPorRol(pasoBD.getIdRol().getIdRol());
+
+            if (candidatos != null && !candidatos.isEmpty()) {
+                // Asignamos al primer candidato que tenga ese rol
+                nuevoPaso.setIdPersonaRol(candidatos.get(0));
+            } else {
+                return Response.status(400)
+                        .entity("No hay personal registrado con el rol requerido para este paso.")
+                        .build();
+            }
+
+            consultaProcedimientoPasoService.crear(nuevoPaso);
+            return Response.status(201).entity(nuevoPaso).build();
+
         } catch (Exception e) {
             return Response.status(500).entity("Error al avanzar: " + e.getMessage()).build();
         }
     }
-    
-       
+
+    @PUT
+    @Path("/{id}/valor")
+    public Response guardarValor(@PathParam("id") UUID id, @QueryParam("valor") String valor) {
+        try {
+            ConsultaProcedimientoPaso paso = consultaProcedimientoPasoService.buscarPorId(id);
+            if (paso == null) {
+                return Response.status(404).entity("Paso no encontrado").build();
+            }
+            paso.setValor(valor);
+            consultaProcedimientoPasoService.modificar(paso);
+            return Response.ok(paso).build();
+        } catch (Exception e) {
+            return Response.status(500).entity("Error: " + e.getMessage()).build();
+        }
+    }
+
 }

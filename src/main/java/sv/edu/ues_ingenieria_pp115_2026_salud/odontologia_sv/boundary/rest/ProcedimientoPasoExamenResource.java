@@ -182,4 +182,16 @@ public class ProcedimientoPasoExamenResource implements Serializable {
                     .build();
         }
     }
+    
+    
+        @GET
+    @Path("/por-paso/{idProcedimientoPaso}")
+    public Response buscarPorPaso(@PathParam("idProcedimientoPaso") UUID idProcedimientoPaso) {
+        try {
+            List<ProcedimientoPasoExamen> lista = procedimientoPasoExamenService.buscarPorPaso(idProcedimientoPaso);
+            return Response.ok(lista).build();
+        } catch (Exception e) {
+            return Response.status(500).entity("Error: " + e.getMessage()).build();
+        }
+    }
 }
