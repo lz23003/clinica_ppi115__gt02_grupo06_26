@@ -1,183 +1,67 @@
 package sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.boundary.rest;
 
-import jakarta.ejb.Stateless;
+import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.*;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import java.util.UUID;
 import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.ProcedimientoPasoSecuenciaService;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.ServiceInterface;
 import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.ProcedimientoPasoSecuencia;
 
-import java.io.Serializable;
-import java.net.URI;
-import java.util.List;
-import java.util.UUID;
-
-@Stateless
+@RequestScoped
 @Path("/procedimientos-pasos-secuencias")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class ProcedimientoPasoSecuenciaResource implements Serializable {
+public class ProcedimientoPasoSecuenciaResource extends DefaultResource<ProcedimientoPasoSecuencia> {
 
     @Inject
     private ProcedimientoPasoSecuenciaService procedimientoPasoSecuenciaService;
 
-    @Inject
-    private UriInfo uriInfo;
-
-    // GET /api/procedimientos-pasos-secuencias?first=0&max=50
-    @GET
-    public Response listar(
-            @QueryParam("first") @DefaultValue("0") int first,
-            @QueryParam("max") @DefaultValue("50") int max) {
-
-        try {
-            List<ProcedimientoPasoSecuencia> lista = procedimientoPasoSecuenciaService.findRange(first, max);
-            int total = procedimientoPasoSecuenciaService.count();
-            return Response.ok(lista)
-                    .header("X-Total-Count", total)
-                    .header("X-Message", "Listado paginado de los procedimientos-pasos-secuencias")
-                    .build();
-        } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("Error al listar los procedimientos-pasos-secuencias")
-                    .header("X-Message", "Error al listar los procedimientos-pasos-secuencias")
-                    .build();
-        }
+    @Override
+    protected ServiceInterface<ProcedimientoPasoSecuencia> getService() {
+        return procedimientoPasoSecuenciaService;
     }
 
-    // GET /api/procedimientos-pasos-secuencias/all
-    @GET
-    @Path("/all")
-    public Response listarTodos() {
-        try {
-            List<ProcedimientoPasoSecuencia> lista = procedimientoPasoSecuenciaService.findAll();
-            return Response.ok(lista)
-                    .header("X-Message", "Listado completo de los procedimientos-pasos-secuencias")
-                    .build();
-        } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("Error al obtener todos los procedimientos-pasos-secuencias")
-                    .header("X-Message", "Error al obtener todos los procedimientos-pasos-secuencias")
-                    .build();
-        }
+    @Override
+    protected String getNombre() {
+        return "procedimiento paso secuencia";
     }
 
-    // GET /api/procedimientos-pasos-secuencias/{id}
-    @GET
-    @Path("/{id}")
-    public Response obtenerPorId(@PathParam("id") UUID id) {
-        try {
-            ProcedimientoPasoSecuencia entidad = procedimientoPasoSecuenciaService.buscarPorId(id);
-            if (entidad == null) {
-                return Response.status(Response.Status.NOT_FOUND)
-                        .entity("No se encontro el procedimiento-paso-secuencia con id " + id)
-                        .header("X-Message", "No se encontro el procedimiento-paso-secuencia con id " + id)
-                        .build();
-            }
-            return Response.ok(entidad)
-                    .header("X-Message", "El procedimiento-paso-secuencia encontrado")
-                    .build();
-        } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("Error al obtener el procedimiento-paso-secuencia por id")
-                    .header("X-Message", "Error al obtener el procedimiento-paso-secuencia por id")
-                    .build();
-        }
+    @Override
+    protected UUID getId(ProcedimientoPasoSecuencia entidad) {
+        return entidad.getIdProcedimientoPasoSecuencia();
     }
 
-    // POST /api/procedimientos-pasos-secuencias
+    @Override
+    protected void asignarId(ProcedimientoPasoSecuencia entidad, UUID id) {
+        entidad.setIdProcedimientoPasoSecuencia(id);
+    }
+
+    @Override
+    protected void copiarCampos(ProcedimientoPasoSecuencia actual, ProcedimientoPasoSecuencia modificado) {
+        actual.setIdProcedimientoPasoReferencia(modificado.getIdProcedimientoPasoReferencia());
+        actual.setTipoSecuencia(modificado.getTipoSecuencia());
+        actual.setIdProcedimientoPaso(modificado.getIdProcedimientoPaso());
+    }
+
+    // POST /api/v1/procedimientos-pasos-secuencias
     @POST
     public Response crear(ProcedimientoPasoSecuencia nuevo) {
-        if (nuevo == null) {
-            return Response.status(422)
-                    .entity("El cuerpo de la peticion no puede estar vacio o mal formado")
-                    .header("X-Message", "El cuerpo de la peticion no puede estar vacio")
-                    .build();
-        }
-
-        try {
-           
-            nuevo.setIdProcedimientoPasoSecuencia(UUID.randomUUID());
-
-            procedimientoPasoSecuenciaService.crear(nuevo);
-
-            UUID idGenerado = nuevo.getIdProcedimientoPasoSecuencia();
-            URI uri = uriInfo.getAbsolutePathBuilder()
-                    .path(idGenerado.toString())
-                    .build();
-
-            return Response.created(uri)
-                    .entity(nuevo)
-                    .header("X-Message", "El procedimiento-paso-secuencia creado exitosamente")
-                    .build(); // 201 Created
-        } catch (Exception e) {
-            return Response.status(500)
-                    .entity("Error al crear el procedimiento-paso-secuencia: " + e.getMessage())
-                    .header("X-Message", "Error al crear el procedimiento-paso-secuencia")
-                    .build();
-        }
+        return crearEntidad(nuevo);
     }
 
-    // PUT /api/procedimientos-pasos-secuencias/{id}
+    // PUT /api/v1/procedimientos-pasos-secuencias/{id}
     @PUT
     @Path("/{id}")
     public Response actualizar(@PathParam("id") UUID id, ProcedimientoPasoSecuencia modificado) {
-        if (modificado == null) {
-            return Response.status(422)
-                    .entity("El cuerpo de la peticion no puede estar vacio o mal formado")
-                    .header("X-Message", "El cuerpo de la peticion no puede estar vacio")
-                    .build();
-        }
-
-        try {
-            ProcedimientoPasoSecuencia actual = procedimientoPasoSecuenciaService.buscarPorId(id);
-            if (actual == null) {
-                return Response.status(404)
-                        .entity("No se encontro el procedimiento-paso-secuencia con id " + id)
-                        .header("X-Message", "No se encontro el procedimiento-paso-secuencia con id " + id)
-                        .build();
-            }
-
-            
-            actual.setIdProcedimientoPasoReferencia(modificado.getIdProcedimientoPasoReferencia());
-            actual.setTipoSecuencia(modificado.getTipoSecuencia());
-            actual.setIdProcedimientoPaso(modificado.getIdProcedimientoPaso());
-
-            ProcedimientoPasoSecuencia actualizado = procedimientoPasoSecuenciaService.modificar(actual);
-
-            return Response.ok(actualizado)
-                    .header("X-Message", "El procedimiento-paso-secuencia actualizado")
-                    .build();
-        } catch (Exception e) {
-            return Response.status(500)
-                    .entity("Error al actualizar el procedimiento-paso-secuencia: " + e.getMessage())
-                    .header("X-Message", "Error al actualizar el procedimiento-paso-secuencia")
-                    .build();
-        }
+        return actualizarEntidad(id, modificado);
     }
 
-    // DELETE /api/procedimientos-pasos-secuencias/{id}
-    @DELETE
-    @Path("/{id}")
-    public Response eliminar(@PathParam("id") UUID id) {
-        try {
-            ProcedimientoPasoSecuencia entidad = procedimientoPasoSecuenciaService.buscarPorId(id);
-            if (entidad == null) {
-                return Response.status(404)
-                        .entity("No se encontro el procedimiento-paso-secuencia con id " + id)
-                        .header("X-Message", "No se encontro el procedimiento-paso-secuencia con id " + id)
-                        .build();
-            }
-
-            procedimientoPasoSecuenciaService.eliminar(entidad);
-            return Response.noContent()
-                    .header("X-Message", "El procedimiento-paso-secuencia eliminado")
-                    .build(); // 204 No Content
-        } catch (Exception e) {
-            return Response.status(500)
-                    .entity("Error al eliminar el procedimiento-paso-secuencia")
-                    .header("X-Message", "Error al eliminar el procedimiento-paso-secuencia")
-                    .build();
-        }
-    }
 }
