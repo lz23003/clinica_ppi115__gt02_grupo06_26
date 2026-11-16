@@ -122,11 +122,21 @@ public class ConsultaService extends DefaultService<Consulta>{
         if (desde != null && hasta != null && !desde.before(hasta)) {
             throw new IllegalArgumentException("El rango de fechas no es válido.");
         }
-        TypedQuery<Consulta> query = em.createNamedQuery("Consulta.buscarDashboardPorFiltros", Consulta.class);
-        query.setParameter("idClinica", idClinica);
-        query.setParameter("idRol", idRol);
-        query.setParameter("desde", desde);
-        query.setParameter("hasta", hasta);
+        List<String> conditions = new ArrayList<>();
+        if (idClinica != null) conditions.add("c.idPersonaRol.idClinica.idClinica = :idClinica");
+        if (idRol != null) conditions.add("c.idPersonaRol.idRol.idRol = :idRol");
+        if (desde != null) conditions.add("c.fechaInicio >= :desde");
+        if (hasta != null) conditions.add("c.fechaInicio < :hasta");
+
+        StringBuilder jpql = new StringBuilder("SELECT c FROM Consulta c");
+        if (!conditions.isEmpty()) jpql.append(" WHERE ").append(String.join(" AND ", conditions));
+        jpql.append(" ORDER BY c.fechaInicio ASC");
+
+        TypedQuery<Consulta> query = em.createQuery(jpql.toString(), Consulta.class);
+        if (idClinica != null) query.setParameter("idClinica", idClinica);
+        if (idRol != null) query.setParameter("idRol", idRol);
+        if (desde != null) query.setParameter("desde", desde);
+        if (hasta != null) query.setParameter("hasta", hasta);
         return query.getResultList();
     }
 

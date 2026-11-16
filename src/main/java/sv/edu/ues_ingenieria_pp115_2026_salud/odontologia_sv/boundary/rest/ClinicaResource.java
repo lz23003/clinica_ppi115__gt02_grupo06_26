@@ -25,6 +25,23 @@ public class ClinicaResource implements Serializable {
     @Inject
     private UriInfo uriInfo;
 
+    // GET /api/clinicas/activas
+    @GET
+    @Path("/activas")
+    public Response listarActivas() {
+        try {
+            List<Clinica> lista = clinicaService.listarActivas();
+            return Response.ok(lista)
+                    .header("X-Message", "Listado de clínicas activas")
+                    .build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Error al listar las clínicas activas")
+                    .header("X-Message", "Error al listar las clínicas activas")
+                    .build();
+        }
+    }
+
     // GET /api/clinicas?first=0&max=50
     @GET
     public Response listar(

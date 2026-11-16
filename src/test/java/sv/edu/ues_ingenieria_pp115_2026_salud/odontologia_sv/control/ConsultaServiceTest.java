@@ -173,12 +173,17 @@ public class ConsultaServiceTest {
         Date hasta = new Date(1_700_086_400_000L);
         List<Consulta> expected = List.of(consultaActiva);
 
-        when(em.createNamedQuery("Consulta.buscarDashboardPorFiltros", Consulta.class)).thenReturn(typedQuery);
+        when(em.createQuery(anyString(), eq(Consulta.class))).thenReturn(typedQuery);
         when(typedQuery.getResultList()).thenReturn(expected);
 
         List<Consulta> actual = service.buscarDashboardPorFiltros(idClinica, idRol, desde, hasta);
 
         assertThat(actual).containsExactly(consultaActiva);
+        verify(em).createQuery(
+                "SELECT c FROM Consulta c WHERE c.idPersonaRol.idClinica.idClinica = :idClinica "
+                + "AND c.idPersonaRol.idRol.idRol = :idRol AND c.fechaInicio >= :desde "
+                + "AND c.fechaInicio < :hasta ORDER BY c.fechaInicio ASC",
+                Consulta.class);
         verify(typedQuery).setParameter("idClinica", idClinica);
         verify(typedQuery).setParameter("idRol", idRol);
         verify(typedQuery).setParameter("desde", desde);
@@ -192,7 +197,25 @@ public class ConsultaServiceTest {
         org.assertj.core.api.Assertions.assertThatThrownBy(() ->
                 service.buscarDashboardPorFiltros(null, null, fechaFin, fechaInicio))
                 .isInstanceOf(IllegalArgumentException.class);
-        verify(em, never()).createNamedQuery(anyString(), eq(Consulta.class));
+        verify(em, never()).createQuery(anyString(), eq(Consulta.class));
+    }
+
+    @Test
+    @DisplayName("Omite los filtros nulos en la consulta del dashboard")
+    public void testBuscarDashboardPorFiltrosOmiteParametrosNulos() {
+        when(em.createQuery(anyString(), eq(Consulta.class))).thenReturn(typedQuery);
+        when(typedQuery.getResultList()).thenReturn(List.of(consultaActiva));
+
+        List<Consulta> actual = service.buscarDashboardPorFiltros(null, null, fechaInicio, null);
+
+        assertThat(actual).containsExactly(consultaActiva);
+        verify(em).createQuery(
+                "SELECT c FROM Consulta c WHERE c.fechaInicio >= :desde ORDER BY c.fechaInicio ASC",
+                Consulta.class);
+        verify(typedQuery).setParameter("desde", fechaInicio);
+        verify(typedQuery, never()).setParameter("idClinica", null);
+        verify(typedQuery, never()).setParameter("idRol", null);
+        verify(typedQuery, never()).setParameter("hasta", null);
     }
 
     @Test

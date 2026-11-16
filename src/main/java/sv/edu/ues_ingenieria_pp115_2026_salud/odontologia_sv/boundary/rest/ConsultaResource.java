@@ -42,11 +42,19 @@ public class ConsultaResource implements Serializable {
 
         try {
             if (hasValue(idClinica) || hasValue(idRol) || hasValue(desde) || hasValue(hasta)) {
+                Date fechaDesde = parseDateStart(desde);
+                Date fechaHasta = parseDateEndExclusive(hasta);
+                if (fechaDesde != null && fechaHasta != null && !fechaDesde.before(fechaHasta)) {
+                    return Response.status(Response.Status.BAD_REQUEST)
+                            .entity(java.util.Map.of("message",
+                                    "La fecha inicial debe ser anterior o igual a la fecha final."))
+                            .build();
+                }
                 List<Consulta> lista = consultaService.buscarDashboardPorFiltros(
                         parseUuid(idClinica, "idClinica"),
                         parseUuid(idRol, "idRol"),
-                        parseDateStart(desde),
-                        parseDateEndExclusive(hasta));
+                        fechaDesde,
+                        fechaHasta);
                 incluirExamenIds(lista);
                 return Response.ok(lista)
                         .header("X-Total-Count", lista.size())

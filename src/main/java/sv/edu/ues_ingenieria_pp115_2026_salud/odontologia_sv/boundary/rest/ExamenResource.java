@@ -24,6 +24,23 @@ public class ExamenResource implements Serializable {
     @Inject
     private UriInfo uriInfo;
 
+    // GET /api/examenes/activos
+    @GET
+    @Path("/activos")
+    public Response listarActivos() {
+        try {
+            List<Examen> lista = examenService.listarActivos();
+            return Response.ok(lista)
+                    .header("X-Message", "Listado de exámenes activos")
+                    .build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Error al listar los exámenes activos")
+                    .header("X-Message", "Error al listar los exámenes activos")
+                    .build();
+        }
+    }
+
     // GET /api/examenes?first=0&max=50
     @GET
     public Response listar(

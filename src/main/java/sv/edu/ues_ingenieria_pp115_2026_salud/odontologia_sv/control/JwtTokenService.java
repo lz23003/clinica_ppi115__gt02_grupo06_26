@@ -20,6 +20,7 @@ public class JwtTokenService {
     private static final String JWT_HEADER = Base64.getUrlEncoder().withoutPadding()
             .encodeToString("{\"alg\":\"HS256\",\"typ\":\"JWT\"}".getBytes(StandardCharsets.UTF_8));
     private static final long TOKEN_LIFETIME_SECONDS = 60 * 60;
+    private static final byte[] EPHEMERAL_SIGNING_KEY = createEphemeralSigningKey();
 
     public boolean isConfigured() {
         return signingKey() != null;
@@ -99,10 +100,16 @@ public class JwtTokenService {
             configured = System.getProperty("galenosv.jwt.secret");
         }
         if (configured == null || configured.isBlank()) {
-            return null;
+            return EPHEMERAL_SIGNING_KEY;
         }
         byte[] key = configured.getBytes(StandardCharsets.UTF_8);
         return key.length >= 32 ? key : null;
+    }
+
+    private static byte[] createEphemeralSigningKey() {
+        byte[] key = new byte[32];
+        new java.security.SecureRandom().nextBytes(key);
+        return key;
     }
 
     private byte[] sign(String value, byte[] key) throws GeneralSecurityException {
