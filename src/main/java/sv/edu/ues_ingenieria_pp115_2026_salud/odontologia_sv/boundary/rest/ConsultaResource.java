@@ -452,122 +452,125 @@ private ConsultaService consultaService;
         }
     }
 
-   @GET
-@Path("/por-clinica-rol")
-public Response buscarPorClinicaYRol(
-        @QueryParam("idClinica") UUID idClinica,
-        @QueryParam("idRol") UUID idRol,
-        @QueryParam("fechaInicio") String fechaInicioStr,
-        @QueryParam("fechaFin") String fechaFinStr) {
-    try {
-        if (idClinica == null) {
-            return Response.status(400).entity("idClinica requerido").build();
-        }
-        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd");
-        Date inicio = (fechaInicioStr != null && !fechaInicioStr.isEmpty()) ? sdf.parse(fechaInicioStr) : null;
-        Date fin = (fechaFinStr != null && !fechaFinStr.isEmpty()) ? sdf.parse(fechaFinStr) : null;
 
-        if (fin != null) {
-            java.util.Calendar cal = java.util.Calendar.getInstance();
-            cal.setTime(fin);
-            cal.set(java.util.Calendar.HOUR_OF_DAY, 23);
-            cal.set(java.util.Calendar.MINUTE, 59);
-            cal.set(java.util.Calendar.SECOND, 59);
-            fin = cal.getTime();
+        @GET
+    @Path("/por-clinica-rol")
+    public Response buscarPorClinicaYRol(
+            @QueryParam("idClinica") UUID idClinica,
+            @QueryParam("idRol") UUID idRol,
+            @QueryParam("idPersona") UUID idPersona,
+            @QueryParam("fechaInicio") String fechaInicioStr,
+            @QueryParam("fechaFin") String fechaFinStr) {
+        try {
+            if (idClinica == null) {
+                return Response.status(400).entity("idClinica requerido").build();
+            }
+            
+            // Usamos el service para filtrar
+            List<Consulta> lista = consultaService.buscarPorClinicaYRol(idClinica, idRol, idPersona, null, null);
+            return Response.ok(lista).build();
+        } catch (Exception e) {
+            return Response.status(500).entity("Error: " + e.getMessage()).build();
         }
-
-        List<Consulta> lista = consultaService.buscarPorClinicaYRol(idClinica, idRol, inicio, fin);
-        return Response.ok(lista).build();
-    } catch (Exception e) {
-        return Response.status(500).entity("Error: " + e.getMessage()).build();
     }
-}
-
-@GET
-@Path("/{id}/detalle-completo")
-public Response detalleCompleto(@PathParam("id") UUID id) {
-    try {
-        Consulta c = consultaService.buscarPorId(id);
-        if (c == null) return Response.status(404).entity("Consulta no encontrada").build();
-
-        ConsultaDetalleDTO dto = new ConsultaDetalleDTO();
-        dto.idConsulta = c.getIdConsulta();
-        dto.fechaInicio = c.getFechaInicio() != null ? c.getFechaInicio().toInstant().toString() : null;
-        dto.fechaFin = c.getFechaFin() != null ? c.getFechaFin().toInstant().toString() : null;
-        dto.referenciaExterna = c.getReferenciaExterna();
-        dto.observaciones = c.getObservaciones();
-
-        if (c.getIdPersonaRol() != null) {
-            Persona p = c.getIdPersonaRol().getIdPersona();
-            if (p != null) {
-                dto.paciente = new ConsultaDetalleDTO.PersonaDetalleDTO();
-                dto.paciente.idPersona = p.getIdPersona();
-                dto.paciente.nombres = p.getNombres();
-                dto.paciente.apellidos = p.getApellidos();
-                dto.paciente.fechaNacimiento = p.getFechaNacimiento() != null
-                        ? p.getFechaNacimiento().toInstant().toString() : null;
-            }
-            Clinica cli = c.getIdPersonaRol().getIdClinica();
-            if (cli != null) {
-                dto.clinica = new ConsultaDetalleDTO.ClinicaDetalleDTO();
-                dto.clinica.idClinica = cli.getIdClinica();
-                dto.clinica.nombre = cli.getNombre();
-            }
-        }
-
-        List<ConsultaProcedimiento> cps = consultaProcedimientoService.buscarPorConsulta(id);
-        dto.procedimientos = new java.util.ArrayList<>();
-
-        for (ConsultaProcedimiento cp : cps) {
-            ConsultaDetalleDTO.ProcedimientoDetalleDTO pd = new ConsultaDetalleDTO.ProcedimientoDetalleDTO();
-            pd.idConsultaProcedimiento = cp.getIdConsultaProcedimiento();
-            pd.idProcedimiento = cp.getIdProcedimiento();
-            pd.fechaInicio = cp.getFechaInicio() != null ? cp.getFechaInicio().toInstant().toString() : null;
-            pd.fechaFin = cp.getFechaFin() != null ? cp.getFechaFin().toInstant().toString() : null;
-            pd.observaciones = cp.getObservaciones();
-
-            Procedimiento proc = procedimientoService.buscarPorId(cp.getIdProcedimiento());
-            if (proc != null) pd.nombreProcedimiento = proc.getNombre();
-
-            pd.pasos = new java.util.ArrayList<>();
-            List<ConsultaProcedimientoPaso> pasos = consultaProcedimientoPasoService.buscarPorConsultaProcedimiento(cp.getIdConsultaProcedimiento());
-
-            for (ConsultaProcedimientoPaso paso : pasos) {
-                ConsultaDetalleDTO.PasoDetalleDTO psd = new ConsultaDetalleDTO.PasoDetalleDTO();
-                psd.idConsultaProcedimientoPaso = paso.getIdConsultaProcedimientoPaso();
-                psd.estado = paso.getEstado();
-                psd.fechaInicio = paso.getFechaInicio() != null ? paso.getFechaInicio().toInstant().toString() : null;
-                psd.fechaFin = paso.getFechaFin() != null ? paso.getFechaFin().toInstant().toString() : null;
-                psd.valor = paso.getValor();
-
-                if (paso.getIdProcedimientoPaso() != null) {
-                    psd.idProcedimientoPaso = paso.getIdProcedimientoPaso().getIdProcedimientoPaso();
-                    psd.nombrePaso = paso.getIdProcedimientoPaso().getNombre();
-                }
-                if (paso.getIdPersonaRol() != null) {
-                    PersonaRol pr = paso.getIdPersonaRol();
-                    if (pr.getIdPersona() != null) {
-                        psd.realizadoPor = new ConsultaDetalleDTO.PersonaDetalleDTO();
-                        psd.realizadoPor.idPersona = pr.getIdPersona().getIdPersona();
-                        psd.realizadoPor.nombres = pr.getIdPersona().getNombres();
-                        psd.realizadoPor.apellidos = pr.getIdPersona().getApellidos();
-                    }
-                    if (pr.getIdRol() != null) {
-                        psd.idRolRealizador = pr.getIdRol().getIdRol();
-                        psd.nombreRolRealizador = pr.getIdRol().getNombre();
-                    }
-                }
-                pd.pasos.add(psd);
-            }
-            dto.procedimientos.add(pd);
-        }
-
-        return Response.ok(dto).build();
-    } catch (Exception e) {
-        e.printStackTrace();
-        return Response.status(500).entity("Error: " + e.getMessage()).build();
-    }
-}
     
+    @GET
+    @Path("/{id}/detalle-completo")
+    public Response detalleCompleto(@PathParam("id") UUID id) {
+        try {
+            Consulta c = consultaService.buscarPorId(id);
+            if (c == null) return Response.status(404).entity("Consulta no encontrada").build();
+
+            ConsultaDetalleDTO dto = new ConsultaDetalleDTO();
+            dto.idConsulta = c.getIdConsulta();
+            dto.fechaInicio = c.getFechaInicio() != null ? c.getFechaInicio().toInstant().toString() : null;
+            dto.fechaFin = c.getFechaFin() != null ? c.getFechaFin().toInstant().toString() : null;
+            dto.referenciaExterna = c.getReferenciaExterna();
+            dto.observaciones = c.getObservaciones();
+
+            if (c.getIdPersonaRol() != null) {
+                Persona p = c.getIdPersonaRol().getIdPersona();
+                if (p != null) {
+                    dto.paciente = new ConsultaDetalleDTO.PersonaDetalleDTO();
+                    dto.paciente.idPersona = p.getIdPersona();
+                    dto.paciente.nombres = p.getNombres();
+                    dto.paciente.apellidos = p.getApellidos();
+                    dto.paciente.fechaNacimiento = p.getFechaNacimiento() != null
+                            ? p.getFechaNacimiento().toInstant().toString() : null;
+                }
+                Clinica cli = c.getIdPersonaRol().getIdClinica();
+                if (cli != null) {
+                    dto.clinica = new ConsultaDetalleDTO.ClinicaDetalleDTO();
+                    dto.clinica.idClinica = cli.getIdClinica();
+                    dto.clinica.nombre = cli.getNombre();
+                }
+            }
+
+            List<ConsultaProcedimiento> cps = consultaProcedimientoService.buscarPorConsulta(id);
+            dto.procedimientos = new java.util.ArrayList<>();
+
+            for (ConsultaProcedimiento cp : cps) {
+                // 🔥 FIX: Verificar que el procedimiento pertenezca realmente a ESTA consulta
+                if (cp.getIdConsulta() == null || !cp.getIdConsulta().getIdConsulta().equals(id)) {
+                    continue; 
+                }
+
+                ConsultaDetalleDTO.ProcedimientoDetalleDTO pd = new ConsultaDetalleDTO.ProcedimientoDetalleDTO();
+                pd.idConsultaProcedimiento = cp.getIdConsultaProcedimiento();
+                pd.idProcedimiento = cp.getIdProcedimiento();
+                pd.fechaInicio = cp.getFechaInicio() != null ? cp.getFechaInicio().toInstant().toString() : null;
+                pd.fechaFin = cp.getFechaFin() != null ? cp.getFechaFin().toInstant().toString() : null;
+                pd.observaciones = cp.getObservaciones();
+
+                Procedimiento proc = procedimientoService.buscarPorId(cp.getIdProcedimiento());
+                if (proc != null) pd.nombreProcedimiento = proc.getNombre();
+
+                pd.pasos = new java.util.ArrayList<>();
+                List<ConsultaProcedimientoPaso> pasos = consultaProcedimientoPasoService.buscarPorConsultaProcedimiento(cp.getIdConsultaProcedimiento());
+
+                for (ConsultaProcedimientoPaso paso : pasos) {
+                    // 🔥 FIX EXTRA: Verificar que el paso pertenezca a este procedimiento
+                    if (paso.getIdConsultaProcedimiento() == null || 
+                        !paso.getIdConsultaProcedimiento().getIdConsultaProcedimiento().equals(cp.getIdConsultaProcedimiento())) {
+                        continue;
+                    }
+
+                    ConsultaDetalleDTO.PasoDetalleDTO psd = new ConsultaDetalleDTO.PasoDetalleDTO();
+                    psd.idConsultaProcedimientoPaso = paso.getIdConsultaProcedimientoPaso();
+                    psd.estado = paso.getEstado();
+                    psd.fechaInicio = paso.getFechaInicio() != null ? paso.getFechaInicio().toInstant().toString() : null;
+                    psd.fechaFin = paso.getFechaFin() != null ? paso.getFechaFin().toInstant().toString() : null;
+                    psd.valor = paso.getValor();
+
+                    if (paso.getIdProcedimientoPaso() != null) {
+                        psd.idProcedimientoPaso = paso.getIdProcedimientoPaso().getIdProcedimientoPaso();
+                        psd.nombrePaso = paso.getIdProcedimientoPaso().getNombre();
+                    }
+                    if (paso.getIdPersonaRol() != null) {
+                        PersonaRol pr = paso.getIdPersonaRol();
+                        if (pr.getIdPersona() != null) {
+                            psd.realizadoPor = new ConsultaDetalleDTO.PersonaDetalleDTO();
+                            psd.realizadoPor.idPersona = pr.getIdPersona().getIdPersona();
+                            psd.realizadoPor.nombres = pr.getIdPersona().getNombres();
+                            psd.realizadoPor.apellidos = pr.getIdPersona().getApellidos();
+                        }
+                        if (pr.getIdRol() != null) {
+                            psd.idRolRealizador = pr.getIdRol().getIdRol();
+                            psd.nombreRolRealizador = pr.getIdRol().getNombre();
+                        }
+                    }
+                    pd.pasos.add(psd);
+                }
+                dto.procedimientos.add(pd);
+            }
+
+            return Response.ok(dto).build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.status(500).entity("Error: " + e.getMessage()).build();
+        }
+    } 
+
+
 
 }

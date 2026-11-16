@@ -12,6 +12,7 @@ import java.net.URI;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.control.ConsultaProcedimientoService;
 import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.ConsultaProcedimiento;
 import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.PersonaRol;
 import sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.ProcedimientoPaso;
@@ -31,6 +32,9 @@ public class ConsultaProcedimientoPasoResource implements Serializable {
 
     @Inject
     private PersonaRolService personaRolService;
+    
+    @Inject
+    private ConsultaProcedimientoService consultaProcedimientoService ;
 
     @Inject
     private UriInfo uriInfo;
@@ -327,11 +331,25 @@ public Response avanzarSiguientePaso(
             cp.setIdConsultaProcedimiento(idConsultaProcedimiento);
             nuevoPaso.setIdConsultaProcedimiento(cp);
 
-            ProcedimientoPaso pasoBD = procedimientoPasoService.buscarPorId(idSiguientePaso);
+                       ProcedimientoPaso pasoBD = procedimientoPasoService.buscarPorId(idSiguientePaso);
+            
+            // 🔥 FIX: Buscamos el rol del paso y la clínica de la consulta para asignar al empleado correcto
             if (pasoBD != null && pasoBD.getIdRol() != null) {
-                List<PersonaRol> candidatos = personaRolService.buscarPorRol(pasoBD.getIdRol().getIdRol());
+                
+                // 1. Obtenemos la clínica de la consulta actual
+                ConsultaProcedimiento cpBD = consultaProcedimientoService.buscarPorId(idConsultaProcedimiento);
+                UUID idClinicaConsulta = cpBD.getIdConsulta().getIdPersonaRol().getIdClinica().getIdClinica();
+
+                // 2. Buscamos candidatos SOLO en esa clínica
+                List<PersonaRol> candidatos = personaRolService.buscarPorRolYClinica(
+                    pasoBD.getIdRol().getIdRol(), 
+                    idClinicaConsulta
+                );
+                
                 if (candidatos != null && !candidatos.isEmpty()) {
                     nuevoPaso.setIdPersonaRol(candidatos.get(0));
+                } else {
+                    return Response.status(400).entity("No hay personal con el rol requerido en la clínica de esta consulta.").build();
                 }
             }
 
@@ -357,6 +375,44 @@ public Response avanzarSiguientePaso(
             return Response.ok(paso).build();
         } catch (Exception e) {
             return Response.status(500).entity("Error: " + e.getMessage()).build();
+        }
+    }
+    
+    
+        @POST
+    @Path("/retroceder/{idConsultaProcedimiento}")
+    public Response retrocederPaso(
+            @PathParam("idConsultaProcedimiento") UUID idConsultaProcedimiento,
+            @QueryParam("idPasoActual") UUID idPasoActual,
+            @QueryParam("idPasoAnterior") UUID idPasoAnterior) {
+        try {
+            // 1. El paso actual vuelve a PENDIENTE
+            if (idPasoActual != null) {
+                ConsultaProcedimientoPaso pasoActual = consultaProcedimientoPasoService.buscarPorId(idPasoActual);
+                if (pasoActual != null) {
+                    pasoActual.setEstado("PENDIENTE");
+                    pasoActual.setFechaFin(null);
+                    consultaProcedimientoPasoService.modificar(pasoActual);
+                }
+            }
+
+            // 2. El paso anterior vuelve a PENDIENTE
+            if (idPasoAnterior != null) {
+                // Buscamos el paso ejecutado que coincida con la plantilla anterior
+                List<ConsultaProcedimientoPaso> pasos = consultaProcedimientoPasoService.buscarPorConsultaProcedimiento(idConsultaProcedimiento);
+                for (ConsultaProcedimientoPaso p : pasos) {
+                    if (p.getIdProcedimientoPaso() != null && p.getIdProcedimientoPaso().getIdProcedimientoPaso().equals(idPasoAnterior)) {
+                        p.setEstado("PENDIENTE");
+                        p.setFechaFin(null);
+                        consultaProcedimientoPasoService.modificar(p);
+                        break;
+                    }
+                }
+            }
+
+            return Response.ok().header("X-Message", "Retroceso exitoso").build();
+        } catch (Exception e) {
+            return Response.status(500).entity("Error al retroceder: " + e.getMessage()).build();
         }
     }
 

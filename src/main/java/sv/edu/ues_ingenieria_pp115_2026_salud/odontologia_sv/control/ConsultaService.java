@@ -100,19 +100,30 @@ public class ConsultaService extends DefaultService<Consulta>{
         }
         return List.of();
     }
-
-    public List<Consulta> buscarPorClinicaYRol(UUID idClinica, UUID idRol, Date inicio, Date fin) {
+     
+public List<Consulta> buscarPorClinicaYRol(UUID idClinica, UUID idRol, UUID idPersona, Date inicio, Date fin) {
     try {
         StringBuilder jpql = new StringBuilder(
             "SELECT DISTINCT c FROM Consulta c " +
             "JOIN c.idPersonaRol pr " +
             "WHERE pr.idClinica.idClinica = :idClinica ");
 
-        if (idRol != null) {
+        // Filtro por Rol, Persona y CLÍNICA DEL EMPLEADO
+        if (idRol != null || idPersona != null) {
             jpql.append("AND EXISTS (SELECT 1 FROM ConsultaProcedimiento cp " +
                         "JOIN ConsultaProcedimientoPaso cpp ON cpp.idConsultaProcedimiento = cp " +
-                        "WHERE cp.idConsulta = c AND cpp.idPersonaRol.idRol.idRol = :idRol) ");
+                        "WHERE cp.idConsulta = c " +
+                        "AND cpp.idPersonaRol.idClinica.idClinica = :idClinica "); // 🔥 AQUI ESTA LA MAGIA
+            
+            if (idRol != null) {
+                jpql.append("AND cpp.idPersonaRol.idRol.idRol = :idRol ");
+            }
+            if (idPersona != null) {
+                jpql.append("AND cpp.idPersonaRol.idPersona.idPersona = :idPersona ");
+            }
+            jpql.append(") ");
         }
+
         if (inicio != null) jpql.append("AND c.fechaInicio >= :inicio ");
         if (fin != null)    jpql.append("AND c.fechaInicio <= :fin ");
         jpql.append("ORDER BY c.fechaInicio DESC");
@@ -120,6 +131,7 @@ public class ConsultaService extends DefaultService<Consulta>{
         TypedQuery<Consulta> q = em.createQuery(jpql.toString(), Consulta.class);
         q.setParameter("idClinica", idClinica);
         if (idRol != null)  q.setParameter("idRol", idRol);
+        if (idPersona != null) q.setParameter("idPersona", idPersona);
         if (inicio != null) q.setParameter("inicio", inicio);
         if (fin != null)    q.setParameter("fin", fin);
 
@@ -129,5 +141,5 @@ public class ConsultaService extends DefaultService<Consulta>{
         return List.of();
     }
 }
-    
+
 }

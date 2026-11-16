@@ -86,7 +86,22 @@ public class PersonaRolService extends DefaultService<PersonaRol>{
         return null;
        }
     
-    
+        public List<PersonaRol> buscarPorRolYClinica(UUID idRol, UUID idClinica) {
+        try {
+            if (idRol != null && idClinica != null) {
+                String jpql = "SELECT pr FROM PersonaRol pr " +
+                              "WHERE pr.idRol.idRol = :idRol " +
+                              "AND pr.idClinica.idClinica = :idClinica";
+                TypedQuery<PersonaRol> query = em.createQuery(jpql, PersonaRol.class);
+                query.setParameter("idRol", idRol);
+                query.setParameter("idClinica", idClinica);
+                return query.getResultList();
+            }
+        } catch (Exception ex) {
+            Logger.getLogger(PersonaRolService.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+        }
+        return List.of();
+    }
     
     
     
