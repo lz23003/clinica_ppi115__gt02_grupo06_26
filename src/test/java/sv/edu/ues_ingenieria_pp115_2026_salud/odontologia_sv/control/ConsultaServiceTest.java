@@ -224,17 +224,26 @@ public class ConsultaServiceTest {
     }
 
     @Test
-    public void actualizaRelacionDeExamenesPorSusIdentificadores() {
+    public void guardaIdentificadoresDeExamenEnObservacionesSinTablaRelacion() {
         UUID examId = UUID.randomUUID();
         Examen exam = new Examen(examId);
         exam.setActivo(true);
+        consultaActiva.setObservaciones("{\"historial\":[{\"paso\":\"Triaje\"}]}");
 
         when(em.find(Examen.class, examId)).thenReturn(exam);
         service.actualizarExamenes(consultaActiva, List.of(examId));
 
-        assertThat(consultaActiva.getExamenes()).containsExactly(exam);
         assertThat(consultaActiva.getExamenIds()).containsExactly(examId);
+        assertThat(service.obtenerExamenIds(consultaActiva)).containsExactly(examId);
+        assertThat(consultaActiva.getObservaciones())
+                .contains("\"paso\":\"Triaje\"")
+                .contains("\"examenIds\":[\"" + examId + "\"]");
         verify(em).find(Examen.class, examId);
+    }
+
+    @Test
+    public void devuelveListaVaciaCuandoConsultaNoTieneExamenesGuardados() {
+        assertThat(service.obtenerExamenIds(consultaActiva)).isEmpty();
     }
 
     @Test

@@ -47,6 +47,7 @@ public class ConsultaResource implements Serializable {
                         parseUuid(idRol, "idRol"),
                         parseDateStart(desde),
                         parseDateEndExclusive(hasta));
+                incluirExamenIds(lista);
                 return Response.ok(lista)
                         .header("X-Total-Count", lista.size())
                         .header("X-Message", "Listado de consultas filtrado")
@@ -54,6 +55,7 @@ public class ConsultaResource implements Serializable {
             }
 
             List<Consulta> lista = consultaService.findRange(first, max);
+            incluirExamenIds(lista);
             int total = consultaService.count();
             return Response.ok(lista)
                     .header("X-Total-Count", total)
@@ -94,12 +96,18 @@ public class ConsultaResource implements Serializable {
         return Date.from(LocalDate.parse(value).plusDays(1).atStartOfDay(CLINIC_ZONE).toInstant());
     }
 
+    private void incluirExamenIds(List<Consulta> consultas) {
+        consultas.forEach(consulta ->
+                consulta.setExamenIds(consultaService.obtenerExamenIds(consulta)));
+    }
+
     // GET /api/consultas/all
     @GET
     @Path("/all")
     public Response listarTodos() {
         try {
             List<Consulta> lista = consultaService.findAll();
+            incluirExamenIds(lista);
             return Response.ok(lista)
                     .header("X-Message", "Listado completo de las consultas")
                     .build();
@@ -123,9 +131,7 @@ public class ConsultaResource implements Serializable {
                         .header("X-Message", "No se encontro la consulta con id " + id)
                         .build();
             }
-            entidad.setExamenIds(entidad.getExamenes().stream()
-                    .map(sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.entity.Examen::getIdExamen)
-                    .toList());
+            entidad.setExamenIds(consultaService.obtenerExamenIds(entidad));
             return Response.ok(entidad)
                     .header("X-Message", "Consulta encontrado")
                     .build();
@@ -211,7 +217,7 @@ public class ConsultaResource implements Serializable {
             }
 
             Consulta actualizado = consultaService.modificar(actual);
-            actualizado.setExamenIds(actual.getExamenIds());
+            actualizado.setExamenIds(consultaService.obtenerExamenIds(actualizado));
 
             return Response.ok(actualizado)
                     .header("X-Message", "Consulta actualizado")

@@ -7,9 +7,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.NamedQueries;
 import jakarta.persistence.NamedQuery;
 import jakarta.persistence.OneToMany;
@@ -64,14 +62,6 @@ public class Consulta implements Serializable {
     @OneToMany(mappedBy = "idConsulta", fetch = FetchType.LAZY)
     @JsonbTransient
     private List<ConsultaProcedimiento> consultaProcedimientoList;
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "consulta_examen",
-            schema = "public",
-            joinColumns = @JoinColumn(name = "id_consulta", referencedColumnName = "id_consulta"),
-            inverseJoinColumns = @JoinColumn(name = "id_examen", referencedColumnName = "id_examen"))
-    @JsonbTransient
-    private List<Examen> examenes;
     @Transient
     private List<UUID> examenIds;
 
@@ -138,22 +128,8 @@ public class Consulta implements Serializable {
         this.consultaProcedimientoList = consultaProcedimientoList;
     }
 
-    public List<Examen> getExamenes() {
-        return examenes;
-    }
-
-    public void setExamenes(List<Examen> examenes) {
-        this.examenes = examenes;
-    }
-
     public List<UUID> getExamenIds() {
-        if (examenIds != null) {
-            return examenIds;
-        }
-        if (examenes == null) return null;
-        return examenes.stream()
-                .map(Examen::getIdExamen)
-                .toList();
+        return examenIds;
     }
 
     public void setExamenIds(List<UUID> examenIds) {
