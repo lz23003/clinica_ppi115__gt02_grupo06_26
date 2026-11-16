@@ -27,20 +27,12 @@ public class OrdenExamenService extends DefaultService<OrdenExamen> {
     }
     
     
-public List<OrdenExamen> buscarPorPaso(UUID idPasoPlantilla) {
+public List<OrdenExamen> buscarPorPaso(UUID idConsultaProcedimientoPaso) {
     try {
-        // Buscamos las órdenes cuyo paso (idConsultaProcedimientoPaso) esté vinculado a la plantilla
         String jpql = "SELECT o FROM OrdenExamen o " +
-                      "WHERE o.idConsultaProcedimientoPaso.idConsultaProcedimiento.idConsultaProcedimiento = :idPasoPlantilla";
-        // 🔥 Nota: Esta consulta asume que tienes una relación entre el paso ejecutado y la plantilla.
-        // Si no la tienes, tendremos que hacer una consulta más compleja.
-        
-        // Si no existe la relación directa, usamos una subconsulta:
-        String jpql2 = "SELECT o FROM OrdenExamen o " +
-                       "WHERE o.idConsultaProcedimientoPaso.idProcedimientoPaso.idProcedimientoPaso = :idPasoPlantilla";
-        
-        TypedQuery<OrdenExamen> query = em.createQuery(jpql2, OrdenExamen.class);
-        query.setParameter("idPasoPlantilla", idPasoPlantilla);
+                      "WHERE o.idConsultaProcedimientoPaso.idConsultaProcedimientoPaso = :idPaso";
+        TypedQuery<OrdenExamen> query = em.createQuery(jpql, OrdenExamen.class);
+        query.setParameter("idPaso", idConsultaProcedimientoPaso);
         return query.getResultList();
     } catch (Exception ex) {
         Logger.getLogger(OrdenExamenService.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);

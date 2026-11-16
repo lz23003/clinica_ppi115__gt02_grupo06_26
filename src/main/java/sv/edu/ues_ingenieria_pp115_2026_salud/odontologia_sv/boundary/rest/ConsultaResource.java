@@ -126,7 +126,7 @@ private ConsultaService consultaService;
         try {
 
             nuevo.setIdConsulta(UUID.randomUUID());
-
+             nuevo.setFechaFin(null); 
             consultaService.crear(nuevo);
 
             UUID idGenerado = nuevo.getIdConsulta();
@@ -421,7 +421,7 @@ private ConsultaService consultaService;
         }
     }
 
-    @PUT
+      @PUT
     @Path("/{id}/finalizar")
     public Response finalizarConsulta(@PathParam("id") UUID id) {
         try {
@@ -430,8 +430,21 @@ private ConsultaService consultaService;
                 return Response.status(404).entity("Consulta no encontrada").build();
             }
 
-            c.setFechaFin(new Date()); // Marcamos la fecha de alta
+            c.setFechaFin(new Date()); 
             consultaService.modificar(c);
+
+            // 🔥 FIX EXTRA: Finalizar todos los pasos que quedaron pendientes en esta consulta
+            List<ConsultaProcedimiento> cps = consultaProcedimientoService.buscarPorConsulta(id);
+            for (ConsultaProcedimiento cp : cps) {
+                List<ConsultaProcedimientoPaso> pasos = consultaProcedimientoPasoService.buscarPorConsultaProcedimiento(cp.getIdConsultaProcedimiento());
+                for (ConsultaProcedimientoPaso paso : pasos) {
+                    if (!"FINALIZADO".equals(paso.getEstado())) {
+                        paso.setEstado("FINALIZADO");
+                        paso.setFechaFin(new Date());
+                        consultaProcedimientoPasoService.modificar(paso);
+                    }
+                }
+            }
 
             return Response.ok(c).build();
         } catch (Exception e) {

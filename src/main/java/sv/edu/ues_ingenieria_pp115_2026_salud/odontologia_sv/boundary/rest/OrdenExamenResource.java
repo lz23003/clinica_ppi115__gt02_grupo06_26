@@ -3,6 +3,7 @@ package sv.edu.ues_ingenieria_pp115_2026_salud.odontologia_sv.boundary.rest;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -60,6 +61,22 @@ public Response crear(OrdenExamen nuevo) {
             return Response.ok(lista).build();
         } catch (Exception e) {
             return Response.status(500).entity("Error: " + e.getMessage()).build();
+        }
+    }
+    
+    
+        @DELETE
+    @Path("/{id}")
+    public Response eliminar(@PathParam("id") UUID id) {
+        try {
+            OrdenExamen entidad = ordenExamenService.buscarPorId(id);
+            if (entidad == null) {
+                return Response.status(404).entity("No se encontró la orden de examen").build();
+            }
+            ordenExamenService.eliminar(entidad);
+            return Response.noContent().build();
+        } catch (Exception e) {
+            return Response.status(500).entity("Error al eliminar: " + e.getMessage()).build();
         }
     }
 }
