@@ -19,7 +19,7 @@ import java.util.UUID;
 
 
 @Entity
-@Table(name = "examen_resultado", catalog = "odontologia_sv", schema = "public")
+@Table(name = "examen_resultado", schema = "public")
 @NamedQueries({
     @NamedQuery(name = "ExamenResultado.findAll", query = "SELECT e FROM ExamenResultado e"),
     @NamedQuery(name = "ExamenResultado.findByFechaCreacion", query = "SELECT e FROM ExamenResultado e WHERE e.fechaCreacion = :fechaCreacion"),

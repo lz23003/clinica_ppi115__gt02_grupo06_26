@@ -19,7 +19,7 @@ import java.util.UUID;
 
 
 @Entity
-@Table(name = "medio_contacto", catalog = "odontologia_sv", schema = "public")
+@Table(name = "medio_contacto", schema = "public")
 @NamedQueries({
     @NamedQuery(name = "MedioContacto.findAll", query = "SELECT m FROM MedioContacto m"),
     @NamedQuery(name = "MedioContacto.findByValor", query = "SELECT m FROM MedioContacto m WHERE m.valor = :valor"),

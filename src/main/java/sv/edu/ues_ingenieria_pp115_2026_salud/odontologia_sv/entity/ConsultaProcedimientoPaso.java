@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "consulta_procedimiento_paso", catalog = "odontologia_sv", schema = "public")
+@Table(name = "consulta_procedimiento_paso", schema = "public")
 @NamedQueries({
     @NamedQuery(name = "ConsultaProcedimientoPaso.findAll", query = "SELECT c FROM ConsultaProcedimientoPaso c"),
     @NamedQuery(name = "ConsultaProcedimientoPaso.findByFechaInicio", query = "SELECT c FROM ConsultaProcedimientoPaso c WHERE c.fechaInicio = :fechaInicio"),

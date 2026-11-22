@@ -17,7 +17,7 @@ import java.util.UUID;
 
 
 @Entity
-@Table(name = "rol", catalog = "odontologia_sv", schema = "public")
+@Table(name = "rol", schema = "public")
 @NamedQueries({
     @NamedQuery(name = "Rol.findAll", query = "SELECT r FROM Rol r"),
     @NamedQuery(name = "Rol.findByNombre", query = "SELECT r FROM Rol r WHERE r.nombre = :nombre"),
